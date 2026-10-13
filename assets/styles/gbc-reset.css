@@ -50,3 +50,30 @@ body.modo-claro {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* --- Ajustes Responsivos para Telas Pequenas (Mobile) --- */
+@media (max-width: 640px) {
+    /* Reduz o título principal [ SOBRE O HERÓI ] em ecrãs móveis */
+    #activeTitle {
+        font-size: 0.9rem !important; /* Reduzido de 1.25rem para caber perfeitamente sem quebrar em várias linhas */
+        line-height: 1.5;
+        letter-spacing: -0.02em;
+    }
+
+    /* Reduz ligeiramente o badge "SEÇÃO ATIVA" no topo da caixa */
+    #contentDisplay > div:first-child {
+        font-size: 8px !important;
+        padding: 2px 8px !important;
+    }
+
+    /* Ajusta a margem e padding do container principal no mobile */
+    #contentDisplay {
+        padding: 1.25rem 1rem !important;
+    }
+
+    /* Ajusta a descrição para não ficar apertada */
+    #activeDesc {
+        font-size: 10px !important;
+        line-height: 1.7;
+    }
+}

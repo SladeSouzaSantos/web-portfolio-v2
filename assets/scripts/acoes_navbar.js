@@ -26,19 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 descricao: 'Cartão do Herói Pedro Santos. Status, habilidades e trajetória profissional.' 
             },
             'projetos': { 
-                titulo: '[ SECÇÃO: PROJETOS ]', 
+                titulo: '[ PROJETOS ]', 
                 descricao: 'Arsenal de Código. Arquiteturas full-stack, aplicações Android e sistemas embarcados.' 
             },
             'experiencia': { 
-                titulo: '[ SECÇÃO: EXPERIÊNCIA ]', 
+                titulo: '[ EXPERIÊNCIA ]', 
                 descricao: 'Escudo de Batalha. Anos de atuação no mercado, engenharia de software e deploy de soluções.' 
             },
             'academico': { 
-                titulo: '[ SECÇÃO: ACADÊMICO ]', 
+                titulo: '[ ACADÊMICO ]', 
                 descricao: 'Grimório do Conhecimento. Bacharelados, pós-graduações e especializações técnicas.' 
             },
             'login': { 
-                titulo: '[ SECÇÃO: ÁREA RESTRITA ]', 
+                titulo: '[ ÁREA RESTRITA ]', 
                 descricao: 'Autenticação via cadeado mágico para acesso a métricas e painel administrativo.' 
             }
         };
