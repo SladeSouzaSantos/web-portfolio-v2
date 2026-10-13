@@ -1,0 +1,52 @@
+/* Configurações Globais e Variáveis de Tema */
+:root {
+    --bg-dark: #080d12;
+    --bg-light: #e2e8f0;
+    --text-dark: #f1f5f9;
+    --text-light: #0f172a;
+    --border-color: #164e63;
+    --accent-cyan: #38bdf8;
+    --accent-gold: #f59e0b;
+    --accent-gold-light: #fef08a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Estado Escuro (Dark Mode padrão GBC) */
+body.modo-escuro {
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+}
+
+/* Estado Claro */
+body.modo-claro {
+    background-color: var(--bg-light);
+    color: var(--text-light);
+}
+
+/* Scrollbar invisível mas funcional */
+.sem-barra-rolagem::-webkit-scrollbar {
+    display: none;
+}
+.sem-barra-rolagem {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
