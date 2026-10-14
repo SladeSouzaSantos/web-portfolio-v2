@@ -8,7 +8,7 @@ body.taverna-ativa {
     background-position: center !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
+    /*background-attachment: fixed !important;*/
 }
 
 /* --- Moldura Principal do Menu Translúcida --- */
