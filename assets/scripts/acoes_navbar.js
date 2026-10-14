@@ -22,16 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function atualizarConteudoSecao(alvo) {
         if (!contentDisplay) return;
 
-        // Limpa classes de molduras específicas de outras seções
+        // Limpa classes da taverna ao navegar para outras abas
         contentDisplay.classList.remove('moldura-taverna');
+        document.body.classList.remove('taverna-ativa');
 
-        // Se existir um módulo específico para a secção (ex: window.GBCSections.sobre)
+        // Se existir um módulo específico para a secção
         if (window.GBCSections && window.GBCSections[alvo] && typeof window.GBCSections[alvo].render === 'function') {
             window.GBCSections[alvo].render(contentDisplay);
             return;
         }
 
-        // Moldura padrão para as outras seções (Projetos, Experiência, etc.)
         const mapaSecoes = {
             'projetos': { 
                 titulo: '[ PROJETOS ]', 
