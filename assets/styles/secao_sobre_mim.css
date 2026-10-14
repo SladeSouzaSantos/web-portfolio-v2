@@ -1,0 +1,57 @@
+/* --- Estilo da Moldura de Taverna (Exclusivo para a Seção Sobre Mim) --- */
+
+/* Moldura Principal do Content Display quando na Taverna (Efeito de Pedras/Madeira Escura) */
+#contentDisplay.moldura-taverna {
+    background-color: #0d131a !important;
+    /* Borda externa dupla estilo pedra/madeira rústica */
+    border: 4px solid #78350f !important;
+    outline: 2px solid #271206 !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9), 
+                inset 0 0 25px rgba(0, 0, 0, 0.85),
+                inset 0 0 8px rgba(217, 119, 6, 0.15) !important;
+    position: relative;
+    padding-top: 2.2rem !important;
+}
+
+/* Placa de Madeira no Topo (Substitui o selo "SEÇÃO ATIVA") */
+.placa-taverna-topo {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* Textura de Madeira Rústica via CSS (Gradiente de tábuas de madeira) */
+    background: linear-gradient(180deg, #b45309 0%, #78350f 50%, #451a03 100%);
+    color: #fef08a;
+    
+    /* Borda pixelada e relevo de placa suspensa */
+    border: 2px solid #fef08a;
+    outline: 2px solid #271206;
+    padding: 4px 18px;
+    font-size: 10px;
+    font-weight: bold;
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 0.1em;
+    text-shadow: 1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    
+    white-space: nowrap;
+    z-index: 10;
+}
+
+/* Efeito de pregos/rebites de ferro nas extremidades da placa de madeira */
+.placa-taverna-topo::before,
+.placa-taverna-topo::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #fef08a;
+    border: 1px solid #451a03;
+    border-radius: 50%;
+}
+
+.placa-taverna-topo::before { left: 5px; }
+.placa-taverna-topo::after { right: 5px; }
