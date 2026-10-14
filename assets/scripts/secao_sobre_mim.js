@@ -76,8 +76,7 @@ window.GBCSections.sobre = {
                 </div>
 
                 <!-- 3. Painel Inferior: Skills e Competências -->
-                <div class="painel-rpg painel-skills">
-                    <h3 class="skills-titulo">[ SKILLS & COMPETÊNCIAS ]</h3>
+                <div class="painel-rpg painel-skills">                    
                     <div class="skills-grid-categorias">
                         <!-- Categoria 1: Core Backend & Arquitetura -->
                         <div class="skill-categoria-box">

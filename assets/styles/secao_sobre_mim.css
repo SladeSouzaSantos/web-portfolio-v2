@@ -276,7 +276,6 @@ body.taverna-ativa {
 /* 3. PAINEL INFERIOR: SKILLS & COMPETÊNCIAS */
 .painel-skills {
     grid-column: 1 / -1;
-    background: var(--bg-card-translucido) !important;
     border-radius: 8px !important;
     padding: 18px 20px !important;
     display: flex !important;
@@ -284,16 +283,6 @@ body.taverna-ativa {
     align-items: center !important;
     justify-content: flex-start !important;
     margin-top: 4px;
-}
-
-.skills-titulo {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    color: var(--texto-ciano);
-    letter-spacing: 0.05em;
-    margin-bottom: 14px;
-    text-shadow: 1px 1px 0px #000;
-    text-align: center;
 }
 
 .skills-grid-categorias {
