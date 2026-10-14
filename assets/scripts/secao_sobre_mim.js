@@ -31,7 +31,7 @@ window.GBCSections.sobre = {
                         <span class="especialidade-tag">JAVA & FLUTTER</span>
                     </div>
 
-                    <!-- Ícones de Redes Sociais e Contato em Esfera Vermelha -->
+                    <!-- Ícones de Redes Sociais e Contato em Esfera Vermelha 3D -->
                     <div class="perfil-social-links">
                         <a href="https://linkedin.com/in/phasscode" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="LinkedIn">
                             <svg class="icon-social-svg" viewBox="0 0 64 64">
@@ -56,9 +56,9 @@ window.GBCSections.sobre = {
                     </div>
                 </div>
 
-                <!-- 2. Painel Superior Direito: Descrição do Herói -->
+                <!-- 2. Painel Superior Direito: Súmario do Aventureiro (Centralizado) -->
                 <div class="painel-rpg painel-descricao">
-                    <h3 class="descricao-titulo">[ SUMÁRIO DO HERÓI ]</h3>
+                    <h3 class="descricao-titulo">[ SÚMARIO DO HERÓI ]</h3>
                     <p class="descricao-texto">
                         Engenheiro de Software e Desenvolvedor com sólida base em sistemas e energias renováveis, atualmente focado no ecossistema <strong>Java</strong> e <strong>Inteligência Artificial</strong>. 
                         Combino rigor arquitetural e algoritmos inteligentes para criar soluções escaláveis, de alta performance e impacto real.
@@ -77,7 +77,46 @@ window.GBCSections.sobre = {
 
                 <!-- 3. Painel Inferior: Skills e Competências -->
                 <div class="painel-rpg painel-skills">
-                    <div class="conteudo-placeholder">[ PAINEL DE SKILLS & COMPETÊNCIAS ]</div>
+                    <h3 class="skills-titulo">[ SKILLS & COMPETÊNCIAS ]</h3>
+                    <div class="skills-grid-categorias">
+                        <!-- Categoria 1: Core Backend & Arquitetura -->
+                        <div class="skill-categoria-box">
+                            <span class="skill-cat-titulo">CORE BACKEND & ARQUITETURA</span>
+                            <div class="skill-tags">
+                                <span class="skill-tag">Java (Spring Boot, Quarkus)</span>
+                                <span class="skill-tag">System Design & Clean Arch</span>
+                                <span class="skill-tag">Microservices & REST APIs</span>
+                            </div>
+                        </div>
+                        <!-- Categoria 2: Engenharia de IA & Agentes -->
+                        <div class="skill-categoria-box">
+                            <span class="skill-cat-titulo">ENGENHARIA DE IA & AGENTES</span>
+                            <div class="skill-tags">
+                                <span class="skill-tag">LLM Integration (Langchain4j, OpenAI, Gemini)</span>
+                                <span class="skill-tag">RAG & Vector Databases</span>
+                                <span class="skill-tag">Autonomous Agents (LangGraph, MCP)</span>
+                            </div>
+                        </div>
+                        <!-- Categoria 3: Eventos & Persistência -->
+                        <div class="skill-categoria-box">
+                            <span class="skill-cat-titulo">EVENTOS & PERSISTÊNCIA</span>
+                            <div class="skill-tags">
+                                <span class="skill-tag">Apache Kafka & RabbitMQ</span>
+                                <span class="skill-tag">PostgreSQL, Redis, MongoDB</span>
+                                <span class="skill-tag">JPA / Hibernate / Flyway</span>
+                            </div>
+                        </div>
+                        <!-- Categoria 4: DevOps & Qualidade -->
+                        <div class="skill-categoria-box">
+                            <span class="skill-cat-titulo">DEVOPS & QUALIDADE</span>
+                            <div class="skill-tags">
+                                <span class="skill-tag">Docker & Kubernetes</span>
+                                <span class="skill-tag">TDD (JUnit, Testcontainers)</span>
+                                <span class="skill-tag">CI/CD (GitHub Actions)</span>
+                                <span class="skill-tag">AWS & Observabilidade</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
