@@ -1,0 +1,82 @@
+/* ==========================================================================
+   PALETA DE CORES E VARIÁVEIS DE TEMA (GBC PALETTE)
+   ========================================================================== */
+
+/* 1. TEMA ESCURO (Padrão) */
+:root,
+body.modo-escuro,
+html.dark {
+    /* Fundos */
+    --bg-principal: #080d12;
+    --bg-container: #090d12;
+    --bg-card-elevado: #0f171e;
+    --bg-navbar: rgba(8, 13, 18, 0.95);
+    --bg-painel-translucido: rgba(8, 13, 18, 0.86);
+    --bg-card-translucido: rgba(15, 23, 30, 0.75);
+    --bg-caixa-interna: rgba(8, 13, 18, 0.85);
+    --bg-destaque-tag: rgba(6, 78, 59, 0.5);
+    --bg-overlay-modal: rgba(8, 13, 18, 0.85);
+
+    /* Bordas & Molduras */
+    --borda-suave: #164e63;
+    --borda-foco: #0e7490;
+    --borda-moldura-rpg: #78350f;
+    --borda-moldura-escura: #271206;
+    --borda-ouro: #d97706;
+    --borda-verde-tag: #34d399;
+
+    /* Textos */
+    --texto-principal: #f1f5f9;
+    --texto-secundario: #94a3b8;
+    --texto-ciano: #67e8f9;
+    --texto-destaque-ouro: #fef08a;
+    --texto-verde: #6ee7b7;
+    --texto-verde-suave: #a7f3d0;
+    --texto-azul-label: #38bdf8;
+
+    /* Acentos & Botões */
+    --acento-ouro: #f59e0b;
+    --acento-ouro-escuro: #78350f;
+    --acento-ciano: #38bdf8;
+    --acento-vermelho: #ef4444;
+    --sombra-projetada: rgba(0, 0, 0, 0.85);
+}
+
+/* 2. TEMA CLARO */
+body.modo-claro,
+html:not(.dark) {
+    /* Fundos */
+    --bg-principal: #e2e8f0;
+    --bg-container: #f8fafc;
+    --bg-card-elevado: #ffffff;
+    --bg-navbar: rgba(241, 245, 249, 0.95);
+    --bg-painel-translucido: rgba(255, 255, 255, 0.88);
+    --bg-card-translucido: rgba(241, 245, 249, 0.85);
+    --bg-caixa-interna: rgba(226, 232, 240, 0.9);
+    --bg-destaque-tag: rgba(209, 250, 229, 0.8);
+    --bg-overlay-modal: rgba(15, 23, 42, 0.6);
+
+    /* Bordas & Molduras */
+    --borda-suave: #cbd5e1;
+    --borda-foco: #0284c7;
+    --borda-moldura-rpg: #b45309;
+    --borda-moldura-escura: #78350f;
+    --borda-ouro: #d97706;
+    --borda-verde-tag: #059669;
+
+    /* Textos */
+    --texto-principal: #0f172a;
+    --texto-secundario: #475569;
+    --texto-ciano: #0369a1;
+    --texto-destaque-ouro: #92400e;
+    --texto-verde: #047857;
+    --texto-verde-suave: #065f46;
+    --texto-azul-label: #0284c7;
+
+    /* Acentos & Botões */
+    --acento-ouro: #d97706;
+    --acento-ouro-escuro: #92400e;
+    --acento-ciano: #0284c7;
+    --acento-vermelho: #dc2626;
+    --sombra-projetada: rgba(0, 0, 0, 0.2);
+}

@@ -1,15 +1,15 @@
-/* Barra de Navegação Principal GBC */
 .barra-navegacao {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 50;
-    background-color: rgba(8, 13, 18, 0.95);
-    border-bottom: 4px solid rgba(22, 78, 99, 0.8);
+    background-color: var(--bg-navbar);
+    border-bottom: 4px solid var(--borda-suave);
     padding: 10px 16px;
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 4px 20px var(--sombra-projetada);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .barra-navegacao-container {
@@ -29,7 +29,6 @@
     }
 }
 
-/* Bloco Identidade / Herói (Esquerda) */
 .bloco-heroi {
     display: flex;
     align-items: center;
@@ -49,14 +48,13 @@
 }
 
 .texto-logo {
-    color: #67e8f9;
+    color: var(--texto-ciano);
     font-weight: bold;
     letter-spacing: 0.05em;
     line-height: 1;
     font-size: 14px;
 }
 
-/* Bloco de Utilitários / Login e Tema (Direita) */
 .bloco-utilitarios {
     display: flex;
     align-items: center;
@@ -72,7 +70,6 @@
     }
 }
 
-/* Botões de Ícones (Login e Tema) */
 .botao-icone {
     background: none;
     border: none;
@@ -82,15 +79,9 @@
     transition: transform 0.2s ease;
 }
 
-.botao-icone:hover {
-    transform: scale(1.1);
-}
+.botao-icone:hover { transform: scale(1.1); }
+.botao-icone:active { transform: scale(0.95); }
 
-.botao-icone:active {
-    transform: scale(0.95);
-}
-
-/* Perspectiva 3D e Animações de Ícones */
 .perspectiva-svg {
     perspective: 400px;
     width: 36px;
@@ -108,7 +99,6 @@
     transition: transform 0.2s ease-out;
 }
 
-/* Bloco Central de Navegação RPG */
 .bloco-navegacao-centro {
     display: flex;
     align-items: center;
@@ -128,7 +118,6 @@
     }
 }
 
-/* Estilo dos Botões RPG da Navbar */
 .botao-rpg {
     position: relative;
     display: flex;
@@ -137,46 +126,40 @@
     justify-content: center;
     min-width: 76px;
     padding: 8px 10px;
-    background-color: #0f171e;
-    border: 2px solid #0e7490;
+    background-color: var(--bg-card-elevado);
+    border: 2px solid var(--borda-foco);
     cursor: pointer;
-    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.8);
+    box-shadow: 0 3px 0 var(--sombra-projetada);
     outline: none;
     transition: all 0.15s ease;
 }
 
-.botao-rpg:hover {
-    border-color: #38bdf8;
-}
-
+.botao-rpg:hover { border-color: var(--acento-ciano); }
 .botao-rpg:active {
     transform: translateY(1px);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
+    box-shadow: 0 1px 0 var(--sombra-projetada);
 }
 
 .indicador-selecao {
     position: absolute;
     top: -1px;
     opacity: 0;
-    color: #f59e0b;
+    color: var(--acento-ouro);
     font-size: 8px;
 }
 
 .botao-rpg span {
     font-size: 12px;
-    color: #cffafe;
+    color: var(--texto-principal);
     letter-spacing: 0.05em;
     margin-top: 4px;
 }
 
-.botao-rpg:hover span {
-    color: #ffffff;
-}
+.botao-rpg:hover span { color: var(--texto-ciano); }
 
-/* Estado Selecionado do Botão RPG (.gbc-selected) */
 .botao-rpg.gbc-selected {
-    border-color: #f59e0b !important;
-    background-color: #321403 !important;
+    border-color: var(--acento-ouro) !important;
+    background-color: var(--bg-caixa-interna) !important;
     animation: pulsoSelecionado 1.8s infinite ease-in-out;
 }
 
@@ -185,8 +168,8 @@
 }
 
 .botao-rpg.gbc-selected span {
-    color: #fef08a !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+    color: var(--texto-destaque-ouro) !important;
+    text-shadow: 0 1px 2px var(--sombra-projetada);
 }
 
 .botao-rpg.gbc-selected .indicador-selecao {
@@ -194,69 +177,41 @@
     animation: flutuarIndicador 0.8s infinite alternate ease-in-out;
 }
 
-/* --- Animações 3D Individuais no Hover por Item --- */
+/* Animações RPG dos Ícones */
+@keyframes rotateY360 { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+.botao-rpg:hover .icon-helm, .btn-rpg:hover .icon-helm { animation: rotateY360 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 
-/* 1. Sobre Mim (Capacete / .icon-helm): Giro 360° no eixo Y (Item inspecionado) */
-@keyframes rotateY360 {
-    0% { transform: rotateY(0deg); }
-    100% { transform: rotateY(360deg); }
-}
-.botao-rpg:hover .icon-helm,
-.btn-rpg:hover .icon-helm {
-    animation: rotateY360 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* 2. Projetos (Castelo / .icon-castle): Efeito de aproximação tática da fortaleza */
 @keyframes castlePulseZoom {
     0% { transform: scale(1) translateY(0); }
     50% { transform: scale(1.18) translateY(-2px); }
     100% { transform: scale(1) translateY(0); }
 }
-.botao-rpg:hover .icon-castle,
-.btn-rpg:hover .icon-castle {
-    animation: castlePulseZoom 0.5s ease-in-out forwards;
-}
+.botao-rpg:hover .icon-castle, .btn-rpg:hover .icon-castle { animation: castlePulseZoom 0.5s ease-in-out forwards; }
 
-/* 3. Experiência (Escudo / .icon-shield): Projeção frontal de bloqueio defensivo 3D */
 @keyframes shieldBlock3D {
     0% { transform: translateZ(0) scale(1) rotate(0deg); }
     40% { transform: translateZ(25px) scale(1.12) rotate(-5deg); }
     80% { transform: translateZ(25px) scale(1.12) rotate(5deg); }
     100% { transform: translateZ(0) scale(1) rotate(0deg); }
 }
-.botao-rpg:hover .icon-shield,
-.btn-rpg:hover .icon-shield {
-    animation: shieldBlock3D 0.6s ease-in-out forwards;
-}
+.botao-rpg:hover .icon-shield, .btn-rpg:hover .icon-shield { animation: shieldBlock3D 0.6s ease-in-out forwards; }
 
-/* 4. Acadêmico (Grimório / .icon-grimoire): Oscilação lateral de abertura do livro mágico */
 @keyframes grimoireFlip {
     0% { transform: rotateY(0deg) scale(1); }
     50% { transform: rotateY(-30deg) scale(1.12); }
     100% { transform: rotateY(0deg) scale(1); }
 }
-.botao-rpg:hover .icon-grimoire,
-.btn-rpg:hover .icon-grimoire {
-    animation: grimoireFlip 0.6s ease-in-out forwards;
-}
+.botao-rpg:hover .icon-grimoire, .btn-rpg:hover .icon-grimoire { animation: grimoireFlip 0.6s ease-in-out forwards; }
 
-/* 5. Login (Cadeado / .icon-padlock): Salto vertical de destravamento */
 @keyframes padlockUnlockJump {
     0% { transform: translateY(0) scale(1); }
     40% { transform: translateY(-5px) scale(1.15); }
     70% { transform: translateY(-2px) scale(1.05); }
     100% { transform: translateY(0) scale(1); }
 }
-.botao-icone:hover .icon-padlock,
-.btn-icon-only:hover .icon-padlock {
-    animation: padlockUnlockJump 0.5s ease-in-out forwards;
-}
+.botao-icone:hover .icon-padlock, .btn-icon-only:hover .icon-padlock { animation: padlockUnlockJump 0.5s ease-in-out forwards; }
 
-/* Animações Globais e Keyframes */
-@keyframes pulsarStatus {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(0.9); }
-}
+@keyframes pulsarStatus { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.9); } }
 
 @keyframes pulsoSelecionado {
     0%, 100% { 
@@ -269,12 +224,5 @@
     }
 }
 
-@keyframes rotacaoContinua {
-    0% { transform: rotateY(0deg); }
-    100% { transform: rotateY(360deg); }
-}
-
-@keyframes flutuarIndicador {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-3px); }
-}
+@keyframes rotacaoContinua { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+@keyframes flutuarIndicador { 0% { transform: translateY(0); } 100% { transform: translateY(-3px); } }

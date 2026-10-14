@@ -26,29 +26,29 @@ window.GBCSections.sobre = {
                     <h2 class="perfil-nome">PEDRO SANTOS</h2>
                     <span class="perfil-cargo">DESENVOLVEDOR JAVA & IA</span>
 
-                    <!-- Área de Especializações (Preparada para GSAP futuramente) -->
+                    <!-- Área de Especializações -->
                     <div class="perfil-especialidades-container">
                         <span class="especialidade-tag">JAVA & FLUTTER</span>
                     </div>
 
                     <!-- Ícones de Redes Sociais e Contato em Esfera Vermelha -->
                     <div class="perfil-social-links">
-                        <a href="https://www.linkedin.com/in/phasscode/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="LinkedIn">
+                        <a href="https://linkedin.com/in/phasscode" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="LinkedIn">
                             <svg class="icon-social-svg" viewBox="0 0 64 64">
                                 <use xlink:href="assets/img/icons.svg#icon-orb-linkedin" />
                             </svg>
                         </a>
-                        <a href="https://github.com/SladeSouzaSantos" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
+                        <a href="https://github.com/PHASS0" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
                             <svg class="icon-social-svg" viewBox="0 0 64 64">
                                 <use xlink:href="assets/img/icons.svg#icon-orb-github" />
                             </svg>
                         </a>
-                        <a href="https://www.instagram.com/phassantos" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+                        <a href="https://instagram.com/seuusuario" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
                             <svg class="icon-social-svg" viewBox="0 0 64 64">
                                 <use xlink:href="assets/img/icons.svg#icon-orb-instagram" />
                             </svg>
                         </a>
-                        <a href="mailto:phassantos.dev@gmail.com" class="social-btn" aria-label="E-mail">
+                        <a href="mailto:seuemail@exemplo.com" class="social-btn" aria-label="E-mail">
                             <svg class="icon-social-svg" viewBox="0 0 64 64">
                                 <use xlink:href="assets/img/icons.svg#icon-orb-email" />
                             </svg>
@@ -56,9 +56,23 @@ window.GBCSections.sobre = {
                     </div>
                 </div>
 
-                <!-- 2. Painel Superior Direito: Descrição -->
+                <!-- 2. Painel Superior Direito: Descrição do Herói -->
                 <div class="painel-rpg painel-descricao">
-                    <div class="conteudo-placeholder">[ DESCRIÇÃO DO HERÓI ]</div>
+                    <h3 class="descricao-titulo">[ SUMÁRIO DO HERÓI ]</h3>
+                    <p class="descricao-texto">
+                        Engenheiro de Software e Desenvolvedor com sólida base em sistemas e energias renováveis, atualmente focado no ecossistema <strong>Java</strong> e <strong>Inteligência Artificial</strong>. 
+                        Combino rigor arquitetural e algoritmos inteligentes para criar soluções escaláveis, de alta performance e impacto real.
+                    </p>
+                    <div class="descricao-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">FOCO PRINCIPAL:</span>
+                            <span class="stat-value">JAVA & IA</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">MISSÃO:</span>
+                            <span class="stat-value">CÓDIGO LIMPO & ESCALÁVEL</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3. Painel Inferior: Skills e Competências -->
