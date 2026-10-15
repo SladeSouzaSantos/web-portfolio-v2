@@ -9,7 +9,7 @@ body.taverna-ativa {
             rgba(8, 13, 18, 0.50)
         ), 
         url('../img/taverna.webp') !important;
-    background-position: center !important;
+    background-position: bottom center !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
 }
@@ -411,6 +411,16 @@ body.taverna-ativa {
 /* ==========================================================================
    MEDIA QUERIES RESPONSIVAS (MOBILE E TABLET)
    ========================================================================== */
+@media (max-width: 1024px) {
+    body.taverna-ativa {
+        background-image: linear-gradient(
+                rgba(8, 13, 18, 0.35), 
+                rgba(8, 13, 18, 0.50)
+            ), 
+            url('../img/taverna-tablet.webp') !important;
+    }
+}
+
 @media (max-width: 972px) {
     .menu-rpg-grid {
         grid-template-columns: 1fr;
@@ -446,15 +456,13 @@ body.taverna-ativa {
 }
 
 @media (max-width: 640px) {
-    .placa-taverna-topo {
-        padding: 4px 16px !important;
-        font-size: 9px !important;
-        letter-spacing: 0.08em !important;
-        top: -14px;
+    body.taverna-ativa {
+        background-image: linear-gradient(
+                rgba(8, 13, 18, 0.35), 
+                rgba(8, 13, 18, 0.50)
+            ), 
+            url('../img/taverna-mobile.webp') !important;
     }
-}
-
-@media (max-width: 640px) {
     .placa-taverna-topo {
         padding: 4px 16px !important;
         font-size: 9px !important;
