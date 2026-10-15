@@ -1,3 +1,7 @@
+/* ==========================================================================
+   SEÇÃO SOBRE MIM - TAVERNA RPG PORTFÓLIO
+   ========================================================================== */
+
 /* --- Plano de Fundo da Taverna (Máscara Escura Delicada em Ambos os Temas) --- */
 body.taverna-ativa {
     background-image: linear-gradient(
@@ -8,7 +12,6 @@ body.taverna-ativa {
     background-position: center !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
-    /*background-attachment: fixed !important;*/
 }
 
 /* --- Moldura Principal do Menu Translúcida --- */
@@ -102,7 +105,9 @@ body.taverna-ativa {
     min-height: 150px;
 }
 
-/* 1. PAINEL SUPERIOR ESQUERDO: PERFIL / AVATAR */
+/* ==========================================================================
+   1. PAINEL SUPERIOR ESQUERDO: PERFIL / AVATAR
+   ========================================================================== */
 .painel-perfil {    
     padding: 16px !important;
     display: flex;
@@ -154,7 +159,7 @@ body.taverna-ativa {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    width: 20rem;
     background-color: var(--bg-destaque-tag);
     border: 2px solid var(--borda-verde-tag);
     padding: 8px 8px;
@@ -207,73 +212,104 @@ body.taverna-ativa {
 
 .social-btn:active { transform: scale(0.95); }
 
-/* 2. PAINEL SUPERIOR DIREITO: DESCRIÇÃO DO HERÓI */
+/* ==========================================================================
+   2. PAINEL SUPERIOR DIREITO: SÚMARIO DO HERÓI (Pergaminho Corrigido)
+   ========================================================================== */
 .painel-descricao {
     grid-column: 2;
-    align-items: center !important;
-    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
     justify-content: space-between !important;
-    padding: 20px !important;
-    background: var(--bg-card-translucido) !important;
-    border-radius: 8px !important;
+    align-items: stretch !important;
+    text-align: left !important;
+    
+    padding: 62px 15% 80px 15% !important;
+    
+    background-image: url('../img/papiro.webp') !important;
+    background-size: 100% 100% !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    
+    border: none !important;
+    outline: none !important;
+    border-radius: 4px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
 }
 
-.descricao-titulo {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
-    color: var(--texto-ciano);
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-    text-shadow: 1px 1px 0px #000;
-    text-align: center;
+/* --- Título [ SÚMARIO DO HERÓI ] --- */
+.painel-descricao .descricao-titulo,
+.painel-descricao h2,
+.painel-descricao h3 {
+    color: #5c1d18 !important; /* Vermelho escuro estilo tinta/selo */
+    font-family: 'Press Start 2P', monospace !important;
+    text-align: center !important;
+    font-size: 9px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important;
+    text-shadow: none !important;
+    margin: 0 0 20px 0 !important;
 }
 
-.descricao-texto {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-    color: var(--texto-secundario);
-    line-height: 1.8;
-    margin-bottom: 16px;
-    text-align: center;
+/* --- Texto do Parágrafo --- */
+.painel-descricao .descricao-texto,
+.painel-descricao p {
+    color: #2b1704 !important; /* Castanho escuro de tinta medieval */
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 7.5px !important;
+    line-height: 1.8 !important;
+    text-shadow: none !important;
+    text-align: center !important;
+    margin: 0 0 12px 0 !important;
 }
 
-.descricao-texto strong {
-    color: var(--texto-destaque-ouro);
-    font-weight: normal;
+.painel-descricao .descricao-texto strong,
+.painel-descricao p strong {
+    color: #8c281f !important; /* Destaque em tom vinho/cobre */
+    font-weight: bold !important;
 }
 
-.descricao-stats {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* --- Caixas de Status / Estatísticas do Rodapé --- */
+.painel-descricao .descricao-stats {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-top: 12px !important;
 }
 
-.stat-box {
-    background-color: var(--bg-caixa-interna);
-    border: 2px solid var(--borda-suave);
-    padding: 8px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 2px;
+.painel-descricao .stat-box,
+.painel-descricao .linha-status {
+    background: rgba(140, 40, 31, 0.08) !important;
+    border: 1px solid rgba(140, 40, 31, 0.3) !important;
+    border-radius: 3px !important;
+    padding: 5px 10px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
 
-.stat-label {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px;
-    color: var(--texto-azul-label);
-    letter-spacing: 0.05em;
+.painel-descricao .stat-label,
+.painel-descricao .label-status {
+    color: #5c1d18 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 6.5px !important;
+    font-weight: bold !important;
+    text-shadow: none !important;
 }
 
-.stat-value {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px;
-    color: var(--texto-destaque-ouro);
-    letter-spacing: 0.05em;
+.painel-descricao .stat-value,
+.painel-descricao .valor-status {
+    color: #2b1704 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 6.5px !important;
+    font-weight: bold !important;
+    text-shadow: none !important;
 }
 
-/* 3. PAINEL INFERIOR: SKILLS & COMPETÊNCIAS */
+/* ==========================================================================
+   3. PAINEL INFERIOR: SKILLS & COMPETÊNCIAS
+   ========================================================================== */
 .painel-skills {
     grid-column: 1 / -1;
     border-radius: 8px !important;
@@ -290,18 +326,6 @@ body.taverna-ativa {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
-}
-
-@media (min-width: 1024px) {
-    .skills-grid-categorias {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .skills-grid-categorias {
-        grid-template-columns: 1fr;
-    }
 }
 
 .skill-categoria-box {
@@ -332,7 +356,6 @@ body.taverna-ativa {
     line-height: 1.4;
 }
 
-/* --- Estilização Limpa das Skills nos Cards --- */
 .skill-tags {
     display: flex;
     flex-direction: column;
@@ -344,7 +367,7 @@ body.taverna-ativa {
 .skill-tag {
     font-family: 'Press Start 2P', monospace;
     font-size: 7px;
-    color: var(--texto-verde-suave); /* Utiliza o verde da paleta */
+    color: var(--texto-verde-suave);
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
@@ -357,7 +380,6 @@ body.taverna-ativa {
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
-/* Marcador estilo RPG em tom de verde/ciano vivo */
 .skill-tag::before {
     content: '▸';
     color: var(--texto-verde);
@@ -365,7 +387,6 @@ body.taverna-ativa {
     flex-shrink: 0;
 }
 
-/* Efeito Hover ao passar o rato na skill */
 .skill-tag:hover {
     color: var(--texto-destaque-ouro);
     transform: translateX(3px);
@@ -375,14 +396,52 @@ body.taverna-ativa {
     color: var(--acento-ouro);
 }
 
-/* --- MEDIA QUERIES RESPONSIVAS --- */
-@media (max-width: 860px) {
+@media (min-width: 1024px) {
+    .skills-grid-categorias {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .skills-grid-categorias {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES RESPONSIVAS (MOBILE E TABLET)
+   ========================================================================== */
+@media (max-width: 972px) {
     .menu-rpg-grid {
         grid-template-columns: 1fr;
     }
 
     .painel-descricao {
-        grid-column: 1;
+        grid-column: 1 !important;
+        /* No Mobile: espaçamento superior para o selo e centralização do texto */
+        padding: 62px 15% 80px 15% !important; 
+        background-size: 100% 100% !important;
+    }
+    
+    .painel-descricao .descricao-titulo {
+        font-size: 8px !important;
+        margin-top: 10px !important;
+    }
+    
+    .painel-descricao .descricao-texto,
+    .painel-descricao p {
+        font-size: 7px !important;
+        line-height: 1.6 !important;
+        text-align: center !important;
+    }
+    
+    .painel-descricao .stat-box {
+        padding: 4px 8px !important;
+    }
+    
+    .painel-descricao .stat-label,
+    .painel-descricao .stat-value {
+        font-size: 6px !important;
     }
 }
 
@@ -392,5 +451,21 @@ body.taverna-ativa {
         font-size: 9px !important;
         letter-spacing: 0.08em !important;
         top: -14px;
+    }
+}
+
+@media (max-width: 640px) {
+    .placa-taverna-topo {
+        padding: 4px 16px !important;
+        font-size: 9px !important;
+        letter-spacing: 0.08em !important;
+        top: -14px;
+    }
+}
+
+@media (max-width: 470px) {
+
+    .perfil-especialidades-container {
+        width: 100% !important;
     }
 }
