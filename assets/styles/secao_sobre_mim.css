@@ -2,16 +2,55 @@
    SEÇÃO SOBRE MIM - TAVERNA RPG PORTFÓLIO
    ========================================================================== */
 
-/* --- Plano de Fundo da Taverna (Máscara Escura Delicada em Ambos os Temas) --- */
+/* --- Plano de Fundo da Taverna (Preenche 100% da tela) --- */
 body.taverna-ativa {
+    /* Estado inicial: deslocada 150px para baixo e invisível */
+    --mesa-y: 180px;
+
     background-image: linear-gradient(
             rgba(8, 13, 18, 0.35), 
             rgba(8, 13, 18, 0.50)
         ), 
-        url('../img/taverna.webp') !important;
-    background-position: bottom center !important;
+        url('../img/taverna_bg.webp') !important;
+    background-position: center bottom !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+    position: relative !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+}
+
+/* --- CAMADA DA MESA FIXA NO RODAPÉ --- */
+body.taverna-ativa::after {
+    content: '' !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    
+    /* Move apenas a posição Y controlada pelo GSAP */
+    transform: translateX(-50%) translateY(var(--mesa-y)) !important;
+    opacity: 1 !important;
+    
+    /* Largura dinâmica controlada pelo JS */
+    width: var(--mesa-width, 1888px) !important;
+    
+    /* ALTURA PROPORCIONAL AUTOMÁTICA DO CSS:
+       Substitua '300' pela proporção de altura exata da sua imagem original em relação a 1888px.
+       Se a imagem tiver, por exemplo, 1888 de largura por 320 de altura, use 1888 / 320. */
+    aspect-ratio: 1888 / 300 !important; 
+    
+    background-image: url('../img/taverna_table.webp') !important;
+    background-position: bottom center !important;
+    background-size: 100% 100% !important;
+    background-repeat: no-repeat !important;
+    
+    z-index: 20 !important; 
+    pointer-events: none !important; 
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+
+    will-change: transform;
 }
 
 /* --- Moldura Principal do Menu Translúcida --- */
@@ -35,11 +74,18 @@ body.taverna-ativa {
     outline: 2px solid var(--borda-moldura-escura) !important;
     box-shadow: 0 20px 40px var(--sombra-projetada), 
                 inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+                
     position: relative !important;
+    
+    /* z-index INFERIOR ao da mesa (10 < 20) para que a mesa fique à frente na base */
+    z-index: 10 !important; 
     
     box-sizing: border-box !important;
     padding: 2.2rem 1.8rem 1.8rem 1.8rem !important;
     overflow: visible !important;
+    
+    /* Margem inferior para garantir o respiro antes da mesa cobrir o rodapé */
+    margin-bottom: 120px !important; 
 }
 
 /* --- Placa de Madeira no Topo: MENU (Totalmente Responsiva) --- */
@@ -213,7 +259,7 @@ body.taverna-ativa {
 .social-btn:active { transform: scale(0.95); }
 
 /* ==========================================================================
-   2. PAINEL SUPERIOR DIREITO: SÚMARIO DO HERÓI (Pergaminho Corrigido)
+   2. PAINEL SUPERIOR DIREITO: SÚMARIO DO HERÓI
    ========================================================================== */
 .painel-descricao {
     grid-column: 2;
@@ -237,11 +283,10 @@ body.taverna-ativa {
     overflow: hidden !important;
 }
 
-/* --- Título [ SÚMARIO DO HERÓI ] --- */
 .painel-descricao .descricao-titulo,
 .painel-descricao h2,
 .painel-descricao h3 {
-    color: #5c1d18 !important; /* Vermelho escuro estilo tinta/selo */
+    color: #5c1d18 !important;
     font-family: 'Press Start 2P', monospace !important;
     text-align: center !important;
     font-size: 9px !important;
@@ -251,10 +296,9 @@ body.taverna-ativa {
     margin: 0 0 20px 0 !important;
 }
 
-/* --- Texto do Parágrafo --- */
 .painel-descricao .descricao-texto,
 .painel-descricao p {
-    color: #2b1704 !important; /* Castanho escuro de tinta medieval */
+    color: #2b1704 !important;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 7.5px !important;
     line-height: 1.8 !important;
@@ -265,11 +309,10 @@ body.taverna-ativa {
 
 .painel-descricao .descricao-texto strong,
 .painel-descricao p strong {
-    color: #8c281f !important; /* Destaque em tom vinho/cobre */
+    color: #8c281f !important;
     font-weight: bold !important;
 }
 
-/* --- Caixas de Status / Estatísticas do Rodapé --- */
 .painel-descricao .descricao-stats {
     width: 100% !important;
     display: flex !important;
@@ -411,15 +454,6 @@ body.taverna-ativa {
 /* ==========================================================================
    MEDIA QUERIES RESPONSIVAS (MOBILE E TABLET)
    ========================================================================== */
-@media (max-width: 1024px) {
-    body.taverna-ativa {
-        background-image: linear-gradient(
-                rgba(8, 13, 18, 0.35), 
-                rgba(8, 13, 18, 0.50)
-            ), 
-            url('../img/taverna-tablet.webp') !important;
-    }
-}
 
 @media (max-width: 972px) {
     .menu-rpg-grid {
@@ -428,7 +462,6 @@ body.taverna-ativa {
 
     .painel-descricao {
         grid-column: 1 !important;
-        /* No Mobile: espaçamento superior para o selo e centralização do texto */
         padding: 62px 15% 80px 15% !important; 
         background-size: 100% 100% !important;
     }
@@ -461,8 +494,13 @@ body.taverna-ativa {
                 rgba(8, 13, 18, 0.35), 
                 rgba(8, 13, 18, 0.50)
             ), 
-            url('../img/taverna-mobile.webp') !important;
+            url('../img/taverna_bg_mobile.webp') !important;
     }
+
+    #contentDisplay.moldura-taverna {
+        margin-bottom: 0px !important;
+    }
+
     .placa-taverna-topo {
         padding: 4px 16px !important;
         font-size: 9px !important;
@@ -472,7 +510,6 @@ body.taverna-ativa {
 }
 
 @media (max-width: 470px) {
-
     .perfil-especialidades-container {
         width: 100% !important;
     }

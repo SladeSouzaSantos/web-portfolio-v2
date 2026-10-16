@@ -1,6 +1,19 @@
 // --- Módulo da Seção: Sobre Mim (Menu da Taverna) ---
 window.GBCSections = window.GBCSections || {};
 
+// Função que calcula apenas a largura proporcional da mesa em relação ao #contentDisplay
+function atualizarProporcaoMesa() {
+    const contentDisplay = document.querySelector("#contentDisplay");
+    if (!contentDisplay) return;
+
+    // Proporção de largura: 1888px (mesa) para 1100px (menu)
+    const larguraMenu = contentDisplay.offsetWidth;
+    const larguraMesaProporcional = larguraMenu * (1888 / 1100);
+
+    // Define apenas a largura na variável CSS global do body
+    document.body.style.setProperty('--mesa-width', `${larguraMesaProporcional}px`);
+}
+
 window.GBCSections.sobre = {
     render: function(container) {
         document.body.classList.add('taverna-ativa');
@@ -120,5 +133,15 @@ window.GBCSections.sobre = {
 
             </div>
         `;
+
+        // Executa a função imediatamente após inserir o conteúdo para calcular a largura da mesa
+        atualizarProporcaoMesa();
     }
 };
+
+// Ouve o redimensionamento da tela e atualiza a proporção se a taverna estiver ativa
+window.addEventListener("resize", () => {
+    if (document.body.classList.contains('taverna-ativa')) {
+        atualizarProporcaoMesa();
+    }
+});
