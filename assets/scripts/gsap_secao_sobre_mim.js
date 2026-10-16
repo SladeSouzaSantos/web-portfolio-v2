@@ -15,12 +15,11 @@ function initTavernaGsap() {
     ease: "none",              // Movimento linear perfeito com o scroll
     scrollTrigger: {
       trigger: "#contentDisplay",     // Gatilho no menu
-      start: "bottom-=150px bottom",  // Começa 150px acima do fim do menu
+      start: "bottom-=50px bottom",  // Começa 150px acima do fim do menu
       endTrigger: "body.taverna-ativa", // Termina no fim da página da taverna
       end: "bottom bottom",           
       scrub: true,                    // Sincroniza com a rolagem
       invalidateOnRefresh: true,      // Recalcula no resize
-      markers: true                   // Deixe true para testar
     }
   });
 }
