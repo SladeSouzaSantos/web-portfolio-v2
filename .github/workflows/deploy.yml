@@ -53,7 +53,7 @@ jobs:
         uses: github/super-linter@v5
         env:
           VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: master
+          DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_HTML: true
           VALIDATE_CSS: true
@@ -65,7 +65,7 @@ jobs:
   deploy:
     name: Deploy to Mac Mini Server
     needs: [lint_commit, lint_code]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -83,8 +83,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Identifica se é produção (master) ou homologação (dev)
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            # Identifica se é produção (main) ou homologação (dev)
+            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
               PROJECT_DIR="/opt/projects/web-portfolio-v2"
               echo "🚀 Atualizando Produção em $PROJECT_DIR..."
             else
