@@ -2,6 +2,9 @@
 gsap.registerPlugin(ScrollTrigger);
 
 function initTavernaGsap() {
+  // Se for mobile ou tablet (<= 768px), a mesa está oculta via CSS, logo o GSAP não deve rodar!
+  if (window.innerWidth <= 768) return;
+
   const bodyTaverna = document.querySelector("body.taverna-ativa");
   const contentDisplay = document.querySelector("#contentDisplay");
   
@@ -32,5 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // Atualiza a largura e o ScrollTrigger sempre que a tela for redimensionada
 window.addEventListener("resize", () => {
   atualizarProporcaoMesa();
-  ScrollTrigger.refresh();
+  
+  // Se a tela for redimensionada para mobile, remove os triggers para evitar conflitos
+  if (window.innerWidth <= 768) {
+    ScrollTrigger.getAll().forEach(st => st.kill());
+  } else {
+    ScrollTrigger.refresh();
+  }
 });
