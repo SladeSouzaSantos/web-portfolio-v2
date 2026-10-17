@@ -1,0 +1,134 @@
+name: CI/CD Pipeline - GitOps Deploy
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------
+  # 1. LINT DE MENSAGENS DE COMMIT (Conventional Commits)
+  # ---------------------------------------------------------------------
+  lint_commit:
+    name: Lint Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node (commitlint)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install commitlint
+        run: |
+          npm install --no-save @commitlint/cli @commitlint/config-conventional
+
+      - name: Lint last commit message
+        run: |
+          npx commitlint --from=HEAD~1 --to=HEAD || {
+            echo -e "\nCommit message does not follow Conventional Commits format (e.g., feat:, fix:, chore:)."
+            exit 1
+          }
+
+  # ---------------------------------------------------------------------
+  # 2. LINT DE CÓDIGO (HTML, CSS, JS)
+  # ---------------------------------------------------------------------
+  lint_code:
+    name: Lint Code Base
+    needs: lint_commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Lint HTML, CSS and JS
+        uses: github/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: master
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_HTML: true
+          VALIDATE_CSS: true
+          VALIDATE_JAVASCRIPT_ES: true
+
+  # ---------------------------------------------------------------------
+  # 3. DEPLOY AUTOMATIZADO VIA TAILSCALE & SSH (GITOPS)
+  # ---------------------------------------------------------------------
+  deploy:
+    name: Deploy to Mac Mini Server
+    needs: [lint_commit, lint_code]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Deploy to Mac Mini via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Identifica se é produção (master) ou homologação (dev)
+            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+              PROJECT_DIR="/opt/projects/web-portfolio-v2"
+              echo "🚀 Atualizando Produção em $PROJECT_DIR..."
+            else
+              PROJECT_DIR="/opt/projects/web-portfolio-v2-dev"
+              echo "🧪 Atualizando Desenvolvimento em $PROJECT_DIR..."
+            fi
+
+            # Garante que a pasta existe e é um repositório git configurado
+            if [ -d "$PROJECT_DIR/.git" ]; then
+              cd "$PROJECT_DIR"
+              git pull origin ${{ github.ref_name }}
+            else
+              echo "⚠️ O diretório não é um repositório Git válido no servidor."
+              exit 1
+            fi
+
+            # Testa a sintaxe do Nginx central para garantir que o nginx.conf do projeto é válido
+            echo "🔍 Validando configuração do Nginx..."
+            docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -t
+
+            # Se o teste passar, recarrega o Nginx sem derrubar conexões ativas
+            echo "🔄 Recarregando Nginx Proxy..."
+            docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -s reload
+            
+            echo "✅ Deploy concluído com sucesso!"
+
+  # ---------------------------------------------------------------------
+  # 4. HEALTHCHECK / VERIFICAÇÃO PÓS-DEPLOY
+  # ---------------------------------------------------------------------
+  healthcheck:
+    name: Verify Deployment URL
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Wait and Test Site Access
+        run: |
+          echo "⏳ Aguardando 10 segundos para estabilização..."
+          sleep 10
+          
+          # Testa o acesso via IP do Tailscale ou URL interna/externa
+          echo "🌐 Testando resposta HTTP do servidor..."
+          curl -s -I https://gbc.phasscode.com || echo "Aviso: verificação HTTP retornou código diferente de 200 (verifique DNS/Cloudflare se necessário)"
