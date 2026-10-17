@@ -145,3 +145,28 @@ window.addEventListener("resize", () => {
         atualizarProporcaoMesa();
     }
 });
+
+// --- Troca inteligente de WebP para GIF após o carregamento inicial ---
+window.addEventListener("load", () => {
+    // Aguarda 500ms após a página carregar por completo para garantir zero impacto no First Paint
+    setTimeout(() => {
+        if (document.body.classList.contains('taverna-ativa')) {
+            // Cria uma tag <style> dinâmica para injetar os GIFs com alta prioridade
+            const styleGif = document.createElement('style');
+            styleGif.id = 'taverna-gifs-dinamicos';
+            styleGif.innerHTML = `
+                body.taverna-ativa {
+                    background-image: linear-gradient(
+                            rgba(8, 13, 18, 0.35), 
+                            rgba(8, 13, 18, 0.50)
+                        ), 
+                        url('../assets/img/taverna_bg.gif') !important;
+                }
+                body.taverna-ativa::after {
+                    background-image: url('../assets/img/taverna_table.gif') !important;
+                }
+            `;
+            document.head.appendChild(styleGif);
+        }
+    }, 500);
+});

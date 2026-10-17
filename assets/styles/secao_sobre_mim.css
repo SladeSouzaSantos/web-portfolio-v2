@@ -11,7 +11,7 @@ body.taverna-ativa {
             rgba(8, 13, 18, 0.35), 
             rgba(8, 13, 18, 0.50)
         ), 
-        url('../img/taverna_bg.gif') !important;
+        url('../img/taverna_bg.webp') !important;
     background-position: center bottom !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
@@ -37,7 +37,7 @@ body.taverna-ativa::after {
     width: var(--mesa-width, 1888px) !important;
     aspect-ratio: 1888 / 300 !important; 
     
-    background-image: url('../img/taverna_table.gif') !important;
+    background-image: url('../img/taverna_table.webp') !important;
     background-position: bottom center !important;
     background-size: 100% 100% !important;
     background-repeat: no-repeat !important;
@@ -441,9 +441,15 @@ body.taverna-ativa::after {
 /* ==========================================================================
    MEDIA QUERIES RESPONSIVAS (MOBILE E TABLET)
    ========================================================================== */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) {    
     .skills-grid-categorias {
         grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1023px) {    
+    main {
+        padding-top: 14rem !important;
     }
 }
 
