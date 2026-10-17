@@ -17,7 +17,7 @@ body.taverna-ativa {
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
     position: relative !important;
-    min-height: 100vh !important;
+    min-height: 100svh !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
 }
@@ -41,6 +41,8 @@ body.taverna-ativa::after {
     background-position: bottom center !important;
     background-size: 100% 100% !important;
     background-repeat: no-repeat !important;
+
+    background-attachment: scroll !important;
     
     z-index: 20 !important; 
     pointer-events: none !important; 
