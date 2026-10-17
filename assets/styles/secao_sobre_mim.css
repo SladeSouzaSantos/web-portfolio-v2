@@ -4,7 +4,7 @@
 
 /* --- Plano de Fundo da Taverna (Preenche 100% da tela) --- */
 body.taverna-ativa {
-    /* Estado inicial: deslocada 150px para baixo e invisível */
+    /* Estado inicial: deslocada 200px para baixo para esconder o topo do fogo/vela */
     --mesa-y: 200px;
 
     background-image: linear-gradient(
@@ -22,11 +22,11 @@ body.taverna-ativa {
     overflow-y: auto !important;
 }
 
-/* --- CAMADA DA MESA FIXA NO RODAPÉ --- */
+/* --- CAMADA DA MESA FIXA NO RODAPÉ (Desktop/Notebook) --- */
 body.taverna-ativa::after {
     content: '' !important;
     position: fixed !important;
-    bottom: 0 !important;
+    bottom: 0px !important;
     left: 50% !important;
     
     /* Move apenas a posição Y controlada pelo GSAP */
@@ -35,10 +35,6 @@ body.taverna-ativa::after {
     
     /* Largura dinâmica controlada pelo JS */
     width: var(--mesa-width, 1888px) !important;
-    
-    /* ALTURA PROPORCIONAL AUTOMÁTICA DO CSS:
-       Substitua '300' pela proporção de altura exata da sua imagem original em relação a 1888px.
-       Se a imagem tiver, por exemplo, 1888 de largura por 320 de altura, use 1888 / 320. */
     aspect-ratio: 1888 / 300 !important; 
     
     background-image: url('../img/taverna_table.webp') !important;
@@ -482,40 +478,39 @@ body.taverna-ativa::after {
     }
 }
 
+/* --- FIX DEFINITIVO PARA MOBILE E TABLET (<= 768px) --- */
 @media (max-width: 768px) {
     .skills-grid-categorias {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
-    /* Oculta a mesa (after) completamente em telas menores */
+    /* DESATIVA TOTALMENTE O ELEMENTO DA MESA NO MOBILE */
     body.taverna-ativa::after {
+        content: none !important;
         display: none !important;
+        visibility: hidden !important;
     }
 
-    /* Reduz a distância do menu para o fim da página no mobile */
+    /* REDUZ A MARGEM INFERIOR PARA O MENU NÃO FICAR VOANDO NEM COLADO */
     #contentDisplay.moldura-taverna {
-        margin-bottom: 20px !important;
+        margin-bottom: 24px !important;
     }
 }
 
+/* --- FIX DEFINITIVO PARA SMARTPHONES (<= 640px) --- */
 @media (max-width: 640px) {
     body.taverna-ativa {
         background-attachment: scroll !important;
-        background-position: center bottom !important;
+        background-position: center top !important; /* Fixa pelo topo para não saltar na base */
         background-size: cover !important;
-        
-        /* Evita problemas de cálculo do 100vh dinâmico */
+        background-repeat: no-repeat !important;
         min-height: 100% !important;
         
         background-image: linear-gradient(
-                rgba(8, 13, 18, 0.35), 
-                rgba(8, 13, 18, 0.50)
+                rgba(8, 13, 18, 0.40), 
+                rgba(8, 13, 18, 0.60)
             ), 
             url('../img/taverna_bg_mobile.webp') !important;
-    }
-
-    #contentDisplay.moldura-taverna {
-        margin-bottom: 0px !important;
     }
 
     .placa-taverna-topo {
