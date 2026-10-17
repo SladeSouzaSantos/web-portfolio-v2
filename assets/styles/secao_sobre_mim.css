@@ -11,7 +11,7 @@ body.taverna-ativa {
             rgba(8, 13, 18, 0.35), 
             rgba(8, 13, 18, 0.50)
         ), 
-        url('../img/taverna_bg.webp') !important;
+        url('../img/taverna_bg.gif') !important;
     background-position: center bottom !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
@@ -37,7 +37,7 @@ body.taverna-ativa::after {
     width: var(--mesa-width, 1888px) !important;
     aspect-ratio: 1888 / 300 !important; 
     
-    background-image: url('../img/taverna_table.webp') !important;
+    background-image: url('../img/taverna_table.gif') !important;
     background-position: bottom center !important;
     background-size: 100% 100% !important;
     background-repeat: no-repeat !important;
@@ -502,17 +502,7 @@ body.taverna-ativa::after {
 /* --- FIX DEFINITIVO PARA SMARTPHONES (<= 640px) --- */
 @media (max-width: 640px) {
     body.taverna-ativa {
-        background-attachment: scroll !important;
-        background-position: center top !important; /* Fixa pelo topo para não saltar na base */
-        background-size: cover !important;
-        background-repeat: no-repeat !important;
-        min-height: 100% !important;
-        
-        background-image: linear-gradient(
-                rgba(8, 13, 18, 0.40), 
-                rgba(8, 13, 18, 0.60)
-            ), 
-            url('../img/taverna_bg_mobile.webp') !important;
+        background-position: center bottom !important;
     }
 
     .placa-taverna-topo {
