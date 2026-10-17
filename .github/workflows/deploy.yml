@@ -83,6 +83,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e  # Interrompe o script imediatamente se qualquer comando falhar
+            
             # Identifica se é produção (main) ou homologação (dev)
             if [ "${{ github.ref }}" == "refs/heads/main" ]; then
               PROJECT_DIR="/opt/projects/web-portfolio-v2"

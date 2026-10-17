@@ -5,7 +5,7 @@
 /* --- Plano de Fundo da Taverna (Preenche 100% da tela) --- */
 body.taverna-ativa {
     /* Estado inicial: deslocada 150px para baixo e invisível */
-    --mesa-y: 180px;
+    --mesa-y: 200px;
 
     background-image: linear-gradient(
             rgba(8, 13, 18, 0.35), 
@@ -19,6 +19,7 @@ body.taverna-ativa {
     position: relative !important;
     min-height: 100vh !important;
     overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
 
 /* --- CAMADA DA MESA FIXA NO RODAPÉ --- */
@@ -85,7 +86,7 @@ body.taverna-ativa::after {
     overflow: visible !important;
     
     /* Margem inferior para garantir o respiro antes da mesa cobrir o rodapé */
-    margin-bottom: 120px !important; 
+    margin-bottom: 80px !important; 
 }
 
 /* --- Placa de Madeira no Topo: MENU (Totalmente Responsiva) --- */
@@ -448,6 +449,16 @@ body.taverna-ativa::after {
 @media (max-width: 768px) {
     .skills-grid-categorias {
         grid-template-columns: 1fr;
+    }
+
+    /* Oculta a mesa (after) completamente em telas menores */
+    body.taverna-ativa::after {
+        display: none !important;
+    }
+
+    /* Reduz a distância do menu para o fim da página no mobile */
+    #contentDisplay.moldura-taverna {
+        margin-bottom: 20px !important;
     }
 }
 
