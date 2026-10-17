@@ -440,31 +440,14 @@ body.taverna-ativa::after {
     color: var(--acento-ouro);
 }
 
+/* ==========================================================================
+   MEDIA QUERIES RESPONSIVAS (MOBILE E TABLET)
+   ========================================================================== */
 @media (min-width: 1024px) {
     .skills-grid-categorias {
         grid-template-columns: repeat(4, 1fr);
     }
 }
-
-@media (max-width: 768px) {
-    .skills-grid-categorias {
-        grid-template-columns: 1fr;
-    }
-
-    /* Oculta a mesa (after) completamente em telas menores */
-    body.taverna-ativa::after {
-        display: none !important;
-    }
-
-    /* Reduz a distância do menu para o fim da página no mobile */
-    #contentDisplay.moldura-taverna {
-        margin-bottom: 20px !important;
-    }
-}
-
-/* ==========================================================================
-   MEDIA QUERIES RESPONSIVAS (MOBILE E TABLET)
-   ========================================================================== */
 
 @media (max-width: 972px) {
     .menu-rpg-grid {
@@ -499,8 +482,31 @@ body.taverna-ativa::after {
     }
 }
 
+@media (max-width: 768px) {
+    .skills-grid-categorias {
+        grid-template-columns: 1fr;
+    }
+
+    /* Oculta a mesa (after) completamente em telas menores */
+    body.taverna-ativa::after {
+        display: none !important;
+    }
+
+    /* Reduz a distância do menu para o fim da página no mobile */
+    #contentDisplay.moldura-taverna {
+        margin-bottom: 20px !important;
+    }
+}
+
 @media (max-width: 640px) {
     body.taverna-ativa {
+        background-attachment: scroll !important;
+        background-position: center bottom !important;
+        background-size: cover !important;
+        
+        /* Evita problemas de cálculo do 100vh dinâmico */
+        min-height: 100% !important;
+        
         background-image: linear-gradient(
                 rgba(8, 13, 18, 0.35), 
                 rgba(8, 13, 18, 0.50)
