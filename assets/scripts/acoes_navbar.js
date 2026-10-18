@@ -22,9 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function atualizarConteudoSecao(alvo) {
         if (!contentDisplay) return;
 
-        // Limpa classes da taverna ao navegar para outras abas
-        contentDisplay.classList.remove('moldura-taverna');
-        document.body.classList.remove('taverna-ativa');
+        // Limpa a seção anterior antes de renderizar outra.
+        if (window.GBCSections?.projetos?.destroy) {
+            window.GBCSections.projetos.destroy();
+        }
+        contentDisplay.classList.remove('moldura-taverna', 'moldura-guilda');
+        document.body.classList.remove('taverna-ativa', 'guilda-ativa');
 
         // Se existir um módulo específico para a secção
         if (window.GBCSections && window.GBCSections[alvo] && typeof window.GBCSections[alvo].render === 'function') {
