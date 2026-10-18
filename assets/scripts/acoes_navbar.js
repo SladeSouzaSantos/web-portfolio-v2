@@ -44,9 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`[PHASSCODE] Erro ao encerrar a seção "${secaoAtual}":`, erro);
         } finally {
             // Remoção defensiva: mesmo que destroy() falhe, o DOM volta ao estado neutro.
-            contentDisplay.classList.remove('moldura-taverna', 'moldura-guilda');
-            document.body.classList.remove('taverna-ativa', 'guilda-ativa', 'guilda-modal-aberto');
+            contentDisplay.classList.remove('moldura-taverna', 'moldura-guilda', 'moldura-cronicas');
+            document.body.classList.remove('taverna-ativa', 'guilda-ativa', 'guilda-modal-aberto', 'cronicas-ativa', 'cronicas-modal-aberto');
             document.body.style.removeProperty('--guilda-fundo-atual');
+            document.body.style.removeProperty('--cronicas-fundo-atual');
             secaoAtual = null;
         }
     }
