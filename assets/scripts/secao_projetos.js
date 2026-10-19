@@ -202,6 +202,14 @@
                             <div class="guilda-projetos-grid">
                                 ${projetos.map(markupCartaz).join('')}
                             </div>
+                            <div class="guilda-arquivo" aria-label="Outros projetos">
+                                <a class="guilda-arquivo__placa" href="projetos.html" aria-label="Explorar outros projetos no Arquivo de Missões">
+                                    <span class="guilda-arquivo__texto">
+                                        <span class="guilda-arquivo__titulo">ARQUIVO DE MISSÕES</span>
+                                        <span class="guilda-arquivo__chamada">EXPLORAR OUTROS PROJETOS <span aria-hidden="true">›</span></span>
+                                    </span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </section>`;
