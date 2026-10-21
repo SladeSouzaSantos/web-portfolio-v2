@@ -2,7 +2,7 @@ name: PHASSCODE | Tests > SAST > Image > DAST > Deploy > Verify
 
 on:
   push:
-    branches: [dev]
+    branches: [main, dev]
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
@@ -218,7 +218,7 @@ jobs:
   deploy:
     name: '5 - Deploy identical image contents to Mac Mini Nginx'
     needs: [image, dast]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -274,24 +274,114 @@ jobs:
             trap - EXIT
 
             PROXY_COMPOSE=/opt/docker-stack/proxy/nginx/docker-compose.yml
-            docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -t
-            PREVIOUS_DIST=$(readlink "$PROJECT_DIR/dist" || true)
-            ln -sfn "$RELEASE_DIR/dist" "$PROJECT_DIR/dist"
-            if ! docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload; then
-              if [ -n "$PREVIOUS_DIST" ]; then
-                ln -sfn "$PREVIOUS_DIST" "$PROJECT_DIR/dist"
-              else
-                rm -f "$PROJECT_DIR/dist"
-              fi
-              docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload || true
-              echo 'Nginx reload failed; attempted rollback.'
-              exit 1
+
+            if [ "$DEPLOY_BRANCH" = "main" ]; then
+              SITE_HOST=gbc.phasscode.com
+            else
+              SITE_HOST=devgbc.phasscode.com
             fi
+
+            # A release anterior deve existir para permitir rollback.
+            test -L "$PROJECT_DIR/dist"
+            PREVIOUS_DIST=$(readlink "$PROJECT_DIR/dist")
+            test -n "$PREVIOUS_DIST"
+            test -s "$PROJECT_DIR/dist/index.html"
+
+            NEXT_LINK="$PROJECT_DIR/.dist-next-$RELEASE_NAME"
+            ROLLBACK_LINK="$PROJECT_DIR/.dist-rollback-$RELEASE_NAME"
+            CHECK_DIR=$(mktemp -d)
+            ACTIVATED=0
+
+            rollback_on_exit() {
+              result=$?
+              trap - EXIT
+
+              if [ "$result" -ne 0 ] && [ "$ACTIVATED" -eq 1 ]; then
+                echo "ERROR: Deploy failed. Restoring previous release." >&2
+                if ln -s "$PREVIOUS_DIST" "$ROLLBACK_LINK" &&
+                   mv -Tf "$ROLLBACK_LINK" "$PROJECT_DIR/dist"; then
+                  echo "Previous release restored: $PREVIOUS_DIST"
+                  docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload || true
+                else
+                  echo "CRITICAL: Automatic rollback failed! Check $PROJECT_DIR/dist immediately." >&2
+                fi
+              fi
+
+              rm -f "$NEXT_LINK" "$ROLLBACK_LINK" || true
+              rm -rf "$CHECK_DIR" || true
+              exit "$result"
+            }
+            trap 'rollback_on_exit' EXIT
+
+            # Conferir que nao existem links temporarios residuais.
+            test ! -e "$NEXT_LINK" && test ! -L "$NEXT_LINK"
+            test ! -e "$ROLLBACK_LINK" && test ! -L "$ROLLBACK_LINK"
+
+            # Ler os nomes reais dos arquivos compilados da release a ser ativada.
+            ASSETS=$(grep -oE '/assets/[^"[:space:]]+\.(js|css)' \
+              "$RELEASE_DIR/dist/index.html" | sort -u)
+            test -n "$ASSETS"
+            EXPECTED_JS=$(printf '%s\n' "$ASSETS" | grep -m 1 '\.js$')
+            test -n "$EXPECTED_JS"
+
+            # Validar a configuracao do Nginx antes da troca.
+            docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -t
+
+            # Ativacao atomica, sem remover dist previamente.
+            ln -s "$RELEASE_DIR/dist" "$NEXT_LINK"
+            ACTIVATED=1
+            mv -Tf "$NEXT_LINK" "$PROJECT_DIR/dist"
+            docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload
+
+            # Verificar HTML exato da release e fallback SPA no Nginx local.
+            for ROUTE in / /projetos; do
+              curl --fail --silent --show-error --max-time 30 \
+                --retry 3 --retry-delay 2 \
+                -H "Host: $SITE_HOST" \
+                -D "$CHECK_DIR/headers" -o "$CHECK_DIR/local.html" \
+                "http://127.0.0.1$ROUTE"
+
+              grep -qiE '^content-type:[[:space:]]*text/html' "$CHECK_DIR/headers"
+              cmp -s "$RELEASE_DIR/dist/index.html" "$CHECK_DIR/local.html"
+              echo "Local route OK: $ROUTE"
+            done
+
+            # SPA fallback pode devolver HTTP 200 para um asset ausente.
+            # Por isso, verificar MIME e conteudo nao vazio para cada JS/CSS.
+            for ASSET in $ASSETS; do
+              curl --fail --silent --show-error --max-time 30 \
+                -H "Host: $SITE_HOST" \
+                -D "$CHECK_DIR/headers" -o "$CHECK_DIR/asset" \
+                "http://127.0.0.1$ASSET"
+              test -s "$CHECK_DIR/asset"
+              case "$ASSET" in
+                *.js)
+                  grep -qiE '^content-type:[[:space:]]*(application|text)/javascript' "$CHECK_DIR/headers"
+                  ;;
+                *.css)
+                  grep -qiE '^content-type:[[:space:]]*text/css' "$CHECK_DIR/headers"
+                  ;;
+              esac
+              echo "Local asset OK: $ASSET"
+            done
+
+            # Confirmar que Cloudflare entrega o JS desta mesma release.
+            curl --fail --silent --show-error --location --max-time 30 \
+              --retry 3 --retry-delay 2 \
+              -H "Cache-Control: no-cache" \
+              -D "$CHECK_DIR/public.headers" -o "$CHECK_DIR/public.html" \
+              "https://$SITE_HOST/?healthcheck=$RELEASE_NAME"
+
+            grep -qiE '^content-type:[[:space:]]*text/html' "$CHECK_DIR/public.headers"
+            grep -Fq "$EXPECTED_JS" "$CHECK_DIR/public.html"
+
+            echo "Public release verified: https://$SITE_HOST"
+            echo "Deploy successful: $RELEASE_NAME"
 
   verify_deploy:
     name: '6 - Verify deployed site'
     needs: deploy
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
