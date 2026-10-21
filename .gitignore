@@ -1,5 +1,6 @@
 node_modules/
 dist/
+/nginx.conf
 .releases/
 playwright-report/
 test-results/
