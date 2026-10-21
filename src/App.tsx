@@ -1,0 +1,73 @@
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router';
+import { Navbar } from './components/Navbar';
+import { OrbAssistant } from './components/OrbAssistant';
+import { useSectionNavigation } from './hooks/useSectionNavigation';
+import { useTheme } from './hooks/useTheme';
+import type { Theme } from './hooks/useTheme';
+import { ArquivoProjetos } from './sections/ArquivoProjetos';
+import { Experiencia } from './sections/Experiencia';
+import { Formacao } from './sections/Formacao';
+import { Projetos } from './sections/Projetos';
+import { Sobre } from './sections/Sobre';
+import type { SecaoId } from './types/portfolio';
+
+const frames: Record<SecaoId, string> = {
+  sobre: 'moldura-taverna', projetos: 'moldura-guilda', experiencia: 'moldura-cronicas', academico: 'moldura-academia',
+};
+function PortfolioPage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
+  const section = useSectionNavigation();
+  const mainRef = useRef<HTMLElement>(null);
+  const [restrictedPreview, setRestrictedPreview] = useState(false);
+  useEffect(() => setRestrictedPreview(false), [section]);
+  return <>
+    <a className="skip-link" href="#conteudo" onClick={event => {
+      event.preventDefault();
+      mainRef.current?.focus();
+    }}>Pular para o conteúdo</a>
+    <Navbar activeSection={section} theme={theme} onToggleTheme={toggleTheme}
+      onNavigate={() => setRestrictedPreview(false)} onOpenPanel={() => setRestrictedPreview(true)} onLogout={() => setRestrictedPreview(false)} />
+    <main ref={mainRef} id="conteudo" className="portfolio-main" tabIndex={-1}>
+      <div id="contentDisplay" className={`content-panel ${restrictedPreview ? '' : frames[section]}`}>
+        {restrictedPreview ? <section className="restricted-preview" aria-labelledby="restricted-title">
+          <h1 id="restricted-title">[ ÁREA RESTRITA ]</h1>
+          <p>Prévia visual do painel do Mestre. A autenticação e as métricas serão implementadas futuramente.</p>
+          <button type="button" className="login-submit-btn" onClick={() => setRestrictedPreview(false)}>VOLTAR AO PORTFÓLIO</button>
+        </section> : <>
+          {section === 'sobre' && <Sobre />}
+          {section === 'projetos' && <Projetos />}
+          {section === 'experiencia' && <Experiencia />}
+          {section === 'academico' && <Formacao />}
+        </>}
+      </div>
+    </main>
+    <OrbAssistant />
+  </>;
+}
+
+function LegacyRedirect({ to }: { to: string }) {
+  const { search, hash } = useLocation();
+  return <Navigate to={`${to}${search}${hash}`} replace />;
+}
+
+export function App() {
+  const { theme, toggleTheme } = useTheme();
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    const archive = /^\/projetos(?:\.html)?\/?$/.test(pathname);
+    document.title = archive ? 'Arquivo de Missões | PHASSCODE' : 'Pedro Santos | PHASSCODE';
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', archive
+      ? 'Arquivo de Missões do PHASSCODE — navegue pelo catálogo de projetos e tecnologias de Pedro Santos.'
+      : 'Portfólio de Pedro Santos: desenvolvimento de software, projetos, experiência profissional e formação em uma jornada RPG em pixel art.');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return <Routes>
+    <Route path="/" element={<PortfolioPage theme={theme} toggleTheme={toggleTheme} />} />
+    <Route path="/projetos" element={<ArquivoProjetos />} />
+    <Route path="/projetos.html" element={<LegacyRedirect to="/projetos" />} />
+    <Route path="/index.html" element={<LegacyRedirect to="/" />} />
+    <Route path="*" element={<LegacyRedirect to="/" />} />
+  </Routes>;
+}

@@ -1,124 +1,146 @@
-name: CI/CD Pipeline - GitOps Deploy
+name: Validate and deploy portfolio
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
 
 permissions:
   contents: read
 
+concurrency:
+  group: portfolio-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  # ---------------------------------------------------------------------
-  # 1. LINT DE MENSAGENS DE COMMIT (Conventional Commits)
-  # ---------------------------------------------------------------------
-  lint_commit:
-    name: Lint Conventional Commits
+  validate:
+    name: Validate TypeScript, build and browser behavior
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository (full history)
+      - name: Checkout complete history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Node (commitlint)
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+          cache: npm
 
-      - name: Install commitlint
-        run: |
-          npm install --no-save @commitlint/cli @commitlint/config-conventional
+      - name: Install locked dependencies
+        run: npm ci
 
-      - name: Lint last commit message
-        run: |
-          npx commitlint --from=HEAD~1 --to=HEAD || {
-            echo -e "\nCommit message does not follow Conventional Commits format (e.g., feat:, fix:, chore:)."
-            exit 1
-          }
-
-  # ---------------------------------------------------------------------
-  # 2. LINT DE CÓDIGO (HTML, CSS, JS)
-  # ---------------------------------------------------------------------
-  lint_code:
-    name: Lint Code Base
-    needs: lint_commit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Lint HTML, CSS and JS
-        uses: github/super-linter@v5
+      - name: Validate Conventional Commits
         env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_HTML: true
-          VALIDATE_CSS: true
-          VALIDATE_JAVASCRIPT_ES: true
+          COMMIT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          COMMIT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if git cat-file -e "${COMMIT_BASE}^{commit}" 2>/dev/null; then
+            npx commitlint --from "$COMMIT_BASE" --to "$COMMIT_HEAD"
+          else
+            git log -1 --format=%B "$COMMIT_HEAD" | npx commitlint
+          fi
 
-  # ---------------------------------------------------------------------
-  # 3. DEPLOY AUTOMATIZADO VIA TAILSCALE & SSH (GITOPS)
-  # ---------------------------------------------------------------------
+      - name: Check types and build SPA
+        run: npm run build
+
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser tests against production build
+        run: npm test
+
+      - name: Upload browser test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Preserve validated production files
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
   deploy:
-    name: Deploy to Mac Mini Server
-    needs: [lint_commit, lint_code]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    name: Deploy validated files to Mac Mini
+    needs: validate
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: ${{ github.ref_name == 'main' && '/opt/projects/web-portfolio-v2' || '/opt/projects/web-portfolio-v2-dev' }}
+      RELEASE_NAME: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      DEPLOY_BRANCH: ${{ github.ref_name }}
+      DEPLOY_SHA: ${{ github.sha }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Download validated production files
+        uses: actions/download-artifact@v4
+        with:
+          name: portfolio-dist
+          path: dist/
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Deploy to Mac Mini via SSH
+      - name: Upload a separate release directory
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: dist
+          target: ${{ env.PROJECT_DIR }}/.releases/${{ env.RELEASE_NAME }}
+
+      - name: Update configuration and activate release
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,RELEASE_NAME,DEPLOY_BRANCH,DEPLOY_SHA
           script: |
-            set -e  # Interrompe o script imediatamente se qualquer comando falhar
-            
-            # Identifica se é produção (main) ou homologação (dev)
-            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-              PROJECT_DIR="/opt/projects/web-portfolio-v2"
-              echo "🚀 Atualizando Produção em $PROJECT_DIR..."
-            else
-              PROJECT_DIR="/opt/projects/web-portfolio-v2-dev"
-              echo "🧪 Atualizando Desenvolvimento em $PROJECT_DIR..."
-            fi
+            set -eu
+            RELEASE_DIR="$PROJECT_DIR/.releases/$RELEASE_NAME"
+            test -d "$PROJECT_DIR/.git"
+            test -s "$RELEASE_DIR/dist/index.html"
+            test -d "$RELEASE_DIR/dist/assets"
 
-            # Garante que a pasta existe e é um repositório git configurado
-            if [ -d "$PROJECT_DIR/.git" ]; then
-              cd "$PROJECT_DIR"
-              git pull origin ${{ github.ref_name }}
-            else
-              echo "⚠️ O diretório não é um repositório Git válido no servidor."
+            # Refuse to replace an existing real directory with a symlink.
+            if [ -e "$PROJECT_DIR/dist" ] && [ ! -L "$PROJECT_DIR/dist" ]; then
+              echo 'dist must be absent or a symlink. Move the existing build to a release directory before enabling this deployment.'
               exit 1
             fi
 
-            # Testa a sintaxe do Nginx central para garantir que o nginx.conf do projeto é válido
-            echo "🔍 Validando configuração do Nginx..."
+            cd "$PROJECT_DIR"
+            test "$(git symbolic-ref --short HEAD)" = "$DEPLOY_BRANCH"
+            git pull --ff-only origin "$DEPLOY_BRANCH"
+            # Never combine an older artifact with a newer nginx.conf.
+            test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
             docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -t
 
-            # Se o teste passar, recarrega o Nginx sem derrubar conexões ativas
-            echo "🔄 Recarregando Nginx Proxy..."
-            docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -s reload
-            
-            echo "✅ Deploy concluído com sucesso!"
+            PREVIOUS_DIST=$(readlink "$PROJECT_DIR/dist" || true)
+            ln -sfn "$RELEASE_DIR/dist" "$PROJECT_DIR/dist"
+            if ! docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -s reload; then
+              if [ -n "$PREVIOUS_DIST" ]; then
+                ln -sfn "$PREVIOUS_DIST" "$PROJECT_DIR/dist"
+              fi
+              echo 'Nginx reload failed; restored the previous release when available.'
+              exit 1
+            fi
 
-  # ---------------------------------------------------------------------
-  # 4. HEALTHCHECK / VERIFICAÇÃO PÓS-DEPLOY
-  # ---------------------------------------------------------------------
   healthcheck:
-    name: Verify Deployment URL
+    name: Verify production response
     needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Connect to Tailscale
@@ -126,11 +148,7 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Wait and Test Site Access
+      - name: Check production routes
         run: |
-          echo "⏳ Aguardando 10 segundos para estabilização..."
-          sleep 10
-          
-          # Testa o acesso via IP do Tailscale ou URL interna/externa
-          echo "🌐 Testando resposta HTTP do servidor..."
-          curl -s -I https://gbc.phasscode.com || echo "Aviso: verificação HTTP retornou código diferente de 200 (verifique DNS/Cloudflare se necessário)"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 --retry-connrefused --max-time 30 https://gbc.phasscode.com/ --output /dev/null
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 --retry-connrefused --max-time 30 https://gbc.phasscode.com/projetos --output /dev/null

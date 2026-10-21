@@ -1,0 +1,524 @@
+/* ==========================================================================
+   PHASSCODE — EXPERIÊNCIA / CRÔNICAS DA JORNADA
+   Fundo WebP -> GIF; tapeçaria e fichas em 9 cortes; responsivo.
+   ========================================================================== */
+
+body.cronicas-ativa {
+    background-color: #080d12 !important;
+    background-image:
+        linear-gradient(rgba(8, 13, 18, 0.15), rgba(8, 13, 18, 0.26)),
+        var(--cronicas-fundo-atual, url('/assets/img/tapecaria-bg.webp')) !important;
+    background-position: center top !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    background-attachment: scroll !important;
+    min-height: 100svh;
+    overflow-x: hidden;
+}
+
+/* Não deixa aparecer a mesa da seção Sobre Mim. */
+body.cronicas-ativa::after { content: none !important; }
+
+/* Neutraliza estilos inline originais do #contentDisplay. */
+#contentDisplay.moldura-cronicas {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 1100px !important;
+    min-width: 0 !important;
+    margin: 0 auto 28px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    text-align: center;
+}
+
+.cronicas-secao { width: 100%; min-width: 0; }
+
+/* A imagem 1122x1402 mantém o brasão superior e os ornamentos de borda
+   enquanto o tecido central cresce: border-image-slice 225 145 145 145 fill. */
+.cronicas-tapecaria {
+    box-sizing: border-box;
+    position: relative;
+    width: min(100%, 940px);
+    min-width: 0;
+    margin-inline: auto;
+    border: solid transparent;
+    border-width: 180px 76px 100px;
+    border-image-source: url('/assets/img/tapecaria.webp');
+    border-image-slice: 235 145 155 145 fill;
+    border-image-width: 180px 76px 100px;
+    border-image-repeat: stretch;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.65));
+}
+
+.cronicas-tapecaria__interior {
+    min-width: 0;
+    position: relative;
+    /* A zona de tecido útil é mais estreita que a caixa de border-image.
+       11% acompanha o redimensionamento, preservando o bordado dourado
+       e deixando medalhões e cartões integralmente dentro do tecido. */
+    padding: 0 11% 26px;
+    box-sizing: border-box;
+}
+
+.cronicas-cabecalho { margin: 0 auto 32px; color: #ffe5a7; }
+.cronicas-cabecalho h1 {
+    margin: 0 0 14px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 1.65vw, 19px);
+    line-height: 1.75;
+    color: #ffda88;
+    text-shadow: 2px 3px 0 #4e160e;
+    overflow-wrap: anywhere;
+}
+.cronicas-cabecalho p {
+    font-size: clamp(6px, 0.73vw, 8px);
+    line-height: 1.9;
+    max-width: 560px;
+    margin: auto;
+    color: #f4d3a2;
+}
+
+.cronicas-capitulos {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 17px;
+}
+
+/* Eixo histórico bordado, abaixo dos medalhões. */
+.cronicas-capitulos::before {
+    content: '';
+    position: absolute;
+    top: 52px;
+    bottom: 52px;
+    left: 42px;
+    width: 4px;
+    background: linear-gradient(90deg, #673115, #e0a44e 45%, #75421c);
+    box-shadow: 1px 0 0 #32070c;
+}
+
+.cronicas-capitulo {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: center;
+    min-width: 0;
+    position: relative;
+}
+
+/* A base da medalha é imagem WebP; os logos internos vêm de icons.svg. */
+.cronicas-capitulo__medalhao {
+    width: 88px;
+    height: 88px;
+    flex: none;
+    position: relative;
+    z-index: 1;
+    background: url('/assets/img/emblema-moldura.webp') center / contain no-repeat;
+    image-rendering: pixelated;
+    display: grid;
+    place-items: center;
+    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.65));
+}
+/* Fundo escuro discreto para o contraste das logos no tecido vinho. */
+.cronicas-capitulo__medalhao::before {
+    content: '';
+    width: 59%;
+    height: 59%;
+    position: absolute;
+    border-radius: 50%;
+    background: #16202a;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, .55);
+    pointer-events: none;
+}
+.cronicas-capitulo__logo {
+    display: block;
+    position: absolute;
+    inset: 20%;
+    width: 60%;
+    height: 60%;
+    overflow: visible;
+    z-index: 1;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* A moldura 1360x504 recebe o título e texto como HTML. */
+.cronicas-capitulo__cartao {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 160px;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    border: solid transparent;
+    border-width: 30px 38px 28px;
+    border-image-source: url('/assets/img/moldura-exp.webp');
+    border-image-slice: 100 95 95 95 fill;
+    border-image-width: 30px 38px 28px;
+    border-image-repeat: stretch;
+    background: transparent;
+    color: #57321f;
+    font-family: 'Press Start 2P', monospace;
+    image-rendering: pixelated;
+    filter: drop-shadow(1px 5px 4px rgba(15, 6, 5, 0.45));
+    transition: transform 150ms steps(3, end), filter 150ms ease;
+}
+.cronicas-capitulo__cartao:hover,
+.cronicas-capitulo__cartao:focus-visible {
+    transform: translateY(-3px);
+    filter: brightness(1.05) drop-shadow(1px 8px 6px rgba(15, 6, 5, 0.55));
+}
+.cronicas-capitulo__cartao:focus-visible { outline: 3px solid #67e8f9; outline-offset: 4px; }
+.cronicas-capitulo__interior {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.cronicas-capitulo__periodo { font-size: 7px; color: #9d572e; line-height: 1.6; }
+.cronicas-capitulo__empresa {
+    font-size: clamp(8px, 0.93vw, 11px);
+    line-height: 1.65;
+    font-weight: bold;
+    color: #462d20;
+}
+.cronicas-capitulo__cargo { font-size: 7px; line-height: 1.65; color: #704326; }
+.cronicas-capitulo__resumo { font-size: 6px; line-height: 1.75; color: #704a30; }
+.cronicas-capitulo__acao { font-size: 6px; color: #9b4a24; line-height: 1.6; }
+.cronicas-rodape {
+    margin: 26px 0 0;
+    color: #eac584;
+    font-size: 7px;
+    line-height: 1.6;
+}
+
+/* Modal de crônica: texto limitado ao papel, sem scroll horizontal. */
+body.cronicas-modal-aberto { overflow: hidden !important; }
+.cronicas-detalhes {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    overflow: hidden;
+    background: rgba(4, 7, 10, 0.86);
+    backdrop-filter: blur(5px);
+}
+.cronicas-detalhes__janela {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 740px);
+    min-width: 0;
+    max-height: min(92dvh, 860px);
+    border: solid transparent;
+    border-width: 44px 46px;
+    border-image-source: url('/assets/img/moldura-exp.webp');
+    border-image-slice: 100 95 95 95 fill;
+    border-image-width: 44px 46px;
+    border-image-repeat: stretch;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    color: #55301b;
+    font-family: 'Press Start 2P', monospace;
+    text-align: left;
+    image-rendering: pixelated;
+    scrollbar-width: thin;
+    scrollbar-color: #b8874d transparent;
+}
+.cronicas-detalhes__conteudo {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+    padding: 6px 9px 10px;
+    overflow-wrap: anywhere;
+}
+.cronicas-detalhes__rotulo { font-size: 8px; line-height: 1.6; color: #8e4e22; }
+.cronicas-detalhes h2 { font-size: clamp(12px, 2.1vw, 18px); line-height: 1.65; margin: 14px 0; }
+.cronicas-detalhes h3 { margin: 18px 0 10px; font-size: 9px; color: #7a3b23; line-height: 1.6; }
+.cronicas-detalhes__periodo, .cronicas-detalhes__cargo { font-size: 8px; line-height: 1.85; margin: 10px 0; }
+.cronicas-detalhes__descricao,
+.cronicas-detalhes__atividades { font-size: 8px; line-height: 2; margin: 8px 0; }
+.cronicas-detalhes__atividades { padding-left: 20px; }
+.cronicas-detalhes__atividades li { margin: 9px 0; }
+.cronicas-detalhes__divisor { border-top: 2px solid rgba(120, 62, 29, 0.45); margin-top: 16px; }
+.cronicas-detalhes__tecnologias { display: flex; gap: 7px; flex-wrap: wrap; padding: 0; list-style: none; margin: 10px 0; }
+.cronicas-detalhes__tecnologias li { border: 1px solid #ba8548; padding: 7px; line-height: 1.45; font-size: 7px; }
+.cronicas-detalhes__fechar {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+    float: right;
+    margin: 0;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #b8864a;
+    background: #642c1e;
+    color: #ffedce;
+    font-size: 22px;
+    cursor: pointer;
+}
+.cronicas-detalhes__fechar:focus-visible { outline: 3px solid #38bdf8; }
+
+@media (max-width: 768px) {
+    #contentDisplay.moldura-cronicas { margin-bottom: 24px !important; }
+    .cronicas-tapecaria {
+        border-width: 120px 37px 80px;
+        border-image-width: 120px 37px 80px;
+    }
+    .cronicas-tapecaria__interior { padding-bottom: 12px; }
+    .cronicas-cabecalho { margin-bottom: 22px; }
+    .cronicas-cabecalho h1 { font-size: clamp(10px, 2.5vw, 14px); }
+    .cronicas-cabecalho p { font-size: 6px; }
+    .cronicas-capitulos { gap: 10px; }
+    .cronicas-capitulos::before { left: 29px; top: 42px; bottom: 42px; }
+    .cronicas-capitulo { grid-template-columns: 62px minmax(0, 1fr); gap: 8px; }
+    .cronicas-capitulo__medalhao { width: 62px; height: 62px; }
+    .cronicas-capitulo__cartao { min-height: 155px; border-width: 25px 23px; border-image-width: 25px 23px; }
+    .cronicas-capitulo__periodo { font-size: 6px; }
+    .cronicas-capitulo__empresa { font-size: 8px; }
+    .cronicas-capitulo__cargo { font-size: 6px; }
+    .cronicas-capitulo__resumo { font-size: 6px; }
+    .cronicas-capitulo__acao { font-size: 6px; }
+}
+
+@media (max-width: 480px) {
+    .cronicas-tapecaria {
+        border-width: 105px 23px 66px;
+        border-image-width: 105px 23px 66px;
+    }
+    /* Em telas estreitas, cada medalhão fica acima da respectiva crônica:
+       mais largura útil para leitura e nenhum item invade o bordado lateral. */
+    .cronicas-tapecaria__interior { padding-bottom: 8px; }
+    .cronicas-cabecalho { margin-bottom: 16px; }
+    .cronicas-cabecalho h1 { font-size: 10px; line-height: 1.8; }
+    .cronicas-cabecalho p { font-size: 6px; line-height: 1.7; }
+    .cronicas-capitulos { gap: 17px; }
+    .cronicas-capitulos::before {
+        left: 50%;
+        transform: translateX(-50%);
+        top: 22px;
+        bottom: 70px;
+        width: 3px;
+        opacity: .65;
+    }
+    .cronicas-capitulo {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        gap: 5px;
+    }
+    .cronicas-capitulo__medalhao { width: 62px; height: 62px; }
+    .cronicas-capitulo__cartao {
+        width: 100%;
+        min-height: 145px;
+        border-width: 24px 20px;
+        border-image-width: 24px 20px;
+    }
+    .cronicas-capitulo__interior { gap: 5px; }
+    .cronicas-capitulo__periodo { font-size: 6px; }
+    .cronicas-capitulo__empresa { font-size: 8px; }
+    .cronicas-capitulo__cargo,
+    .cronicas-capitulo__resumo,
+    .cronicas-capitulo__acao { font-size: 7px; }
+    .cronicas-rodape { font-size: 6px; }
+    .cronicas-detalhes { padding: 8px; }
+    .cronicas-detalhes__janela { max-height: calc(100dvh - 16px); border-width: 30px 24px; border-image-width: 30px 24px; }
+    .cronicas-detalhes__conteudo { padding: 4px 2px 8px; }
+    .cronicas-detalhes__rotulo { font-size: 6px; }
+    .cronicas-detalhes h2 { font-size: 11px; }
+    .cronicas-detalhes h3 { font-size: 8px; }
+    .cronicas-detalhes__periodo,
+    .cronicas-detalhes__cargo,
+    .cronicas-detalhes__descricao,
+    .cronicas-detalhes__atividades { font-size: 7px; line-height: 1.9; }
+    .cronicas-detalhes__tecnologias li { font-size: 6px; }
+    .cronicas-detalhes__fechar { width: 30px; height: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cronicas-capitulo__cartao { transition: none; }
+    .cronicas-capitulo__cartao:hover { transform: none; }
+}
+
+/* ===============================================================
+   PHASSCODE / CRÔNICAS — medalhões sobre o pergaminho, dentro do tecido
+   Ajustes adicionais da apresentação das crônicas
+   Não exige alterações em HTML ou JavaScript.
+   =============================================================== */
+
+/* 1. Reservar espaço real entre o conteúdo e o bordado dourado. */
+.cronicas-tapecaria__interior {
+    box-sizing: border-box;
+    padding-inline: clamp(10px, 13%, 110px);
+    padding-bottom: 26px;
+}
+
+.cronicas-capitulos {
+    gap: 24px;
+    padding-inline: clamp(4px, 3%, 18px);
+}
+
+/* 2. Cada capítulo vira um conjunto pergaminho + medalhão sobreposto. */
+.cronicas-capitulo {
+    display: block;
+    position: relative;
+    min-width: 0;
+    padding-left: clamp(18px, 6%, 34px);
+    padding-right: 26px;
+}
+
+/* 3. Desativar completamente a linha cronológica anterior. */
+.cronicas-capitulos::before,
+.cronicas-capitulo::before,
+.cronicas-capitulo::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* 4. Medalhão no canto superior esquerdo do respectivo pergaminho. */
+.cronicas-capitulo__medalhao {
+    position: absolute;
+    left: 0;
+    top: -13px;
+    z-index: 3;
+    width: clamp(56px, 7vw, 72px);
+    height: clamp(56px, 7vw, 72px);
+    background: url('/assets/img/emblema-moldura.webp') center / contain no-repeat;
+    image-rendering: pixelated;
+}
+
+/* A imagem emblema.webp já possui o centro vermelho.
+   O disco azulado anterior encobria esse tecido. */
+.cronicas-capitulo__medalhao::before,
+.cronicas-capitulo__medalhao::after {
+    content: none !important;
+    display: none !important;
+}
+
+.cronicas-capitulo__logo {
+    inset: 24%;
+    width: 52%;
+    height: 52%;
+}
+
+.cronicas-capitulo__cartao {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 150px;
+    box-sizing: border-box;
+}
+
+.cronicas-capitulo__interior {
+    min-width: 0;
+    padding-left: clamp(25px, 9%, 53px);
+    padding-block: 3px;
+}
+
+/* 5. Tablet: ornamentação preservada sem cartões encostarem nas laterais. */
+@media (max-width: 768px) {
+    .cronicas-tapecaria__interior {
+        padding-inline: clamp(8px, 9%, 55px);
+        padding-bottom: 20px;
+    }
+    .cronicas-capitulos { gap: 18px; padding-inline: 3%; }
+    .cronicas-capitulo { padding-left: 24px; }
+    .cronicas-capitulo__medalhao { width: 58px; height: 58px; top: -10px; }
+    .cronicas-capitulo__cartao { min-height: 155px; }
+    .cronicas-capitulo__interior { padding-left: 30px; }
+}
+
+/* 6. Mobile: manter medalhão NO CANTO do card, nunca em linha separada. */
+@media (max-width: 480px) {
+    .cronicas-tapecaria__interior {
+        padding-inline: clamp(13px, 13%, 44px);
+        padding-bottom: 12px;
+    }
+    .cronicas-capitulos {
+        gap: 17px;
+        padding-inline: 1%;
+    }
+    .cronicas-capitulo {
+        display: block;
+        padding-left: 17px;
+        min-width: 0;
+    }
+    .cronicas-capitulo__medalhao {
+        position: absolute;
+        left: 0;
+        top: -8px;
+        width: 48px;
+        height: 48px;
+    }
+    .cronicas-capitulo__logo {
+        inset: 23%;
+        width: 54%;
+        height: 54%;
+    }
+    .cronicas-capitulo__cartao {
+        width: 100%;
+        min-height: 162px;
+        border-width: 25px 19px;
+        border-image-width: 25px 19px;
+    }
+    .cronicas-capitulo__interior {
+        padding-left: 19px;
+        gap: 6px;
+    }
+    .cronicas-capitulo__periodo { font-size: 6px; }
+    .cronicas-capitulo__empresa { font-size: 7px; }
+    .cronicas-capitulo__cargo,
+    .cronicas-capitulo__resumo,
+    .cronicas-capitulo__acao { font-size: 6px; }
+    .cronicas-cabecalho { margin-bottom: 24px; }
+    .cronicas-rodape { margin-top: 20px; }
+}
+
+
+/* ================================================================
+   OPÇÃO A — Medalhão reutilizável: aro transparente + fundo via CSS
+   Funciona com os ícones SVG existentes e não altera o layout.
+   Colocar ao FINAL de secao_experiencia.css.
+   ================================================================ */
+.cronicas-capitulo__medalhao {
+    --medal-bg: #8b1725; /* fallback */
+    /* Primeira camada: aro pixel art sem o miolo.
+       Segunda camada: disco de cor, visível através da transparência. */
+    background-image:
+        url('/assets/img/emblema-moldura.webp'),
+        radial-gradient(circle closest-side,
+            var(--medal-bg) 0 69%, transparent 70%);
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: contain, 100% 100%;
+    image-rendering: pixelated;
+}
+
+/* Evita que um pseudo-elemento antigo cubra as cores escolhidas. */
+.cronicas-capitulo__medalhao::before,
+.cronicas-capitulo__medalhao::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Fundos elegidos a partir do contraste com as logos originais. */
+.cronicas-capitulo__medalhao--acrux     { --medal-bg: #ffa601fb; } /* logo escura */
+.cronicas-capitulo__medalhao--sig       { --medal-bg: #dbdbdb; } /* prata/azul */
+.cronicas-capitulo__medalhao--geowellex { --medal-bg: #c4c4c7; } /* azul-marinho */
+.cronicas-capitulo__medalhao--greencity { --medal-bg: #a2df92; } /* sol amarelo/verde */

@@ -1,0 +1,19 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
+import { App } from './App';
+import './styles/paleta_cores.css';
+import './styles/gbc-reset.css';
+import './styles/navbar.css';
+import './styles/secao_sobre_mim.css';
+import './styles/secao_projetos.css';
+import './styles/secao_experiencia.css';
+import './styles/secao_academica.css';
+import './styles/login_modal.css';
+import './styles/orbe_assistant.css';
+import './styles/arquivo_projetos.css';
+import './styles/app.css';
+
+const root = document.getElementById('root');
+if (!root) throw new Error('Elemento raiz do portfólio não encontrado.');
+createRoot(root).render(<StrictMode><BrowserRouter><App /></BrowserRouter></StrictMode>);

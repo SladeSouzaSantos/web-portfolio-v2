@@ -1,0 +1,108 @@
+import { useState } from 'react';
+import { Link } from 'react-router';
+import { Modal } from '../components/Modal';
+import { projetos } from '../data/projetos';
+import { useSceneBackground } from '../hooks/useSceneBackground';
+import type { Projeto } from '../types/portfolio';
+
+type Filtro = Projeto['categoria'] | 'todos';
+
+const filtros: { id: Filtro; rotulo: string }[] = [
+  { id: 'todos', rotulo: '✦ TODOS' },
+  { id: 'ia', rotulo: '✧ IA & BACKEND' },
+  { id: 'mobile', rotulo: '▣ MOBILE' },
+  { id: 'ferramentas', rotulo: '⚒ FERRAMENTAS' },
+];
+
+export function ArquivoProjetos() {
+  const [filtro, setFiltro] = useState<Filtro>('todos');
+  const [projetoAberto, setProjetoAberto] = useState<Projeto | null>(null);
+  const projetosVisiveis = projetos.filter(projeto => filtro === 'todos' || projeto.categoria === filtro);
+
+  useSceneBackground({
+    className: 'arquivo-ativa',
+    property: '--arquivo-fundo-atual',
+    desktop: 'guilda-bg.webp',
+    mobile: 'guilda-bg-mobile.webp',
+  });
+
+  return (
+    <>
+      <header className="topbar">
+        <nav className="topbar__inner" aria-label="Navegação principal">
+          <Link className="brand" to="/" aria-label="Voltar à página inicial do PHASSCODE">PHASSCODE</Link>
+          <Link className="back-top" to="/#projetos">← VOLTAR AO PORTFÓLIO</Link>
+        </nav>
+      </header>
+      <main className="arquivo-container">
+        <section className="arquivo-mural" aria-labelledby="arquivo-titulo">
+          <div className="arquivo-mural__interior">
+            <h1 id="arquivo-titulo">ARQUIVO DE MISSÕES</h1>
+            <p className="subtitulo">EXPLORE OUTROS PROJETOS</p>
+            <div className="arquivo-filtros" role="group" aria-label="Filtrar projetos">
+              {filtros.map(item => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="arquivo-filtro"
+                  data-filtro={item.id}
+                  aria-pressed={filtro === item.id}
+                  onClick={() => setFiltro(item.id)}
+                >
+                  {item.rotulo}
+                </button>
+              ))}
+            </div>
+            <div className="arquivo-grid" id="arquivo-grid" aria-live="polite">
+              {projetosVisiveis.map(projeto => (
+                <article className="arquivo-card" key={projeto.id}>
+                  <span className="arquivo-card__icone" aria-hidden="true">{projeto.icone}</span>
+                  <h2 className="arquivo-card__titulo">{projeto.nome}</h2>
+                  <p className="arquivo-card__tipo">{projeto.tipo}</p>
+                  <p className="arquivo-card__descricao">{projeto.subtitulo}</p>
+                  <button
+                    className="arquivo-card__abrir"
+                    type="button"
+                    data-projeto={projeto.id}
+                    aria-label={`Ver detalhes de ${projeto.nome}`}
+                    onClick={() => setProjetoAberto(projeto)}
+                  >
+                    ▶ VER MISSÃO
+                  </button>
+                </article>
+              ))}
+              {projetosVisiveis.length === 0 && <p id="arquivo-vazio" className="arquivo-vazio">NENHUMA MISSÃO NESTA CATEGORIA.</p>}
+            </div>
+            <p className="arquivo-rodape">NOVOS REGISTROS SERÃO ADICIONADOS EM BREVE.</p>
+            <Link className="retornar" to="/#projetos">← RETORNAR AO PORTFÓLIO</Link>
+          </div>
+        </section>
+      </main>
+      {projetoAberto && (
+        <Modal
+          overlayClassName="arquivo-overlay"
+          panelClassName="arquivo-modal"
+          labelledBy="arquivo-modal-titulo"
+          describedBy="arquivo-modal-descricao"
+          onClose={() => setProjetoAberto(null)}
+        >
+          <button type="button" className="arquivo-modal__fechar" aria-label="Fechar detalhes" onClick={() => setProjetoAberto(null)}>×</button>
+          <p>[ REGISTRO DA MISSÃO ]</p>
+          <h2 id="arquivo-modal-titulo">{projetoAberto.nome}</h2>
+          <p>{projetoAberto.tipo}</p>
+          <p id="arquivo-modal-descricao">{projetoAberto.descricao}</p>
+          <p><strong>ARSENAL UTILIZADO</strong></p>
+          <ul className="arquivo-modal__tec">
+            {projetoAberto.tecnologias.map(tecnologia => <li key={tecnologia}>{tecnologia}</li>)}
+          </ul>
+          {(projetoAberto.repositorio || projetoAberto.demonstracao) && (
+            <div className="arquivo-modal__links">
+              {projetoAberto.repositorio && <a href={projetoAberto.repositorio} target="_blank" rel="noopener noreferrer">GITHUB ↗</a>}
+              {projetoAberto.demonstracao && <a href={projetoAberto.demonstracao} target="_blank" rel="noopener noreferrer">DEMONSTRAÇÃO ↗</a>}
+            </div>
+          )}
+        </Modal>
+      )}
+    </>
+  );
+}
