@@ -1,30 +1,33 @@
-name: Validate and deploy portfolio
+name: PHASSCODE | Tests > SAST > Image > DAST > Deploy > Verify
 
 on:
   push:
-    branches: [main, dev]
+    branches: [dev]
   pull_request:
     branches: [main, dev]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# Nunca publicar duas releases simultâneas da mesma branch.
 concurrency:
-  group: portfolio-${{ github.workflow }}-${{ github.ref }}
+  group: phasscode-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  validate:
-    name: Validate TypeScript, build and browser behavior
+  tests:
+    name: '1 - Tests / Typecheck / Build / Playwright'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - name: Checkout complete history
-        uses: actions/checkout@v4
+      - name: Checkout (full history for Commitlint)
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - name: Node.js 24
+        uses: actions/setup-node@v5
         with:
           node-version: '24'
           cache: npm
@@ -36,119 +39,284 @@ jobs:
         env:
           COMMIT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           COMMIT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        shell: bash
         run: |
-          if git cat-file -e "${COMMIT_BASE}^{commit}" 2>/dev/null; then
+          set -euo pipefail
+          if [[ -n "${COMMIT_BASE:-}" ]] && git cat-file -e "${COMMIT_BASE}^{commit}" 2>/dev/null; then
             npx commitlint --from "$COMMIT_BASE" --to "$COMMIT_HEAD"
           else
             git log -1 --format=%B "$COMMIT_HEAD" | npx commitlint
           fi
 
-      - name: Check types and build SPA
+      - name: Validate TypeScript and compile Vite
         run: npm run build
 
-      - name: Install Chromium for browser tests
+      - name: Install Chromium for Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: Run browser tests against production build
+      - name: Run end-to-end browser tests
         run: npm test
 
-      - name: Upload browser test report
+      - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-report
-          path: playwright-report/
-          retention-days: 7
+          path: |
+            playwright-report/
+            test-results/
           if-no-files-found: ignore
+          retention-days: 7
 
-      - name: Preserve validated production files
-        uses: actions/upload-artifact@v4
+      - name: Preserve exactly the tested static files
+        uses: actions/upload-artifact@v5
         with:
           name: portfolio-dist
           path: dist/
           if-no-files-found: error
           retention-days: 7
 
-  deploy:
-    name: Deploy validated files to Mac Mini
-    needs: validate
-    if: github.event_name == 'push'
+  sast:
+    name: '2 - SAST (CodeQL) + dependency audit'
     runs-on: ubuntu-latest
+    needs: tests
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Dependency vulnerability audit (SCA)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Blocking SAST (Semgrep high-severity findings)
+        run: |
+          docker run --rm \
+            -v "$PWD:/src:ro" -w /src \
+            semgrep/semgrep:latest \
+            semgrep scan --config p/security-audit \
+            --severity ERROR --error src
+      - name: Initialize CodeQL (actual SAST)
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - name: Analyze JavaScript and TypeScript
+        uses: github/codeql-action/analyze@v4
+
+  image:
+    name: '3 - Build and push immutable GHCR image'
+    needs: sast
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      ref: ${{ steps.image_meta.outputs.name }}@${{ steps.publish.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Download tested dist (not a second build)
+        uses: actions/download-artifact@v5
+        with:
+          name: portfolio-dist
+          path: dist
+      - name: Verify downloaded static files
+        run: test -s dist/index.html && test -d dist/assets
+      - name: Generate lowercase registry reference
+        id: image_meta
+        shell: bash
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - name: Authenticate to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish production artifact to GHCR
+        id: publish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .ci/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.image_meta.outputs.name }}:sha-${{ github.sha }}
+          provenance: true
+          sbom: true
+
+  dast:
+    name: '4 - DAST on disposable image (OWASP ZAP)'
+    needs: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Authenticate to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Start immutable image in ephemeral staging
+        env:
+          IMAGE_REF: ${{ needs.image.outputs.ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull "$IMAGE_REF"
+          docker run -d --name phasscode-dast -p 127.0.0.1:8080:80 "$IMAGE_REF"
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8080/healthz > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs phasscode-dast
+          exit 1
+      - name: Validate SPA route before ZAP
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8080/ --output /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8080/projetos --output /dev/null
+      - name: Scan ephemeral staging with OWASP ZAP Baseline
+        shell: bash
+        run: |
+          mkdir -p security-reports
+          chmod 777 security-reports
+          cp .ci/zap-rules.conf security-reports/zap-rules.conf
+          # -I allows advisory WARNs but fails on configured FAIL rules.
+          docker run --rm --network host \
+            -v "$PWD/security-reports:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:8080 \
+            -m 1 -I -c zap-rules.conf \
+            -r zap-report.html -J zap-report.json
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: zap-report
+          path: security-reports/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Clean up disposable staging
+        if: always()
+        run: docker rm -f phasscode-dast || true
+
+  deploy:
+    name: '5 - Deploy identical image contents to Mac Mini Nginx'
+    needs: [image, dast]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
     env:
       PROJECT_DIR: ${{ github.ref_name == 'main' && '/opt/projects/web-portfolio-v2' || '/opt/projects/web-portfolio-v2-dev' }}
       RELEASE_NAME: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
       DEPLOY_BRANCH: ${{ github.ref_name }}
       DEPLOY_SHA: ${{ github.sha }}
+      IMAGE_REF: ${{ needs.image.outputs.ref }}
+      GHCR_USER: ${{ github.repository_owner }}
+      GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
     steps:
-      - name: Download validated production files
-        uses: actions/download-artifact@v4
-        with:
-          name: portfolio-dist
-          path: dist/
-
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
+      - name: Connect to Tailscale using existing authkey
+        uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-
-      - name: Upload a separate release directory
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: dist
-          target: ${{ env.PROJECT_DIR }}/.releases/${{ env.RELEASE_NAME }}
-
-      - name: Update configuration and activate release
+      - name: Pull tested image, extract dist, and switch release
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: PROJECT_DIR,RELEASE_NAME,DEPLOY_BRANCH,DEPLOY_SHA
+          envs: PROJECT_DIR,RELEASE_NAME,DEPLOY_BRANCH,DEPLOY_SHA,IMAGE_REF,GHCR_USER,GHCR_PULL_TOKEN
+          command_timeout: 20m
           script: |
             set -eu
             RELEASE_DIR="$PROJECT_DIR/.releases/$RELEASE_NAME"
             test -d "$PROJECT_DIR/.git"
-            test -s "$RELEASE_DIR/dist/index.html"
-            test -d "$RELEASE_DIR/dist/assets"
-
-            # Refuse to replace an existing real directory with a symlink.
-            if [ -e "$PROJECT_DIR/dist" ] && [ ! -L "$PROJECT_DIR/dist" ]; then
-              echo 'dist must be absent or a symlink. Move the existing build to a release directory before enabling this deployment.'
-              exit 1
-            fi
-
             cd "$PROJECT_DIR"
             test "$(git symbolic-ref --short HEAD)" = "$DEPLOY_BRANCH"
             git pull --ff-only origin "$DEPLOY_BRANCH"
-            # Never combine an older artifact with a newer nginx.conf.
             test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
-            docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -t
 
-            PREVIOUS_DIST=$(readlink "$PROJECT_DIR/dist" || true)
-            ln -sfn "$RELEASE_DIR/dist" "$PROJECT_DIR/dist"
-            if ! docker compose -f /opt/docker-stack/proxy/nginx/docker-compose.yml exec -T nginx nginx -s reload; then
-              if [ -n "$PREVIOUS_DIST" ]; then
-                ln -sfn "$PREVIOUS_DIST" "$PROJECT_DIR/dist"
-              fi
-              echo 'Nginx reload failed; restored the previous release when available.'
+            # Prevent accidental deletion of a pre-existing physical dist directory.
+            if [ -e "$PROJECT_DIR/dist" ] && [ ! -L "$PROJECT_DIR/dist" ]; then
+              echo 'ERROR: dist is a real directory. Back it up and create a symlink before activating image-based deploy.'
               exit 1
             fi
 
-  healthcheck:
-    name: Verify production response
+            # Private GHCR images require read:packages; public images can be pulled without a token.
+            if [ -n "$GHCR_PULL_TOKEN" ]; then
+              printf '%s' "$GHCR_PULL_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            fi
+            docker pull "$IMAGE_REF"
+            mkdir -p "$RELEASE_DIR/dist"
+            CONTAINER_ID=$(docker create "$IMAGE_REF")
+            trap 'docker rm -f "$CONTAINER_ID" >/dev/null 2>&1 || true' EXIT
+            docker cp "$CONTAINER_ID:/usr/share/nginx/html/." "$RELEASE_DIR/dist/"
+            test -s "$RELEASE_DIR/dist/index.html"
+            test -d "$RELEASE_DIR/dist/assets"
+            docker rm "$CONTAINER_ID"
+            CONTAINER_ID=''
+            trap - EXIT
+
+            PROXY_COMPOSE=/opt/docker-stack/proxy/nginx/docker-compose.yml
+            docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -t
+            PREVIOUS_DIST=$(readlink "$PROJECT_DIR/dist" || true)
+            ln -sfn "$RELEASE_DIR/dist" "$PROJECT_DIR/dist"
+            if ! docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload; then
+              if [ -n "$PREVIOUS_DIST" ]; then
+                ln -sfn "$PREVIOUS_DIST" "$PROJECT_DIR/dist"
+              else
+                rm -f "$PROJECT_DIR/dist"
+              fi
+              docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload || true
+              echo 'Nginx reload failed; attempted rollback.'
+              exit 1
+            fi
+
+  verify_deploy:
+    name: '6 - Verify deployed site'
     needs: deploy
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE_URL: ${{ github.ref_name == 'main' && 'https://gbc.phasscode.com' || vars.DEV_SITE_URL }}
     steps:
       - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
+        uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-
-      - name: Check production routes
+      - name: Check public routing and asset integrity
+        shell: bash
         run: |
-          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 --retry-connrefused --max-time 30 https://gbc.phasscode.com/ --output /dev/null
-          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 --retry-connrefused --max-time 30 https://gbc.phasscode.com/projetos --output /dev/null
+          set -euo pipefail
+          if [ -z "${SITE_URL:-}" ]; then
+            echo 'Missing GitHub Actions variable DEV_SITE_URL for dev deploy validation.'
+            exit 1
+          fi
+          for route in / /projetos; do
+            headers=$(mktemp)
+            body=$(mktemp)
+            curl --fail --silent --show-error --location \
+              --retry 5 --retry-delay 2 --retry-connrefused \
+              --max-time 30 -D "$headers" -o "$body" "${SITE_URL%/}$route"
+            grep -qi '<html' "$body"
+            grep -qiE 'content-type:[[:space:]]*text/html' "$headers"
+            echo "OK: ${SITE_URL%/}$route"
+            rm -f "$headers" "$body"
+          done
