@@ -32,7 +32,7 @@ export function Navbar({ activeSection, theme, onToggleTheme, onNavigate, onOpen
           <span className="indicador-selecao" aria-hidden="true">▼</span>
           <span className="perspectiva-svg nav-section-icon"><svg className={`icon-${link.icon}`} viewBox="0 0 32 32" aria-hidden="true">
             <use href={`${assetUrl('icons.svg')}#icon-${link.icon}`} />
-          </svg></span><span>{link.label}</span>
+          </svg></span><span className="nav-section-label">{link.label}</span>
         </Link>)}
       </div>
     </div>

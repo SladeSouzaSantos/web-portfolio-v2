@@ -53,11 +53,12 @@ export function ArquivoProjetos() {
                 </button>
               ))}
             </div>
-            <div className="arquivo-grid" id="arquivo-grid" aria-live="polite">
+            <div className="arquivo-grid" id="arquivo-grid" data-total={projetosVisiveis.length} aria-live="polite">
               {projetosVisiveis.map(projeto => (
                 <article className="arquivo-card" key={projeto.id}>
                   <span className="arquivo-card__icone" aria-hidden="true">{projeto.icone}</span>
                   <h2 className="arquivo-card__titulo">{projeto.nome}</h2>
+                  <span className="arquivo-card__linha" aria-hidden="true" />
                   <p className="arquivo-card__tipo">{projeto.tipo}</p>
                   <p className="arquivo-card__descricao">{projeto.subtitulo}</p>
                   <button
@@ -86,12 +87,16 @@ export function ArquivoProjetos() {
           describedBy="arquivo-modal-descricao"
           onClose={() => setProjetoAberto(null)}
         >
-          <button type="button" className="arquivo-modal__fechar" aria-label="Fechar detalhes" onClick={() => setProjetoAberto(null)}>×</button>
-          <p>[ REGISTRO DA MISSÃO ]</p>
+          <button type="button" className="arquivo-modal__fechar" aria-label="Fechar detalhes" onClick={() => setProjetoAberto(null)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          </button>
+          <p className="arquivo-modal__rotulo">[ REGISTRO DA MISSÃO ]</p>
           <h2 id="arquivo-modal-titulo">{projetoAberto.nome}</h2>
           <p>{projetoAberto.tipo}</p>
           <p id="arquivo-modal-descricao">{projetoAberto.descricao}</p>
-          <p><strong>ARSENAL UTILIZADO</strong></p>
+          <h3 className="arquivo-modal__arsenal">ARSENAL UTILIZADO</h3>
           <ul className="arquivo-modal__tec">
             {projetoAberto.tecnologias.map(tecnologia => <li key={tecnologia}>{tecnologia}</li>)}
           </ul>

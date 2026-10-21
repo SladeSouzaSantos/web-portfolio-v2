@@ -66,7 +66,14 @@ body.cronicas-ativa::after { content: none !important; }
     box-sizing: border-box;
 }
 
-.cronicas-cabecalho { margin: 0 auto 32px; color: #ffe5a7; }
+.cronicas-cabecalho {
+    margin: 0 auto 32px;
+    padding-inline: clamp(10px, 3vw, 20px);
+    min-width: 0;
+    color: #ffe5a7;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
 .cronicas-cabecalho h1 {
     margin: 0 0 14px;
     font-family: 'Press Start 2P', monospace;
@@ -77,8 +84,8 @@ body.cronicas-ativa::after { content: none !important; }
     overflow-wrap: anywhere;
 }
 .cronicas-cabecalho p {
-    font-size: clamp(6px, 0.73vw, 8px);
-    line-height: 1.9;
+    font-size: clamp(6.5px, 1.6vw, 9px);
+    line-height: 2;
     max-width: 560px;
     margin: auto;
     color: #f4d3a2;
@@ -157,8 +164,11 @@ body.cronicas-ativa::after { content: none !important; }
     width: 100%;
     min-width: 0;
     min-height: 160px;
+    /* cqi mede a largura útil deste pergaminho, sem incluir a moldura.
+       Apenas o eixo horizontal é contido; a altura cresce com todo o texto. */
+    container-type: inline-size;
     cursor: pointer;
-    text-align: left;
+    text-align: center;
     padding: 0;
     border: solid transparent;
     border-width: 30px 38px 28px;
@@ -186,18 +196,26 @@ body.cronicas-ativa::after { content: none !important; }
     justify-content: center;
     gap: 7px;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
-.cronicas-capitulo__periodo { font-size: 7px; color: #9d572e; line-height: 1.6; }
+.cronicas-capitulo__interior > span {
+    min-width: 0;
+    max-width: 100%;
+    font-weight: 400;
+    letter-spacing: .015em;
+    line-height: 1.95;
+}
+.cronicas-capitulo__periodo {
+    font-size: clamp(6px, 3.4cqi, 8px);
+    color: #77451e;
+}
 .cronicas-capitulo__empresa {
-    font-size: clamp(8px, 0.93vw, 11px);
-    line-height: 1.65;
-    font-weight: bold;
+    font-size: clamp(7.5px, 4.8cqi, 11px);
     color: #462d20;
 }
-.cronicas-capitulo__cargo { font-size: 7px; line-height: 1.65; color: #704326; }
-.cronicas-capitulo__resumo { font-size: 6px; line-height: 1.75; color: #704a30; }
-.cronicas-capitulo__acao { font-size: 6px; color: #9b4a24; line-height: 1.6; }
+.cronicas-capitulo__cargo { font-size: clamp(6.5px, 4cqi, 9.5px); color: #704326; }
+.cronicas-capitulo__resumo { font-size: clamp(6.5px, 4cqi, 9.5px); color: #704a30; }
+.cronicas-capitulo__acao { font-size: clamp(6px, 3.4cqi, 8px); color: #763919; }
 .cronicas-rodape {
     margin: 26px 0 0;
     color: #eac584;
@@ -268,12 +286,16 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
     margin: 0;
     width: 32px;
     height: 32px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    letter-spacing: 0;
     border: 2px solid #b8864a;
     background: #642c1e;
     color: #ffedce;
-    font-size: 22px;
     cursor: pointer;
 }
+.cronicas-detalhes__fechar svg { display: block; }
 .cronicas-detalhes__fechar:focus-visible { outline: 3px solid #38bdf8; }
 
 @media (max-width: 768px) {
@@ -285,17 +307,11 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
     .cronicas-tapecaria__interior { padding-bottom: 12px; }
     .cronicas-cabecalho { margin-bottom: 22px; }
     .cronicas-cabecalho h1 { font-size: clamp(10px, 2.5vw, 14px); }
-    .cronicas-cabecalho p { font-size: 6px; }
     .cronicas-capitulos { gap: 10px; }
     .cronicas-capitulos::before { left: 29px; top: 42px; bottom: 42px; }
-    .cronicas-capitulo { grid-template-columns: 62px minmax(0, 1fr); gap: 8px; }
+    .cronicas-capitulo { grid-template-columns: 62px minmax(0, 1fr); gap: 8px; margin: 0 3%; }
     .cronicas-capitulo__medalhao { width: 62px; height: 62px; }
     .cronicas-capitulo__cartao { min-height: 155px; border-width: 25px 23px; border-image-width: 25px 23px; }
-    .cronicas-capitulo__periodo { font-size: 6px; }
-    .cronicas-capitulo__empresa { font-size: 8px; }
-    .cronicas-capitulo__cargo { font-size: 6px; }
-    .cronicas-capitulo__resumo { font-size: 6px; }
-    .cronicas-capitulo__acao { font-size: 6px; }
 }
 
 @media (max-width: 480px) {
@@ -308,7 +324,6 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
     .cronicas-tapecaria__interior { padding-bottom: 8px; }
     .cronicas-cabecalho { margin-bottom: 16px; }
     .cronicas-cabecalho h1 { font-size: 10px; line-height: 1.8; }
-    .cronicas-cabecalho p { font-size: 6px; line-height: 1.7; }
     .cronicas-capitulos { gap: 17px; }
     .cronicas-capitulos::before {
         left: 50%;
@@ -331,11 +346,6 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
         border-image-width: 24px 20px;
     }
     .cronicas-capitulo__interior { gap: 5px; }
-    .cronicas-capitulo__periodo { font-size: 6px; }
-    .cronicas-capitulo__empresa { font-size: 8px; }
-    .cronicas-capitulo__cargo,
-    .cronicas-capitulo__resumo,
-    .cronicas-capitulo__acao { font-size: 7px; }
     .cronicas-rodape { font-size: 6px; }
     .cronicas-detalhes { padding: 8px; }
     .cronicas-detalhes__janela { max-height: calc(100dvh - 16px); border-width: 30px 24px; border-image-width: 30px 24px; }
@@ -427,7 +437,6 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
 
 .cronicas-capitulo__interior {
     min-width: 0;
-    padding-left: clamp(25px, 9%, 53px);
     padding-block: 3px;
 }
 
@@ -441,28 +450,32 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
     .cronicas-capitulo { padding-left: 24px; }
     .cronicas-capitulo__medalhao { width: 58px; height: 58px; top: -10px; }
     .cronicas-capitulo__cartao { min-height: 155px; }
-    .cronicas-capitulo__interior { padding-left: 30px; }
 }
 
 /* 6. Mobile: manter medalhão NO CANTO do card, nunca em linha separada. */
 @media (max-width: 480px) {
+    /* Recuos proporcionais se acumulavam e deixavam o texto estreito.
+       O medalhão sobe sobre a borda, liberando a largura do pergaminho. */
     .cronicas-tapecaria__interior {
-        padding-inline: clamp(13px, 13%, 44px);
+        padding-inline: 10px;
         padding-bottom: 12px;
     }
     .cronicas-capitulos {
-        gap: 17px;
-        padding-inline: 1%;
+        gap: 28px;
+        padding-inline: 0;
+        padding-bottom: 50px;
     }
     .cronicas-capitulo {
         display: block;
         padding-left: 17px;
+        padding-right: 0;
         min-width: 0;
+        margin: 0 13% 0 12%;
     }
     .cronicas-capitulo__medalhao {
         position: absolute;
         left: 0;
-        top: -8px;
+        top: -24px;
         width: 48px;
         height: 48px;
     }
@@ -474,20 +487,24 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
     .cronicas-capitulo__cartao {
         width: 100%;
         min-height: 162px;
-        border-width: 25px 19px;
-        border-image-width: 25px 19px;
+        border-width: 25px 18px;
+        border-image-width: 25px 18px;
     }
     .cronicas-capitulo__interior {
-        padding-left: 19px;
+        padding-left: 0;
         gap: 6px;
     }
-    .cronicas-capitulo__periodo { font-size: 6px; }
-    .cronicas-capitulo__empresa { font-size: 7px; }
-    .cronicas-capitulo__cargo,
-    .cronicas-capitulo__resumo,
-    .cronicas-capitulo__acao { font-size: 6px; }
-    .cronicas-cabecalho { margin-bottom: 24px; }
+    .cronicas-cabecalho {
+        margin-bottom: 24px;
+        padding: 0 12%;
+     }
     .cronicas-rodape { margin-top: 20px; }
+}
+
+@media (max-width: 360px) {
+    /* Evita acumular os recuos do tecido, da ficha e da moldura nas telas
+       menores, preservando palavras inteiras em vez de uma coluna de letras. */
+    .cronicas-capitulo { margin-inline: 4%; }
 }
 
 

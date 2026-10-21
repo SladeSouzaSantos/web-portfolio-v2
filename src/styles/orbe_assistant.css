@@ -107,6 +107,14 @@
     margin-bottom: 12px;
 }
 
+.login-modal-overlay .orb-chat-panel {
+    max-width: 520px;
+}
+
+.orb-chat-panel .orb-chat-history {
+    height: clamp(96px, 30dvh, 280px);
+}
+
 .chat-msg {
     font-size: 8px;
     line-height: 1.6;
@@ -131,6 +139,8 @@
 
 .orb-chat-form input {
     flex: 1;
+    min-width: 0;
+    min-height: 44px;
     background-color: var(--bg-caixa-interna);
     border: 2px solid var(--borda-suave);
     color: var(--texto-principal);
@@ -154,6 +164,18 @@
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 3px 0 var(--acento-ouro-escuro);
+    flex-shrink: 0;
+    min-height: 44px;
 }
 
 .orb-chat-send-btn:hover { opacity: 0.9; }
+
+@media (max-width: 400px) {
+    .orb-chat-form {
+        flex-direction: column;
+    }
+
+    .orb-chat-form input, .orb-chat-send-btn {
+        width: 100%;
+    }
+}

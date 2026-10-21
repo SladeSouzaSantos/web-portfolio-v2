@@ -48,6 +48,7 @@
 }
 
 .texto-logo {
+    font-family: var(--fonte-titulo, 'Press Start 2P', monospace);
     color: var(--texto-ciano);
     font-weight: bold;
     letter-spacing: 0.05em;
@@ -100,12 +101,13 @@
 }
 
 .bloco-navegacao-centro {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     flex-grow: 1;
-    overflow-x: auto;
+    min-width: 0;
     width: 100%;
     order: 3;
     padding: 4px 0;
@@ -115,6 +117,8 @@
     .bloco-navegacao-centro {
         width: auto;
         order: 2;
+        max-width: 660px;
+        gap: 8px;
     }
 }
 
@@ -124,8 +128,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 76px;
-    padding: 8px 10px;
+    min-width: 0;
+    min-height: 64px;
+    padding: 8px 2px;
     background-color: var(--bg-card-elevado);
     border: 2px solid var(--borda-foco);
     cursor: pointer;
@@ -148,11 +153,26 @@
     font-size: 8px;
 }
 
-.botao-rpg span {
-    font-size: 12px;
+.nav-section-label {
+    max-width: 100%;
+    font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+    font-size: clamp(6px, 1.65vw, 9px);
+    font-weight: 400;
+    line-height: 1.8;
     color: var(--texto-principal);
-    letter-spacing: 0.05em;
-    margin-top: 4px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+/* Reserva largura para os nomes completos nas telas menores. */
+@media (max-width: 360px) {
+    .barra-navegacao { padding-inline: 8px; }
+    .bloco-navegacao-centro { gap: 4px; }
+    .botao-rpg { padding-inline: 0; }
+}
+
+@media (max-width: 319px) {
+    .nav-section-label { font-size: clamp(4.75px, 1.8vw, 5.75px); }
 }
 
 .botao-rpg:hover span { color: var(--texto-ciano); }

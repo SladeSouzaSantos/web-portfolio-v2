@@ -47,10 +47,15 @@ src/
 ├── styles/                 # CSS original e ajustes da aplicação
 └── types/                  # Contratos dos dados do portfólio
 public/assets/img/          # Imagens e símbolos SVG
+public/assets/fonts/        # Press Start 2P e licença SIL Open Font License
 tests/                      # Testes Playwright
 ```
 
 Para editar conteúdo, comece por `src/data/perfil.ts`, `projetos.ts`, `experiencias.ts` e `formacoes.ts`. A seção inicial de projetos e o Arquivo de Missões compartilham o mesmo catálogo. Os registros de experiência, formação e trilhas mantêm o conteúdo e as datas da versão anterior, incluindo situações provisórias que precisam de revisão editorial antes da publicação.
+
+A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descrições, fichas e controles usam Press Start 2P, com tamanhos, espaçamento entre letras e entrelinhas ajustados para cada contexto. A fonte é servida pelo próprio site, com sua licença em `public/assets/fonts/OFL.txt`. O catálogo `/projetos` reutiliza as artes do mural e dos pergaminhos da Guilda, mantendo os símbolos dos projetos. As referências visuais devem ser revisadas após mudanças nesses estilos.
+
+Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
 
 O baú mantém uma **simulação de login em memória** para demonstrar a interface. Nenhuma credencial é enviada ou autenticada. O orbe é um **guia com respostas predefinidas**, sem integração com um modelo de IA ou serviço externo. O site permanece um front-end estático, sem backend, banco de dados ou área administrativa real.
 
