@@ -1,0 +1,6 @@
+# Restrict the image context to the exact, previously tested dist/ artifact.
+*
+!dist
+!dist/**
+!.ci
+!.ci/**

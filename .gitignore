@@ -1,5 +1,6 @@
 node_modules/
 dist/
+/dist
 /nginx.conf
 .releases/
 playwright-report/
