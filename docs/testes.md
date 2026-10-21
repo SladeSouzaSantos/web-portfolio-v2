@@ -11,10 +11,11 @@ npm test
 A suíte existente continua executando no preview de produção do Vite, iniciado automaticamente na porta 4173. Inclui navegação, histórico, modais, teclado, filtros, temas, animações e imagens. Os novos testes acrescentam:
 
 - Responsividade em tablet (768 × 1024) e desktop (1440 × 900), incluindo navegação, catálogo e modal.
+- Redimensionamento sem recarregar entre celular, tablet e desktop: cards e placa do mural, colunas da Academia, textos dentro das molduras e uso do orbe em retrato/paisagem. Os testes medem os glifos com a Press Start 2P local carregada; a navegação também é verificada a partir de 270 px.
 - Axe com regras WCAG 2.1 A/AA nas quatro seções, nos dois temas, no catálogo e nos modais de detalhes, login e orbe.
 - Um fixture compartilhado que detecta erros JavaScript, `console.error`, respostas HTTP de erro, requisições malsucedidas e MIME incorreto em scripts, estilos e imagens do próprio site.
 
-As falhas incluem URL, status ou tipo do recurso e são anexadas ao relatório Playwright. Falhas de serviços externos, como Google Fonts, são anexadas separadamente; não bloqueiam o portfólio. Requisições canceladas com `net::ERR_ABORTED` durante navegação são desconsideradas. Os testes `runtime-errors.spec.ts` usam páginas isoladas com erros intencionais para verificar o monitor.
+As falhas incluem URL, status ou tipo do recurso e são anexadas ao relatório Playwright. Falhas de serviços externos são anexadas separadamente; não bloqueiam o portfólio. A fonte Press Start 2P é servida pelo próprio site. Requisições canceladas com `net::ERR_ABORTED` durante navegação são desconsideradas. Os testes `runtime-errors.spec.ts` usam páginas isoladas com erros intencionais para verificar o monitor.
 
 O axe complementa os testes de teclado e foco. Uma execução sem violações não comprova conformidade completa: leitura por tecnologias assistivas, clareza do conteúdo e outros aspectos ainda precisam de avaliação humana. [Documentação Playwright](https://playwright.dev/docs/accessibility-testing).
 

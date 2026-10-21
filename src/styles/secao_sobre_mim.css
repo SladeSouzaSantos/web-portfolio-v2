@@ -268,16 +268,13 @@ body.taverna-ativa::after {
     align-items: stretch !important;
     text-align: left !important;
     
-    padding: 62px 15% 80px 15% !important;
-    
-    background-image: url('/assets/img/papiro.webp') !important;
-    background-size: 100% 100% !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    
-    border: none !important;
+    padding: 16px 12px !important;
+    background: none !important;
+    /* A moldura mantém sua espessura quando o texto faz o papiro crescer. */
+    border: 32px solid transparent !important;
+    border-image: url('/assets/img/papiro.webp') 140 130 140 130 fill / 32px / 0 stretch !important;
     outline: none !important;
-    border-radius: 4px !important;
+    border-radius: 0 !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
 }
@@ -460,8 +457,7 @@ body.taverna-ativa::after {
 
     .painel-descricao {
         grid-column: 1 !important;
-        padding: 62px 15% 80px 15% !important; 
-        background-size: 100% 100% !important;
+        padding: 16px 12px !important;
     }
     
     .painel-descricao .descricao-titulo {

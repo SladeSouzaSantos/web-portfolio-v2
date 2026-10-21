@@ -1,0 +1,140 @@
+/* Fonte local: as medidas dos textos não dependem de uma requisição externa. */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/assets/fonts/press-start-2p.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Press Start 2P em toda a interface, com uma escala própria de leitura. */
+:root {
+  --fonte-titulo: 'Press Start 2P', monospace;
+  --fonte-texto: var(--fonte-titulo);
+  --fonte-interface: var(--fonte-titulo);
+}
+
+body {
+  font-family: var(--fonte-texto);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 2.05;
+  letter-spacing: .02em;
+}
+
+h1, h2, h3 { font-family: var(--fonte-titulo); }
+
+.perfil-nome { font-size: clamp(11px, 1.1vw, 14px); line-height: 1.7; }
+.perfil-cargo, .especialidade-tag {
+  font-family: var(--fonte-interface);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: .015em;
+}
+
+/* Os estilos da moldura original usam !important também nos textos. */
+.painel-descricao .descricao-titulo { font-size: 10px !important; line-height: 1.8; }
+.painel-descricao .descricao-texto, .painel-descricao p {
+  font-family: var(--fonte-texto) !important;
+  font-size: 10px !important;
+  line-height: 2.1 !important;
+  letter-spacing: .025em !important;
+  text-align: left !important;
+  overflow-wrap: break-word;
+}
+.painel-descricao .stat-box {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 8px 10px !important;
+}
+.painel-descricao .stat-label, .painel-descricao .stat-value {
+  font-family: var(--fonte-interface) !important;
+  font-size: 8.5px !important;
+  font-weight: 400 !important;
+  line-height: 1.9;
+}
+.painel-descricao .stat-label { font-size: 7.5px !important; letter-spacing: .02em; }
+.skill-cat-titulo { font-size: 9px; line-height: 1.8; }
+.skill-tag {
+  font-family: var(--fonte-texto);
+  font-size: 9px;
+  letter-spacing: .015em;
+  line-height: 1.95;
+}
+.skill-tag::before { font-size: 9px; }
+
+.guilda-cartaz__numero, .guilda-cartaz__chamada, .guilda-arquivo__chamada {
+  font-family: var(--fonte-interface);
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 1.9;
+}
+.guilda-cartaz__titulo { font-size: clamp(9px, 1vw, 11px); line-height: 1.8; }
+.guilda-cartaz__tipo, .guilda-cartaz__subtitulo {
+  font-family: var(--fonte-texto);
+  font-size: 9.5px;
+  line-height: 2;
+}
+.guilda-cartaz__tipo { font-size: 8.5px; font-weight: 400; }
+.guilda-detalhes__tipo, .guilda-detalhes__descricao {
+  font-family: var(--fonte-texto);
+  font-size: 10.5px;
+  line-height: 2.05;
+  text-align: left;
+}
+.guilda-detalhes__tecnologias li, .guilda-detalhes__link {
+  font-family: var(--fonte-interface);
+  font-size: 8.5px;
+  line-height: 1.9;
+}
+
+/* A escala dos cartões de Experiência pertence a secao_experiencia.css:
+   sobrescrevê-la aqui impediria a fonte de acompanhar a largura do papel. */
+.cronicas-detalhes__periodo, .cronicas-detalhes__cargo,
+.cronicas-detalhes__descricao, .cronicas-detalhes__atividades {
+  font-family: var(--fonte-texto);
+  font-size: 10.5px;
+  line-height: 2.05;
+}
+.cronicas-detalhes__tecnologias li {
+  font-family: var(--fonte-interface);
+  font-size: 8.5px;
+  line-height: 1.9;
+}
+
+.login-modal-box { font-family: var(--fonte-texto); }
+.login-modal-header h2 {
+  font-size: clamp(9px, 1.1vw, 11px);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.login-subtitle, .login-feedback, .chat-msg {
+  font-family: var(--fonte-texto);
+  font-size: 10px;
+  line-height: 2.05;
+}
+.login-input-group label { font-family: var(--fonte-interface); font-size: 8px; font-weight: 400; line-height: 1.9; }
+.login-input-group input, .orb-chat-form input {
+  font-family: var(--fonte-texto);
+  font-size: 10px;
+  line-height: 1.9;
+}
+.login-submit-btn, .orb-chat-send-btn {
+  font-family: var(--fonte-interface);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.9;
+}
+.orb-chat-history { height: clamp(220px, 38dvh, 340px); }
+#gbcSpeechText { font-family: var(--fonte-texto); font-size: 9px; line-height: 2; }
+.restricted-preview { font-family: var(--fonte-texto); font-size: 10px; line-height: 2.05; }
+
+@media (max-width: 480px) {
+  #contentDisplay.moldura-taverna { padding: 2rem 12px 20px !important; }
+  .guilda-arquivo__titulo { font-size: 8px; }
+  .guilda-arquivo__chamada { font-size: 7px; }
+  .orb-chat-form { gap: 6px; }
+  .orb-chat-send-btn { padding-inline: 10px; }
+}

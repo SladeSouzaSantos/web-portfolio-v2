@@ -48,7 +48,8 @@ body.academia-ativa::after {
   transform: translateX(-50%) translateY(calc(67.3% - var(--academia-mesa-exposicao) + var(--academia-mesa-y))) !important;
   transition: none !important;
   will-change: transform;
-  z-index: 20 !important;
+  /* O cenário permanece atrás do armário, inclusive em movimento reduzido. */
+  z-index: 5 !important;
   pointer-events: none !important;
   image-rendering: auto;
 }
@@ -86,7 +87,8 @@ body.academia-modal-aberto {overflow:hidden !important;}
   width:100%;
   margin:0 auto;
   padding:20px 0 clamp(110px,19vh,200px);
-  font-family:'Press Start 2P',monospace;
+  font-family:var(--fonte-texto);
+  letter-spacing:.02em;
   color:var(--academia-ouro);
 }
 .academia-visualmente-oculto {
@@ -96,7 +98,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
 .academia-armario {
   position:relative;
   width:min(1240px,96svw);
-  aspect-ratio:1536 / 1024;
+  aspect-ratio:1536 / 1152;
   margin:auto auto;
   isolation:isolate;
   filter:drop-shadow(0 14px 20px rgba(0,0,0,.6));
@@ -113,6 +115,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
 .academia-armario__cabecalho {
   position:absolute;z-index:2;
   top:20.7%;left:50%;width:54%;transform:translateX(-50%);
+  min-width:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:8px;
   text-align:center;
@@ -120,6 +123,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
 }
 .academia-armario__cabecalho h1 {
   margin:0 !important;
+  font-family:var(--fonte-titulo);
   font-size:clamp(13px,1.95vw,24px) !important;
   line-height:1.3;
   letter-spacing:.04em;
@@ -128,8 +132,11 @@ body.academia-modal-aberto {overflow:hidden !important;}
 .academia-armario__cabecalho p {
   margin:0 !important;
   color:#fce1a5;
-  font-size:clamp(6px,.68vw,9px);
-  line-height:1.6;
+  font-size:clamp(8px,.72vw,9px);
+  font-weight:400;
+  line-height:1.9;
+  max-width:100%;
+  overflow-wrap:break-word;
 }
 .academia-armario__conteudo {
   position:absolute;
@@ -168,35 +175,38 @@ body.academia-modal-aberto {overflow:hidden !important;}
 .academia-cartao:focus-visible,
 .academia-trilha:focus-visible {outline:3px solid #4ef2fa;outline-offset:2px;}
 .academia-cartao__conteudo {
-  display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;height: 100%;
-  width:100%;min-width:0;padding:0 1.8svw;
+  box-sizing:border-box;
+  display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;height:100%;
+  width:100%;min-width:0;padding:6% 13%;
 }
+.academia-cartao__conteudo > * { max-width:100%;overflow-wrap:break-word; }
 .academia-cartao__tipo {
-  color:#a05a30;
-  font-size:clamp(5px,.5vw,7px);
-  line-height:1.35;
+  color:#72401e;
+  font-size:7.5px;
+  font-weight:400;
+  line-height:1.7;
   text-transform:uppercase;
 }
 .academia-cartao__nome {
-  font-weight:bold;
-  font-size:clamp(6px,.61vw,8.5px);
-  line-height:1.35;
+  font-weight:400;
+  font-size:clamp(8px,.73vw,9px);
+  line-height:1.7;
   text-transform:uppercase;
-  overflow-wrap:anywhere;
+  overflow-wrap:break-word;
 }
 .academia-cartao__instituicao {
-  font-size:clamp(6px,.56vw,8px);
-  line-height:1.25;
-  font-weight:bold;
+  font-size:7.5px;
+  line-height:1.7;
+  font-weight:400;
 }
 .academia-cartao__periodo {
   color:#704021;
-  font:600 clamp(6.5px,.58vw,8px)/1.28 system-ui,sans-serif;
+  font:400 7px/1.7 var(--fonte-interface);
 }
 .academia-cartao__acao {
-  color:#995323;
-  font-size:clamp(5px,.48vw,6px);
-  line-height:1.3;
+  color:#72401e;
+  font-size:7.5px;
+  line-height:1.7;
   margin-top:1px;
 }
 
@@ -282,16 +292,20 @@ body.academia-modal-aberto {overflow:hidden !important;}
   width:100%;
   padding:0;
   margin-top:8px;
-  font-size:clamp(8px,.82vw,11px);
-  line-height:1.2;
+  font-family:var(--fonte-titulo);
+  font-size:clamp(10px,.82vw,11px);
+  line-height:1.5;
   color:#ffe29c;
   text-shadow:2px 2px 1px #250e00;
+  min-width:0;
+  overflow-wrap:break-word;
 }
 .academia-estudos__subtitulo {
   margin:0;
   color:#ffe1a3;
-  font-size:clamp(5.5px,.52vw,7px);
-  line-height:1.15;
+  font-size:7.5px;
+  font-weight:400;
+  line-height:1.8;
   display:flex;align-items:center;justify-content:center;
   width:100%;
   text-shadow:1px 1px 1px #250e00;
@@ -302,20 +316,22 @@ body.academia-modal-aberto {overflow:hidden !important;}
   min-height:0;
   flex:1 1 auto;
   display:flex;flex-direction:column;
-  justify-content:flex-start;
-  gap:1.2%;
-  padding:7.8% 7.8% 7%;
-  overflow:hidden;
-  background:url('/assets/img/moldura-crtificacoes.webp') center / 100% 100% no-repeat;
+  justify-content:space-between;
+  gap:2px;
+  padding:10% 13% 20%;
+  overflow:visible;
+  /* A arte tem 6,5% de transparência abaixo da moldura. Essa faixa não deve
+     reduzir o papel disponível nem trazer a borda para cima dos textos. */
+  background:url('/assets/img/moldura-crtificacoes.webp') center top / 100% 107% no-repeat;
   margin-top:-0.25svh;
 }
 .academia-trilha {
   appearance:none;display:flex;align-items:center;gap:6px;
-  width:100%;min-width:0;padding:0.1svh 1.3svw;
+  width:100%;min-width:0;padding:2px 0;
   border:0;border-bottom:1px solid rgba(122,70,26,.22);
   background:transparent;color:#43250f;
   font:inherit;text-align:left;cursor:pointer;
-  overflow:hidden;
+  overflow-wrap:break-word;
 }
 .academia-trilha:hover {background:rgba(205,142,48,.17);}
 .academia-trilha__icone {
@@ -332,11 +348,11 @@ body.academia-modal-aberto {overflow:hidden !important;}
 .academia-trilha:nth-child(5) .academia-trilha__icone {background:#5b3b24;}
 .academia-trilha:nth-child(6) .academia-trilha__icone {background:#215246;}
 .academia-trilha span:nth-child(2) {flex:1;display:block;min-width:0;}
-.academia-trilha strong {display:block;font-size:clamp(5.6px,.54vw,7px);line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.academia-trilha small {display:block;font:500 clamp(6px,.58vw,8px)/1.2 system-ui,sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.academia-trilha strong {display:block;font-size:8px;font-weight:400;line-height:1.8;}
+.academia-trilha small {display:block;font:400 7.5px/1.8 var(--fonte-interface);}
 .academia-trilha__seta {font:24px/1 Georgia,serif;color:#774119;}
 .academia-estudos__rodape {display:none !important;}
-.academia-secao__nota {margin:15px auto 0;text-align:center;font-size:8px;line-height:1.8;color:#ffe1a5;text-shadow:1px 2px 2px #000;}
+.academia-secao__nota {margin:15px auto 0;text-align:center;font-size:9px;line-height:2;color:#ffe1a5;text-shadow:1px 2px 2px #000;}
 
 /* Modal independente do plano de fundo. */
 .academia-modal {
@@ -354,35 +370,25 @@ body.academia-modal-aberto {overflow:hidden !important;}
   border:8px ridge #bd7c29;
   box-shadow:0 20px 60px #000c,inset 0 0 0 2px #62300f;
   padding:clamp(22px,5vw,42px);
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(8px,.95vw,11px);line-height:1.9;
+  font-family:var(--fonte-texto);
+  font-size:10.5px;line-height:2.1;letter-spacing:.02em;
 }
-.academia-modal__painel h2 {margin:0 0 24px;color:#663311;font-size:clamp(12px,1.4vw,17px);line-height:1.6;}
+.academia-modal__painel h2 {margin:0 0 24px;color:#663311;font-family:var(--fonte-titulo);font-size:clamp(12px,1.4vw,17px);line-height:1.6;overflow-wrap:break-word;}
 .academia-modal__painel p {margin:0 0 15px;}
-.academia-modal__categoria {font-weight:bold;color:#9c5c20;}
+.academia-modal__categoria {font-weight:400;color:#9c5c20;}
 .academia-modal__fechar {
   position:absolute;top:8px;right:10px;
+  display:grid;place-items:center;
+  padding:0;letter-spacing:0;
   border:2px solid #ad782d;background:#43200d;color:#ffde94;
-  cursor:pointer;font:bold 24px/1 system-ui,sans-serif;width:36px;height:36px;
+  cursor:pointer;width:36px;height:36px;
 }
-.academia-modal__link {display:inline-block;margin-top:10px;color:#6d320d;font-size:10px;}
-@media(max-width:1475px) {
-  .academia-cartao__conteudo{
-    padding:0 2.5svw;
-  }
-}
+.academia-modal__fechar svg {display:block;}
+.academia-modal__link {display:inline-block;margin-top:10px;color:#6d320d;font-size:9px;font-weight:400;line-height:2;}
 
-/* Tablets: mantém a composição da prancha, aliviando textos. */
-@media(max-width:1100px) and (min-width:769px) {
-  .academia-cartao__nome {font-size:clamp(7px,.85vw,9px);}
-  .academia-cartao__conteudo{
-    padding:0 3svw;
-  }
-}
-
-/* Mobile: preserva a composição em camadas e utiliza svw/svh.
-   Medalhão no canto superior esquerdo; texto recuado para não sobrepor. */
-@media (max-width:768px) {
+/* Fora do armário desktop, o conteúdo determina a altura. A moldura usa
+   bordas recortadas para acompanhar a grade sem alongar os cantos dourados. */
+@media (max-width:1150px) {
   body.academia-ativa {
     background-image:linear-gradient(rgba(4,8,13,.12),rgba(4,8,13,.25)),
                      var(--academia-fundo-atual,url('/assets/img/academia-bg-mobile.webp')) !important;
@@ -409,15 +415,14 @@ body.academia-modal-aberto {overflow:hidden !important;}
 
   .academia-armario {
     box-sizing:border-box;
-    width:min(94svw,560px);
+    width:min(calc(100% - 24px),1040px);
     margin-inline:auto;
     aspect-ratio:auto;
-    padding:clamp(8px,1.8svh,15px) clamp(4px,1.2svw,8px)
-            clamp(18px,4svh,32px);
-    border:clamp(14px,4.5svw,22px) solid transparent;
+    padding:8px clamp(3px,1vw,10px) 20px;
+    border:clamp(12px,2.8vw,24px) solid transparent;
     border-image-source:url('/assets/img/moldura-formacao-ft.webp');
     border-image-slice:145 145 180 145 fill;
-    border-image-width:clamp(14px,4.5svw,22px);
+    border-image-width:clamp(12px,2.8vw,24px);
     border-image-repeat:stretch;
   }
 
@@ -428,25 +433,25 @@ body.academia-modal-aberto {overflow:hidden !important;}
     top:auto;right:auto;bottom:auto;left:auto;
     width:100%;
     transform:none;
-    gap:clamp(6px,1svh,10px);
-    margin:0 0 clamp(14px,2.6svh,24px);
-    padding:clamp(40px,0svh,25px) clamp(6px,2svw,12px)
-            clamp(40px,2.6svh,22px);
-    border-bottom:3px solid #a76c2c;
+    gap:6px;
+    margin:0 0 20px;
+    padding:40px 13% 32px;
     box-sizing:border-box;
     background: url(/assets/img/moldura-crtificacoes-titulo.webp) center / 100% 100% no-repeat;
   }
 
   .academia-armario__cabecalho h1 {
-    font-size:clamp(11px,3svw,19px) !important;
+    max-width:100%;
+    font-size:clamp(11px,2.2vw,18px) !important;
     line-height:1.5;
     margin: 20px 0 0 !important;
+    overflow-wrap:break-word;
   }
 
   .academia-armario__cabecalho p {
-    font-size:clamp(6px,1.55svw,1svw) !important;
-    line-height:1.7;
-    margin: 0 0 10px !important;
+    font-size:8px !important;
+    line-height:1.8;
+    margin:0 0 20px !important;
   }
 
   .academia-armario__conteudo {
@@ -459,9 +464,11 @@ body.academia-modal-aberto {overflow:hidden !important;}
   }
 
   .academia-formacoes__grade {
-    display:flex;
-    flex-direction:column;
-    gap:clamp(9px,1.6svh,14px);
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:none;
+    align-items:stretch;
+    gap:16px;
     width:100%;
     height:auto;
   }
@@ -471,12 +478,9 @@ body.academia-modal-aberto {overflow:hidden !important;}
     flex-direction:row;
     align-items:center;
     justify-content:flex-start;
-    min-height:clamp(130px,19svh,178px);
-    height:40svh;
-    padding:clamp(12px,2svh,20px)
-            clamp(65px,19svw,80px)
-            clamp(12px,2svh,20px)
-            clamp(65px,19svw,80px);
+    min-height:240px;
+    height:auto;
+    padding:34px 13%;
     gap:0;
     text-align:left;
     background-size:100% 100%;
@@ -489,7 +493,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
     left:clamp(-5px,-.6svw,-1px);
     right:auto;
     transform:none;
-    width:clamp(48px,14svw,72px);
+    width:clamp(44px,6vw,62px);
     margin:0;
   }
 
@@ -499,25 +503,25 @@ body.academia-modal-aberto {overflow:hidden !important;}
     min-width:0;
     margin-top:0;
     padding:0;
-    gap:clamp(4px,.8svh,8px);
+    gap:7px;
     align-items:center;
     justify-content:center;
     text-align:center;
   }
 
-  .academia-cartao__tipo { font-size:clamp(6px,1.6svw,9px); }
+  .academia-cartao__tipo { font-size:8px;line-height:1.9; }
   .academia-cartao__nome {
-    font-size:clamp(8px,2.2svw,12px);
-    line-height:1.45;
+    font-size:9px;
+    line-height:1.8;
   }
-  .academia-cartao__instituicao { font-size:clamp(7px,1.8svw,11px); }
-  .academia-cartao__periodo { font-size:clamp(8px,1.9svw,11px); }
-  .academia-cartao__acao { font-size:clamp(6px,1.5svw,8px); }
+  .academia-cartao__instituicao { font-size:8.5px;line-height:1.9; }
+  .academia-cartao__periodo { font-size:8px;line-height:1.9; }
+  .academia-cartao__acao { font-size:8px;line-height:1.9; }
 
   .academia-estudos {
     box-sizing:border-box;
     width:100%;
-    min-height:clamp(570px,78svh,720px);
+    min-height:0;
     height:auto;
     padding:0;
     gap:clamp(2px,.35svh,6px);
@@ -527,103 +531,109 @@ body.academia-modal-aberto {overflow:hidden !important;}
   }
 
   .academia-estudos__cabecalho {
-    min-height:auto;
+    min-height:120px;
+    aspect-ratio:auto;
     width:100%;
-    padding:12% 8.6% 16%;
+    padding:38px 13% 30px;
   }
 
   .academia-estudos h2 {
-    margin-top: 32px;
-    font-size:clamp(8px,2.1svw,12px);
+    margin:0;
+    font-size:clamp(10px,1.8vw,13px);
   }
 
   .academia-estudos__subtitulo {
     min-height:auto;
-    font-size:clamp(6px,1.7svw,10px);
+    font-size:8px;
   }
 
   .academia-estudos__lista {
     min-height:0;
     flex:1 1 auto;
-    gap:clamp(3px,.6svh,7px);
-    justify-content:flex-start;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;
+    column-gap:22px;
+    row-gap:8px;
     overflow:visible;
-    padding:7.6% 12% 20%;
-    margin-top:-0.2svh;
+    padding:8% 13% 10%;
+    margin-top:0;
   }
 
   .academia-trilha {
-    min-height:clamp(49px,7svh,62px);
-    padding:clamp(5px,1svh,9px) clamp(2px,.8svw,6px);
-    gap:clamp(5px,1.8svw,9px);
+    min-height:64px;
+    padding:8px 0;
+    gap:7px;
   }
 
   .academia-trilha__icone {
-    width:clamp(25px,8svw,34px);
-    height:clamp(25px,8svw,34px);
+    width:28px;
+    height:28px;
   }
 
   .academia-trilha strong {
-    font-size:clamp(6px,1.7svw,10px);
+    font-size:9px;
     white-space:normal;
-    overflow-wrap:anywhere;
+    overflow-wrap:break-word;
   }
 
   .academia-trilha small {
-    font-size:clamp(8px,1.9svw,11px);
+    font-size:8px;
     white-space:normal;
-    overflow-wrap:anywhere;
+    overflow-wrap:break-word;
   }
 
   .academia-secao__nota {
     max-width:88svw;
-    font-size:clamp(6px,1.5svw,8px);
+    font-size:9px;
   }
 }
 
-@media (max-width:375px) {
+@media (max-width:639px) {
   .academia-armario {
-    width:96svw;
-    border-width:clamp(12px,3.8svw,16px);
-    border-image-width:clamp(12px,3.8svw,16px);
-    padding-inline:clamp(3px,1svw,5px);
+    width:calc(100% - 12px);
+    border-width:14px;
+    border-image-width:14px;
+    padding-inline:3px;
   }
 
-  .academia-armario__cabecalho {
-    padding-inline:clamp(4px,1.5svw,8px);
+  .academia-formacoes__grade {
+    grid-template-columns:minmax(0,1fr);
+    gap:16px;
   }
 
   .academia-cartao {
-    min-height:clamp(126px,18svh,157px);
-    padding:clamp(10px,1.8svh,15px)
-            clamp(10px,3svw,15px)
-            clamp(10px,1.8svh,15px)
-            clamp(59px,18svw,70px);
+    min-height:244px;
+    padding:36px 14%;
   }
 
   .academia-medalhao {
     top:clamp(-5px,-.45svh,-2px);
     left:clamp(-4px,-.45svw,-1px);
     right:auto;
-    width:clamp(46px,13.5svw,53px);
+    width:clamp(44px,11.5vw,54px);
   }
 
   .academia-cartao__conteudo {
     width:100%;
     margin-top:0;
     padding:0;
-    gap:clamp(3px,.55svh,6px);
-    align-items:flex-start;
+    gap:8px;
   }
 
-  .academia-cartao__nome { font-size:clamp(8px,2.15svw,10px); }
-  .academia-cartao__periodo { font-size:clamp(7px,1.9svw,9px); }
-
   .academia-estudos {
-    min-height:clamp(540px,75svh,660px);
+    min-height:0;
     padding-inline:0;
     gap:clamp(2px,.3svh,5px);
   }
+
+  .academia-estudos__lista {
+    grid-template-columns:minmax(0,1fr);
+    gap:8px;
+    padding:12% 11% max(16%,72px);
+  }
+
+  .academia-trilha { min-height:64px; }
 }
 
 @media(prefers-reduced-motion:reduce) {

@@ -66,7 +66,11 @@ export function Projetos() {
           bodyClassName="guilda-modal-aberto"
           onClose={() => setProjetoAberto(null)}
         >
-          <button className="guilda-detalhes__fechar" type="button" aria-label="Fechar detalhes" onClick={() => setProjetoAberto(null)}>×</button>
+          <button className="guilda-detalhes__fechar" type="button" aria-label="Fechar detalhes" onClick={() => setProjetoAberto(null)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          </button>
           <p className="guilda-detalhes__rotulo">[ REGISTRO DA MISSÃO ]</p>
           <h2 id="guilda-detalhes-titulo">{projetoAberto.nome}</h2>
           <p className="guilda-detalhes__tipo">{projetoAberto.tipo}</p>

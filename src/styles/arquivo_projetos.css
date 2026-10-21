@@ -1,120 +1,398 @@
-/* Arquivo de Missões: estilos da página original, isolados da página inicial. */
+/* O catálogo usa o mesmo mural e os mesmos pergaminhos da Guilda. */
 body.arquivo-ativa {
   color-scheme: dark;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--fonte-texto, 'Press Start 2P', monospace);
+  font-weight: 400;
+  letter-spacing: .025em;
   margin: 0;
-  min-width: 300px;
+  min-width: 0;
   min-height: 100svh;
   display: block;
   user-select: text;
   -webkit-user-select: text;
   background-color: #080d12 !important;
-  background-image: linear-gradient(rgba(5,8,12,.24),rgba(5,8,12,.40)), var(--arquivo-fundo-atual, url('/assets/img/guilda-bg.webp')) !important;
+  background-image: linear-gradient(rgba(5, 8, 12, .24), rgba(5, 8, 12, .4)), var(--arquivo-fundo-atual, url('/assets/img/guilda-bg.webp')) !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
   color: #ffe8b4;
 }
+
 body.arquivo-ativa::after { content: none !important; }
-body.arquivo-ativa *, body.arquivo-ativa *::before, body.arquivo-ativa *::after { box-sizing: border-box; }
+body.arquivo-ativa *,
+body.arquivo-ativa *::before,
+body.arquivo-ativa *::after { box-sizing: border-box; }
 body.arquivo-ativa a { color: inherit; }
 body.arquivo-ativa button { font: inherit; cursor: pointer; }
-body.arquivo-ativa button:focus-visible, body.arquivo-ativa a:focus-visible { outline: 3px solid #67e8f9; outline-offset: 4px; }
-.topbar { width: 100%; background: #090e13; border-bottom: 2px solid #075b6b; min-height: 80px; }
-.topbar__inner { max-width: 1340px; margin: auto; padding: 12px 26px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
-.brand { font-size: clamp(9px,1.1vw,14px); color: #65e8f3 !important; text-shadow: 0 0 6px #176978; text-decoration: none; white-space: nowrap; }
-.brand::before { content:''; display:inline-block; vertical-align:middle; width:11px; height:11px; margin-right:9px; border-radius:50%; background:#1bcc9a; box-shadow:0 0 8px #1bcc9a; }
-.back-top { border: 1px solid #2c8d9f; text-decoration: none; font-size: 8px; padding: 14px 12px; line-height: 1.5; }
-.back-top:hover { background: #15363d; }
-body.arquivo-ativa .arquivo-container { width: min(1180px, calc(100% - 24px)); max-width: none; margin: clamp(18px,4vw,44px) auto 48px !important; padding: 0; }
-.arquivo-mural {
-  position:relative;
-  box-sizing: border-box;
+body.arquivo-ativa button:focus-visible,
+body.arquivo-ativa a:focus-visible { outline: 3px solid #67e8f9; outline-offset: 4px; }
+
+.topbar {
   width: 100%;
-  border: 67px solid transparent;
-  border-left-width: 66px;
-  border-right-width: 66px;
-  border-image-source: url('/assets/img/moldura-projeto-simples.webp');
-  border-image-slice: 179 171 145 171 fill;
-  border-image-width: 67px 66px 67px 66px;
+  background: rgba(9, 14, 19, .96);
+  border-bottom: 2px solid #075b6b;
+}
+.topbar__inner {
+  max-width: 1240px;
+  margin: auto;
+  padding: 14px 24px;
+  min-height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.brand {
+  flex-shrink: 0;
+  font-family: var(--fonte-titulo, 'Press Start 2P', monospace);
+  font-size: clamp(10px, 1.1vw, 14px);
+  color: #65e8f3 !important;
+  text-shadow: 0 0 6px #176978;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand::before {
+  content: '';
+  display: inline-block;
+  vertical-align: middle;
+  width: 9px;
+  height: 9px;
+  margin-right: 9px;
+  background: #1bcc9a;
+  box-shadow: 0 0 8px #1bcc9a;
+}
+.back-top {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid #2c8d9f;
+  text-decoration: none;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  padding: 10px 14px;
+  line-height: 1.8;
+  text-align: center;
+  text-wrap: balance;
+}
+.back-top:hover { background: #15363d; }
+
+body.arquivo-ativa .arquivo-container {
+  width: min(1180px, calc(100% - 32px));
+  max-width: none;
+  margin: clamp(22px, 4vw, 48px) auto 64px !important;
+  padding: 0;
+}
+.arquivo-mural {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border: 74px solid transparent;
+  border-top-width: 164px;
+  border-bottom-width: 92px;
+  border-image-source: url('/assets/img/moldura-projeto.webp');
+  border-image-slice: 250 160 140 160 fill;
+  border-image-width: 164px 74px 92px 74px;
   border-image-repeat: stretch;
   image-rendering: pixelated;
-  filter: drop-shadow(0 18px 22px rgba(0,0,0,.66));
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .6));
 }
-.arquivo-mural__interior { min-width:0; padding: 5px 6px 12px; text-align:center; }
-#arquivo-titulo { margin: 10px 0 7px; color: #ffedc3; font-size: clamp(13px,2.0vw,22px); line-height: 1.65; text-shadow:3px 3px 0 #361407,0 0 5px #341705; }
-.arquivo-mural .subtitulo { color: #ffd258; text-shadow:2px 2px #3b1a09; font-size: clamp(7px,1vw,10px); line-height:2; margin: 0 0 21px; }
-.arquivo-filtros { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin: 0 0 22px; }
+.arquivo-mural__interior { min-width: 0; padding: 20px 4px 8px; text-align: center; }
+#arquivo-titulo {
+  margin: 0 0 12px;
+  color: #fff1ce;
+  font-family: var(--fonte-titulo, 'Press Start 2P', monospace);
+  font-size: clamp(12px, 1.5vw, 18px);
+  line-height: 1.8;
+  text-wrap: balance;
+  text-shadow: 3px 3px 0 #361407, 0 0 5px #341705;
+}
+.arquivo-mural .subtitulo {
+  color: #ffe3a7;
+  text-shadow: 2px 2px #3b1a09;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  line-height: 1.9;
+  margin: 0 0 24px;
+}
+.arquivo-filtros { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 0 26px; }
 body.arquivo-ativa .arquivo-filtro {
-  appearance:none; border: 3px solid #261308; box-shadow: 0 3px 0 #1a0a03, inset 0 2px 0 #87512c;
-  background: #3b2115; color:#ffe0a5; padding: 12px 12px;
-  font-size: clamp(7px,.78vw,9px); line-height: 1.65;
+  appearance: none;
+  min-height: 44px;
+  border: 2px solid #9e672c;
+  box-shadow: 0 3px 0 #1a0a03, inset 0 2px 0 #87512c;
+  background: #3b2115;
+  color: #ffe0a5;
+  padding: 10px 14px;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  line-height: 1.8;
   transition: filter 120ms ease;
 }
-.arquivo-filtro[aria-pressed="true"] { border-color:#ffc933 !important; color:#ffdd54 !important; background:#251b12 !important; box-shadow:0 3px 0 #1a0a03,inset 0 0 0 1px #805522 !important; }
+.arquivo-filtro[aria-pressed="true"] {
+  border-color: #ffc933 !important;
+  color: #ffdd54 !important;
+  background: #251b12 !important;
+  box-shadow: 0 3px 0 #1a0a03, inset 0 0 0 1px #805522 !important;
+}
 .arquivo-filtro:hover { filter: brightness(1.2); }
-.arquivo-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap: 7px 2px; text-align:center; }
+
+/* Seis colunas permitem os mesmos três cartazes + dois centralizados da Guilda. */
+.arquivo-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px 4px;
+  align-items: stretch;
+  text-align: center;
+}
 .arquivo-card {
-  box-sizing:border-box;
+  grid-column: span 2;
   min-width: 0;
-  min-height: 242px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
+  min-height: 332px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   border: 34px solid transparent;
-  border-top-width: 41px;
-  border-bottom-width: 37px;
+  border-top-width: 42px;
+  border-bottom-width: 38px;
   border-image-source: url('/assets/img/pergaminho-projeto.webp');
   border-image-slice: 165 160 145 160 fill;
-  border-image-width: 41px 34px 37px 34px;
+  border-image-width: 42px 34px 38px 34px;
   border-image-repeat: stretch;
-  background:transparent;
-  image-rendering:pixelated;
+  background: transparent;
+  image-rendering: pixelated;
   color: #4a260c;
-  padding: 0 6px;
+  padding: 8px 4px 6px;
+  filter: drop-shadow(1px 7px 4px rgba(18, 8, 2, .55));
 }
-.arquivo-card__icone { display:block; color:#77421a; font-size:23px; line-height:1.1; margin-bottom: 8px; }
-.arquivo-card__titulo { color:#4b240c; margin:0 0 9px; font-size: clamp(8px,.92vw,11px); line-height:1.65; overflow-wrap:anywhere; }
-.arquivo-card__tipo { color:#8a4225; margin: 0 0 6px; font-size: 7px; line-height:1.7; }
-.arquivo-card__descricao { color:#633719; margin:0 0 12px; font-size:7px; line-height:1.85; max-width: 25ch; }
-body.arquivo-ativa .arquivo-card__abrir { background:#4a250f; color:#ffd879; border:2px solid #a46a22; box-shadow: 0 3px #261208; padding:8px 9px; font-size:7px; line-height:1.6; }
+.arquivo-grid[data-total="5"] .arquivo-card:nth-child(4),
+.arquivo-grid[data-total="2"] .arquivo-card:first-child { grid-column: 2 / span 2; }
+.arquivo-grid[data-total="5"] .arquivo-card:nth-child(5),
+.arquivo-grid[data-total="2"] .arquivo-card:nth-child(2) { grid-column: 4 / span 2; }
+.arquivo-grid[data-total="1"] .arquivo-card { grid-column: 3 / span 2; }
+.arquivo-card__icone {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  min-height: 48px;
+  color: #633512;
+  font-family: Georgia, serif;
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.arquivo-card__titulo {
+  color: #4b240c;
+  margin: 0 0 14px;
+  font-family: var(--fonte-titulo, 'Press Start 2P', monospace);
+  font-size: 11px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.arquivo-card__linha { width: 68%; max-width: 140px; border-top: 2px solid rgba(118, 60, 22, .5); margin-bottom: 12px; }
+.arquivo-card__tipo {
+  color: #633018;
+  margin: 0 0 8px;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .03em;
+  line-height: 1.9;
+}
+.arquivo-card__descricao {
+  color: #513014;
+  margin: 0 0 22px;
+  font-family: var(--fonte-texto, 'Press Start 2P', monospace);
+  font-size: 10px;
+  letter-spacing: .025em;
+  line-height: 2.1;
+  max-width: 25ch;
+  text-wrap: pretty;
+}
+body.arquivo-ativa .arquivo-card__abrir {
+  margin-top: auto;
+  min-height: 44px;
+  background: #4a250f;
+  color: #ffe7ab;
+  border: 2px solid #a46a22;
+  box-shadow: 0 3px #261208;
+  padding: 10px 12px;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  line-height: 1.8;
+}
 body.arquivo-ativa .arquivo-card__abrir:hover { background: #6f3618; }
-.arquivo-vazio { grid-column: 1 / -1; font-size:10px; line-height:2; color:#ffe0a5; text-shadow: 1px 2px 1px #210e06; padding:34px 10px; }
-.arquivo-rodape { margin: 17px 0 0; font-size: 7px; line-height:2; color: #ffdc95; text-shadow:1px 2px 0 #361407; }
-.retornar { display:inline-block; margin-top:17px; font-size:8px; padding:12px; color:#ffe7ac; text-decoration:none; border:2px solid #c18b4b; background:#341a0d; }
-.retornar:hover { background:#5f3018; }
-.arquivo-overlay { position:fixed; z-index:1000; inset:0; background:rgba(3,6,9,.88); display:grid; place-items:center; padding:12px; }
-.arquivo-modal { width:min(100%,600px); max-height:calc(100dvh - 24px); overflow-y:auto; position:relative; padding: 45px 24px 26px; border: 42px solid transparent; border-image-source:url('/assets/img/pergaminho-projeto.webp'); border-image-slice:165 160 145 160 fill; border-image-width:42px; color:#4d2b14; text-align:center; image-rendering:pixelated; }
-.arquivo-modal h2 { margin: .83em 0; font-size:clamp(10px,2vw,16px); line-height:1.8; }
-.arquivo-modal p { margin: 1em 0; font-size:9px; line-height:2.1; }
-body.arquivo-ativa .arquivo-modal__fechar {position:absolute; top:0; right:0; border:2px solid #f6b75c; background:#582713; color:#ffe9bd; width:37px; height:37px; font-size:16px; }
-.arquivo-modal__tec {display:flex; flex-wrap:wrap; list-style:none; gap:7px; justify-content:center; padding:0; margin:1em 0;}
-.arquivo-modal__tec li {border:1px solid #976339; padding:8px; font-size:8px;line-height:1.6;}
-.arquivo-modal__links { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:15px; }
-body.arquivo-ativa .arquivo-modal__links a { border:2px solid #8d5324; background:#582713; color:#ffdfa7; padding:10px; font-size:8px; line-height:1.6; text-decoration:none; }
-@media (max-width: 850px) {
-  .arquivo-mural { border-width: 60px 40px; border-image-width: 60px 40px; }
-  .arquivo-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .arquivo-card { min-height: 231px; border-width:36px 26px 32px; border-image-width:36px 26px 32px; }
+.arquivo-vazio {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  line-height: 2;
+  color: #ffe0a5;
+  text-shadow: 1px 2px 1px #210e06;
+  padding: 34px 10px;
 }
-@media (max-width: 580px) {
-  .topbar__inner {padding: 12px 11px;}
-  .back-top { font-size: 6px; padding: 11px 7px; }
-  body.arquivo-ativa .arquivo-container { width: calc(100% - 10px); margin-top:15px !important; }
-  .arquivo-mural { border-width: 49px 24px; border-image-width: 49px 24px; }
-  .arquivo-mural__interior {padding:0 0 6px;}
-  #arquivo-titulo {font-size:11px;}
-  .arquivo-mural .subtitulo {font-size:7px; margin-bottom:14px;}
-  .arquivo-filtros {gap:6px; margin-bottom:12px;}
-  body.arquivo-ativa .arquivo-filtro {font-size:6px; padding:9px 8px; border-width:2px;}
-  .arquivo-grid {grid-template-columns:1fr; gap:1px; }
-  .arquivo-card { width:min(100%,330px); justify-self:center; min-height:215px; }
-  .arquivo-card__titulo {font-size:9px;}
-  .arquivo-rodape {font-size:6px;}
-  .retornar { font-size:7px; }
-  .arquivo-modal {border-width:30px 23px; border-image-width:30px 23px; padding:31px 2px 18px;}
+.arquivo-rodape {
+  margin: 24px 0 0;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  line-height: 2;
+  color: #ffe4b1;
+  text-shadow: 1px 2px 0 #361407;
 }
-@media (prefers-reduced-motion:reduce) {
-  body.arquivo-ativa *, body.arquivo-ativa *::before, body.arquivo-ativa *::after {transition:none !important;}
+.retornar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 20px;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  line-height: 1.8;
+  padding: 10px 16px;
+  color: #ffe7ac;
+  text-decoration: none;
+  border: 2px solid #c18b4b;
+  background: #341a0d;
+}
+.retornar:hover { background: #5f3018; }
+
+.arquivo-overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: rgba(3, 6, 9, .88);
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  backdrop-filter: blur(5px);
+}
+.arquivo-modal {
+  width: min(100%, 650px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  position: relative;
+  padding: 40px 18px 20px;
+  border: 44px solid transparent;
+  border-image-source: url('/assets/img/pergaminho-projeto.webp');
+  border-image-slice: 165 160 145 160 fill;
+  border-image-width: 44px;
+  color: #4d2b14;
+  text-align: center;
+  image-rendering: pixelated;
+}
+.arquivo-modal h2 {
+  margin: 18px 0;
+  font-family: var(--fonte-titulo, 'Press Start 2P', monospace);
+  font-size: clamp(11px, 2vw, 16px);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.arquivo-modal p {
+  margin: 16px 0;
+  font-family: var(--fonte-texto, 'Press Start 2P', monospace);
+  font-size: 10px;
+  letter-spacing: .025em;
+  line-height: 2.1;
+}
+.arquivo-modal p.arquivo-modal__rotulo,
+.arquivo-modal__arsenal {
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .03em;
+  line-height: 1.9;
+}
+.arquivo-modal__arsenal { margin: 26px 0 14px; }
+body.arquivo-ativa .arquivo-modal__fechar {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  letter-spacing: 0;
+  top: 0;
+  right: 0;
+  border: 2px solid #f6b75c;
+  background: #582713;
+  color: #ffe9bd;
+  width: 44px;
+  height: 44px;
+}
+.arquivo-modal__fechar svg { display: block; }
+.arquivo-modal__tec {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  gap: 8px;
+  justify-content: center;
+  padding: 0;
+  margin: 16px 0;
+}
+.arquivo-modal__tec li {
+  border: 1px solid #976339;
+  padding: 8px 10px;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  line-height: 1.9;
+}
+.arquivo-modal__links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+body.arquivo-ativa .arquivo-modal__links a {
+  border: 2px solid #8d5324;
+  background: #582713;
+  color: #ffdfa7;
+  padding: 12px 14px;
+  font-family: var(--fonte-interface, 'Press Start 2P', monospace);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.9;
+  text-decoration: none;
+}
+
+@media (max-width: 1000px) {
+  .arquivo-mural { border-width: 140px 42px 72px; border-image-width: 140px 42px 72px; }
+  .arquivo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 8px; }
+  .arquivo-grid[data-total] .arquivo-card:nth-child(n) { grid-column: auto; }
+  .arquivo-grid[data-total="5"] .arquivo-card:last-child,
+  .arquivo-grid[data-total="1"] .arquivo-card { grid-column: 1 / -1; width: calc(50% - 4px); justify-self: center; }
+  .arquivo-card { border-width: 38px 28px 34px; border-image-width: 38px 28px 34px; }
+}
+@media (max-width: 620px) {
+  .topbar__inner { padding: 10px 12px; min-height: 72px; gap: 12px; }
+  .back-top { font-size: 8px; padding: 8px; }
+  body.arquivo-ativa .arquivo-container { width: calc(100% - 12px); margin-top: 18px !important; }
+  .arquivo-mural { border-width: 110px 24px 60px; border-image-width: 110px 24px 60px; }
+  .arquivo-mural__interior { padding: 16px 0 8px; }
+  #arquivo-titulo { font-size: 12px; }
+  .arquivo-mural .subtitulo { font-size: 9px; margin-bottom: 18px; }
+  .arquivo-filtros { gap: 8px; margin-bottom: 20px; }
+  body.arquivo-ativa .arquivo-filtro { font-size: 8px; padding: 9px 10px; }
+  .arquivo-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .arquivo-grid[data-total] .arquivo-card:nth-child(n) { grid-column: 1; width: min(100%, 370px); justify-self: center; min-height: 310px; }
+  .arquivo-card { border-width: 36px 26px 32px; border-image-width: 36px 26px 32px; }
+  .arquivo-card__titulo { font-size: 11px; }
+  .arquivo-rodape { font-size: 8px; }
+  .retornar { font-size: 8px; padding: 10px; }
+  .arquivo-modal { border-width: 34px 25px; border-image-width: 34px 25px; padding: 40px 6px 16px; }
+}
+@media (max-width: 360px) {
+  .brand { font-size: 9px; }
+  .brand::before { width: 7px; height: 7px; margin-right: 6px; }
+  .back-top { max-width: 180px; font-size: 7.5px; }
+  .arquivo-mural { border-width: 94px 18px 50px; border-image-width: 94px 18px 50px; }
+  .arquivo-card { border-width: 34px 23px 30px; border-image-width: 34px 23px 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.arquivo-ativa *,
+  body.arquivo-ativa *::before,
+  body.arquivo-ativa *::after { transition: none !important; }
 }

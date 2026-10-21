@@ -81,7 +81,7 @@ body.guilda-ativa::after {
 
 .guilda-mural__interior {
     min-width: 0;
-    padding: 20px 4px 0px;
+    padding: 16px 4px 0;
 }
 
 .guilda-mural__intro,
@@ -103,6 +103,7 @@ body.guilda-ativa::after {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     justify-content: center;
     align-items: stretch;
+    gap: 18px 8px;
 }
 
 .guilda-cartaz {
@@ -186,6 +187,8 @@ body.guilda-ativa::after {
 .guilda-cartaz__subtitulo {
     font-size: 7px;
     line-height: 1.65;
+    max-width: 100%;
+    overflow-wrap: anywhere;
 }
 
 .guilda-cartaz__tipo { color: #8d3a25; }
@@ -270,6 +273,10 @@ body.guilda-modal-aberto { overflow: hidden !important; }
 
 .guilda-detalhes__fechar {
     position: absolute;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    letter-spacing: 0;
     right: 0px;
     top: 0px;
     width: 38px;
@@ -277,9 +284,9 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     background: #6c2b19;
     color: #fff2c2;
     border: 2px solid #e0a04b;
-    font-size: 27px;
     cursor: pointer;
 }
+.guilda-detalhes__fechar svg { display: block; }
 
 .guilda-detalhes__links {
     display: flex;
@@ -296,16 +303,26 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     text-decoration: none;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 1000px) {
     .guilda-mural {
-        border-width: 140px 42px 72px;
-        border-image-width: 140px 42px 72px;
+        border-width: 126px 38px 60px;
+        border-image-width: 126px 38px 60px;
     }
-    .guilda-projetos-grid { gap: 10px 4px; }
+    .guilda-projetos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 8px;
+    }
     .guilda-cartaz {
+        grid-column: auto;
         min-height: 225px;
         border-width: 36px 25px 32px;
         border-image-width: 36px 25px 32px;
+    }
+    .guilda-cartaz:nth-child(4) { grid-column: auto; }
+    .guilda-cartaz:nth-child(5) {
+        grid-column: 1 / -1;
+        width: calc(50% - 4px);
+        justify-self: center;
     }
     .guilda-cartaz__conteudo { gap: 6px; }
 }
@@ -319,30 +336,20 @@ body.guilda-modal-aberto { overflow: hidden !important; }
         background-size: cover !important;
         background-attachment: scroll !important;
     }
-    .guilda-mural {
-        border-width: 115px 30px 60px;
-        border-image-width: 115px 30px 60px;        
-        border-image-slice: 250 160 240 160 fill;
-    }
-    .guilda-mural__interior { padding: 24px 0 32px; }
+    .guilda-mural__interior { padding: 12px 0 0; }
     .guilda-mural__intro {
         font-size: 7px;
         margin-bottom: 16px;
     }
     .guilda-mural__rodape { margin-top: 20px; margin-bottom: 8px; }
-    .guilda-projetos-grid {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 2px;
-        padding-top: 40px;
-    }
-    
     .guilda-cartaz__titulo { font-size: 9px; }
     .guilda-mural__rodape { font-size: 7px; }
 }
 
 @media (max-width: 640px) {
-    .guilda-mural {       
-        border-image-slice: 350 160 240 160 fill;
+    .guilda-mural {
+        border-width: 100px 24px 46px;
+        border-image-width: 100px 24px 46px;
     }
     .guilda-cartaz,
     .guilda-cartaz:nth-child(4),
@@ -356,13 +363,13 @@ body.guilda-modal-aberto { overflow: hidden !important; }
         border-image-width: 32px 26px 30px;
     }
     .guilda-projetos-grid {
-        padding-top: 0px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
     }
 }
 
 @media (max-width: 440px) {
-    .guilda-mural { border-width: 94px 22px 50px; border-image-width: 94px 22px 50px; }
-    .guilda-cartaz { min-height: 210px !important; }
+    .guilda-mural { border-width: 84px 18px 40px; border-image-width: 84px 18px 40px; }
     .guilda-mural__intro { font-size: 6px; }
     .guilda-detalhes__fechar { top: 0; right: 0; }
     .guilda-detalhes {
@@ -394,14 +401,11 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 10px auto 0;
-    padding: 0 6px;
-    /* A placa ocupa seu lugar no fluxo, mas é deslocada visualmente para
-       sobrepor a travessa inferior da moldura, como na referência.
-       Não se cria nenhuma caixa branca nem se move os cinco pergaminhos. */
+    margin: 24px auto 0;
+    padding: 0;
+    /* A placa permanece no fluxo e cresce com o texto em qualquer largura. */
     position: relative;
     z-index: 2;
-    transform: translateY(55px);
 }
 
 .guilda-arquivo__placa {
@@ -410,14 +414,13 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     justify-content: center;
     align-items: center;
     width: min(100%, 435px);
-    min-height: 91px;
-    padding: 28px 7px;
-    border: 27px solid transparent;
-    border-left-width: 40px;
-    border-right-width: 40px;
+    min-width: 0;
+    min-height: 112px;
+    padding: 10px 4px;
+    border: 30px solid transparent;
     border-image-source: url('/assets/img/moldura-projeto-simples.webp');
-    border-image-slice: 179 171 145 171 fill;
-    border-image-width: 27px 40px 27px 40px;
+    border-image-slice: 270 175 235 175 fill;
+    border-image-width: 30px;
     border-image-repeat: stretch;
     background: transparent;
     text-decoration: none;
@@ -447,7 +450,9 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     align-items: center;
     gap: 9px;
     min-width: 0;
+    max-width: 100%;
     line-height: 1.55;
+    overflow-wrap: anywhere;
     text-shadow: 2px 2px 0 #2b1207, 0 2px 4px #240c03;
 }
 
@@ -464,28 +469,14 @@ body.guilda-modal-aberto { overflow: hidden !important; }
 }
 
 @media (max-width: 768px) {
-    /* Travessa menor no mobile: deslocamento proporcional para evitar
-       sobreposição da placa com o conteúdo e manter o link clicável. */
-    .guilda-arquivo { margin-top: 10px; padding: 0; transform: translateY(88px); }
     .guilda-arquivo__placa {
         width: min(100%, 350px);
-        min-height: 85px;
-        border-top-width: 24px;
-        border-bottom-width: 24px;
-        border-left-width: 27px;
-        border-right-width: 27px;
-        border-image-width: 24px 27px 24px 27px;
-        padding: 0 4px;
+        border-width: 28px;
+        border-image-width: 28px;
     }
-    .guilda-arquivo__texto { gap: 5px; }
+    .guilda-arquivo__texto { gap: 8px; }
     .guilda-arquivo__titulo { font-size: clamp(6px, 2.2vw, 9px); }
     .guilda-arquivo__chamada { font-size: clamp(5px, 1.65vw, 7px); }
-    .guilda-mural__interior { padding-bottom: 22px; }
-}
-
-@media (max-width: 440px) {
-    .guilda-arquivo { transform: translateY(80px); }
-    .guilda-arquivo__placa { min-height: 81px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

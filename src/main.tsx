@@ -13,6 +13,7 @@ import './styles/login_modal.css';
 import './styles/orbe_assistant.css';
 import './styles/arquivo_projetos.css';
 import './styles/app.css';
+import './styles/tipografia.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Elemento raiz do portfólio não encontrado.');

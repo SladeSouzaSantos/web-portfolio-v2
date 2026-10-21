@@ -135,7 +135,11 @@ export function Formacao() {
       </section>
       {ficha && (
         <Modal overlayClassName="academia-modal" panelClassName="academia-modal__painel" bodyClassName="academia-modal-aberto" labelledBy="academia-modal-titulo" onClose={() => setFicha(null)}>
-          <button type="button" className="academia-modal__fechar" aria-label="Fechar ficha" onClick={() => setFicha(null)}>×</button>
+          <button type="button" className="academia-modal__fechar" aria-label="Fechar ficha" onClick={() => setFicha(null)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          </button>
           <h2 id="academia-modal-titulo">{ficha.item.titulo}</h2>
           {ficha.tipo === 'formacao' ? (
             <>

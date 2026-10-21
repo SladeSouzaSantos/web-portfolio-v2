@@ -7,6 +7,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 12px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -28,6 +29,11 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.login-modal-overlay .login-modal-box {
+    width: 100%;
+    min-width: 0;
+}
+
 .login-modal-overlay.ativo .login-modal-box {
     transform: scale(1);
 }
@@ -39,12 +45,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
 }
 
-.login-modal-header span {
+.login-modal-header > :first-child {
+    flex: 1;
+    min-width: 0;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.login-modal-header span, .login-modal-header .orb-chat-title {
     color: var(--texto-destaque-ouro);
-    font-size: 11px;
-    letter-spacing: 0.05em;
+    font-size: clamp(9px, 1.1vw, 11px);
+    line-height: 1.8;
+    letter-spacing: 0.02em;
 }
 
 .login-close-btn {
@@ -54,7 +69,11 @@
     font-size: 16px;
     cursor: pointer;
     font-family: monospace;
-    padding: 0 4px;
+    flex: 0 0 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px;
+    line-height: 1;
 }
 
 .login-close-btn:hover { opacity: 0.8; }

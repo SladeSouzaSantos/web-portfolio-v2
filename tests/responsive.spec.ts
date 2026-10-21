@@ -20,6 +20,59 @@ async function expectControlsWithinViewport(page: Page) {
   expect(clippedControls, 'Navigation and content controls must remain within the viewport').toEqual([]);
 }
 
+for (const width of [270, 320, 375]) {
+  test(`mobile: full navigation labels fit their buttons at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 });
+    await page.goto('/');
+    const loadedFonts = await page.evaluate(() => document.fonts.load('12px "Press Start 2P"').then(fonts => fonts.length));
+    expect(loadedFonts, 'Navigation must fit with the actual pixel font loaded').toBeGreaterThan(0);
+
+    const links = page.locator('.bloco-navegacao-centro a');
+    const labels = links.locator('.nav-section-label');
+    await expect(labels).toHaveText(['SOBRE', 'PROJETOS', 'EXPERIÊNCIA', 'FORMAÇÃO']);
+    for (const label of await labels.all()) await expect(label).toBeVisible();
+
+    const measurements = await links.evaluateAll(elements => elements.map(element => {
+      const label = element.querySelector<HTMLElement>('.nav-section-label')!;
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      const text = range.getBoundingClientRect();
+      const button = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        label: label.textContent,
+        textLeft: text.left,
+        textRight: text.right,
+        textWidth: text.width,
+        contentLeft: button.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft),
+        contentRight: button.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
+        buttonHeight: button.height,
+        clippedWidth: label.scrollWidth - label.clientWidth,
+      };
+    }));
+
+    for (const [index, measurement] of measurements.entries()) {
+      const context = `${measurement.label} at ${width}px`;
+      expect(measurement.textWidth, `${context}: the complete label must be rendered`).toBeGreaterThan(0);
+      expect(measurement.textLeft, `${context}: text must fit inside its own button`)
+        .toBeGreaterThanOrEqual(measurement.contentLeft - 1);
+      expect(measurement.textRight, `${context}: text must fit inside its own button`)
+        .toBeLessThanOrEqual(measurement.contentRight + 1);
+      expect(measurement.clippedWidth, `${context}: the label must not be truncated`).toBeLessThanOrEqual(1);
+      expect(measurement.buttonHeight, `${context}: retain a usable touch target`).toBeGreaterThanOrEqual(44);
+      const next = measurements[index + 1];
+      if (next) {
+        expect(measurement.textRight, `${context}: labels must not overlap their neighbours`)
+          .toBeLessThanOrEqual(next.textLeft);
+      }
+    }
+    const navigationOverflow = await page.locator('.bloco-navegacao-centro')
+      .evaluate(element => element.scrollWidth - element.clientWidth);
+    expect(navigationOverflow, 'Every navigation tab must fit without horizontal scrolling').toBeLessThanOrEqual(1);
+    await expectControlsWithinViewport(page);
+  });
+}
+
 for (const viewport of [
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'desktop', width: 1440, height: 900 },

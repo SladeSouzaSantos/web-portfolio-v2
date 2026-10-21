@@ -58,7 +58,11 @@ export function Experiencia() {
       </section>
       {selecionada && (
         <Modal overlayClassName="cronicas-detalhes" panelClassName="cronicas-detalhes__janela" bodyClassName="cronicas-modal-aberto" labelledBy="cronicas-detalhes-titulo" describedBy="cronicas-detalhes-descricao" onClose={() => setSelecionada(null)}>
-          <button className="cronicas-detalhes__fechar" type="button" aria-label="Fechar crônica" onClick={() => setSelecionada(null)}>×</button>
+          <button className="cronicas-detalhes__fechar" type="button" aria-label="Fechar crônica" onClick={() => setSelecionada(null)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          </button>
           <div className="cronicas-detalhes__conteudo">
             <p className="cronicas-detalhes__rotulo">[ REGISTRO DA JORNADA ]</p>
             <h2 id="cronicas-detalhes-titulo">{selecionada.empresa}</h2>

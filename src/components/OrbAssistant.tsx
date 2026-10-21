@@ -140,7 +140,7 @@ export function OrbAssistant() {
       {open && (
         <Modal overlayClassName="login-modal-overlay ativo" panelClassName="login-modal-box orb-chat-panel" labelledBy="orbChatTitle" describedBy="orbChatDescription" onClose={closeChat}>
           <div className="login-modal-header">
-            <span id="orbChatTitle">[ CONSULTAR ORBE MÁGICO ]</span>
+            <h2 id="orbChatTitle" className="orb-chat-title">[&nbsp;CONSULTAR ORBE MÁGICO&nbsp;]</h2>
             <button type="button" className="login-close-btn" aria-label="Fechar guia do portfólio" onClick={closeChat}>×</button>
           </div>
           <div className="login-modal-body" style={{ padding: 16 }}>
@@ -153,7 +153,7 @@ export function OrbAssistant() {
               ))}
             </div>
             <form className="orb-chat-form" onSubmit={submitMessage}>
-              <input type="text" aria-label="Sua pergunta ao orbe" placeholder="Ex: Quais são os projetos do Pedro?" autoComplete="off" required maxLength={1000} value={query} onChange={(event) => setQuery(event.target.value)} />
+              <input type="text" aria-label="Sua pergunta ao orbe" placeholder="Sua pergunta..." autoComplete="off" required maxLength={1000} value={query} onChange={(event) => setQuery(event.target.value)} />
               <button type="submit" className="orb-chat-send-btn">ENVIAR</button>
             </form>
           </div>
