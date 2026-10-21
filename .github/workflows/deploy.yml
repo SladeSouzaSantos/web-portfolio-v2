@@ -331,13 +331,6 @@ jobs:
             ln -s "$RELEASE_DIR/dist" "$NEXT_LINK"
             ACTIVATED=1
             mv -Tf "$NEXT_LINK" "$PROJECT_DIR/dist"
-            # TESTE TEMPORARIO: provocar rollback somente na dev.
-            if [ "$DEPLOY_BRANCH" = "dev" ] &&
-               [ -f "$PROJECT_DIR/.releases/.rollback-test-once" ]; then
-              rm -f "$PROJECT_DIR/.releases/.rollback-test-once"
-              echo "INJECTED FAILURE: testing automatic rollback" >&2
-              exit 78
-            fi
             
             docker compose -f "$PROXY_COMPOSE" exec -T nginx nginx -s reload
 
