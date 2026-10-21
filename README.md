@@ -31,6 +31,8 @@ npm test
 
 No Windows, a configuração utiliza o Microsoft Edge instalado. Nos demais sistemas, utiliza o Chromium do Playwright. No Linux da CI, a instalação inclui as dependências do navegador com `npx playwright install --with-deps chromium`.
 
+Os testes também verificam erros JavaScript, recursos do site, responsividade em tablet/desktop e acessibilidade com axe. A suíte separada `npm run test:smoke` verifica a URL publicada após o deploy; `npm run test:visual` compara capturas com referências revisadas. Consulte [os comandos e as configurações dos testes](docs/testes.md).
+
 ## Organização
 
 ```text
@@ -89,7 +91,9 @@ server {
 
 Para homologação, configure um domínio próprio e use `/opt/projects/web-portfolio-v2-dev/dist`. Se o Nginx executar em Docker, monte o diretório do projeto inteiro no mesmo caminho absoluto do host, ou ajuste a estratégia de links: o contêiner precisa conseguir resolver tanto `dist` quanto os diretórios `.releases` para os quais ele aponta. Montar apenas o destino atual de `dist` impede que futuras trocas de symlink sejam acompanhadas pelo contêiner.
 
-O workflow `.github/workflows/deploy.yml` instala dependências com `npm ci`, valida Conventional Commits, verifica tipos, gera o build, executa testes de navegador e guarda o artefato `dist`. Em pushes para `main` e `dev`, ele envia esse mesmo artefato por SCP via Tailscale para uma nova pasta `.releases/<commit>-<execução>/dist` no servidor. Em seguida, atualiza o checkout com `git pull --ff-only`, valida o Nginx e troca o symlink `dist` para a release enviada. O servidor não precisa executar npm ou compilar o front-end. O healthcheck público é executado apenas para produção.
+O workflow `.github/workflows/deploy.yml` mantém a sequência: testes/build → SAST/SCA → imagem GHCR → DAST → deploy → verificação pública. A imagem contém o `dist` aprovado pelos testes e é consumida por digest. Em pushes para `main` e `dev`, o servidor extrai os arquivos dessa imagem em `.releases/<commit>-<execução>/dist`, atualiza o checkout e ativa a release por symlink, com as verificações e o rollback existentes. O servidor não compila o front-end. Depois do deploy, os smoke tests verificam a navegação pelo navegador e comparam os bundles publicados com o artefato da mesma execução.
+
+A homologação usa `DEV_SITE_URL=https://devgbc.phasscode.com`; a produção usa `https://gbc.phasscode.com`. A autenticação Tailscale está preparada para OAuth e preserva a authkey enquanto as novas credenciais não forem cadastradas. Veja [a configuração do OAuth e as versões das actions](docs/tailscale-oauth.md).
 
 O ambiente existente precisa manter os secrets de conexão Tailscale/SSH configurados no GitHub Actions e o checkout de cada ambiente na branch correspondente. O usuário SSH precisa escrever no diretório do projeto e executar o Docker Compose do proxy. A validação recusa misturar um artefato antigo com um checkout mais novo.
 

@@ -102,7 +102,7 @@ export function Formacao() {
               <h2 className="academia-visualmente-oculto">Formações</h2>
               <div className="academia-formacoes__grade">
                 {formacoes.map(formacao => (
-                  <button type="button" className="academia-cartao" key={formacao.id} aria-label={`Detalhes da formação: ${formacao.titulo}`} onClick={() => setFicha({ tipo: 'formacao', item: formacao })}>
+                  <button type="button" className="academia-cartao" key={formacao.id} onClick={() => setFicha({ tipo: 'formacao', item: formacao })}>
                     <Medalhao formacao={formacao} />
                     <span className="academia-cartao__conteudo">
                       <span className="academia-cartao__tipo">{formacao.tipo}</span>
@@ -121,7 +121,7 @@ export function Formacao() {
               </div>
               <div className="academia-estudos__lista">
                 {trilhas.map(trilha => (
-                  <button type="button" className="academia-trilha" key={trilha.id} aria-label={`Explorar área de estudo: ${trilha.titulo}`} onClick={() => setFicha({ tipo: 'trilha', item: trilha })}>
+                  <button type="button" className="academia-trilha" key={trilha.id} onClick={() => setFicha({ tipo: 'trilha', item: trilha })}>
                     <Simbolo id={trilha.icone} className="academia-trilha__icone" />
                     <span><strong>{trilha.titulo}</strong><small>{trilha.descricao}</small></span>
                     <span className="academia-trilha__seta" aria-hidden="true">›</span>

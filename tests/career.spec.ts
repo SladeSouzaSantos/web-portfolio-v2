@@ -1,11 +1,11 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('professional chronicles show the selected experience and restore focus after Escape', async ({ page }) => {
   await page.goto('/#experiencia');
   await expect(page.getByRole('heading', { name: 'CRÔNICAS DA JORNADA', exact: true })).toBeVisible();
   await expect(page.locator('.cronicas-capitulos > li')).toHaveCount(4);
 
-  const trigger = page.getByRole('button', { name: 'Abrir crônica SIG Software e Consultoria em TI', exact: true });
+  const trigger = page.getByRole('button', { name: /SIG Software e Consultoria em TI/ });
   await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'SIG Software e Consultoria em TI', exact: true });
   const close = dialog.getByRole('button', { name: 'Fechar crônica', exact: true });
@@ -24,7 +24,7 @@ test('professional chronicles show the selected experience and restore focus aft
   await expect(trigger).toBeFocused();
   await expect(page.locator('#root')).toHaveJSProperty('inert', false);
 
-  await page.getByRole('button', { name: 'Abrir crônica ACRUX', exact: true }).click();
+  await page.getByRole('button', { name: /ACRUX/ }).click();
   const firstExperience = page.getByRole('dialog', { name: 'ACRUX', exact: true });
   await expect(firstExperience).toContainText('Fevereiro de 2014 — Janeiro de 2015');
   await expect(firstExperience).toContainText('Estagiário como Programador de Sistemas');
@@ -39,7 +39,7 @@ test('academic diplomas and learning tracks keep distinct details and accessible
   await expect(page.locator('.academia-cartao')).toHaveCount(8);
   await expect(page.locator('.academia-trilha')).toHaveCount(6);
 
-  const diploma = page.getByRole('button', { name: 'Detalhes da formação: Ciência da Computação', exact: true });
+  const diploma = page.getByRole('button', { name: /Ciência da Computação/ });
   await diploma.click();
   const diplomaDialog = page.getByRole('dialog', { name: 'Ciência da Computação', exact: true });
   const diplomaClose = diplomaDialog.getByRole('button', { name: 'Fechar ficha', exact: true });
@@ -56,7 +56,7 @@ test('academic diplomas and learning tracks keep distinct details and accessible
   await expect(diploma).toBeFocused();
   await expect(page.locator('#root')).toHaveJSProperty('inert', false);
 
-  const track = page.getByRole('button', { name: 'Explorar área de estudo: Java & Ecossistema', exact: true });
+  const track = page.getByRole('button', { name: /Java & Ecossistema/ });
   await track.click();
   const trackDialog = page.getByRole('dialog', { name: 'Java & Ecossistema', exact: true });
   await expect(trackDialog).toContainText('TRILHA DE APRENDIZAGEM');
