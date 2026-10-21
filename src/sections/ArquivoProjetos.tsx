@@ -67,7 +67,7 @@ export function ArquivoProjetos() {
                     aria-label={`Ver detalhes de ${projeto.nome}`}
                     onClick={() => setProjetoAberto(projeto)}
                   >
-                    ▶ VER MISSÃO
+                    ▶ VER DETALHES
                   </button>
                 </article>
               ))}

@@ -30,7 +30,6 @@ export function Projetos() {
                   className="guilda-cartaz"
                   type="button"
                   data-guilda-projeto={projeto.id}
-                  aria-label={`Abrir detalhes do projeto ${projeto.nome}`}
                   onClick={() => setProjetoAberto(projeto)}
                 >
                   <span className="guilda-cartaz__conteudo">
@@ -48,7 +47,6 @@ export function Projetos() {
               <Link
                 className="guilda-arquivo__placa"
                 to="/projetos"
-                aria-label="Explorar outros projetos no Arquivo de Missões"
               >
                 <span className="guilda-arquivo__texto">
                   <span className="guilda-arquivo__titulo">ARQUIVO DE MISSÕES</span>

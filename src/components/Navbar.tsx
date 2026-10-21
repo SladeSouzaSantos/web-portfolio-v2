@@ -7,9 +7,9 @@ import { ThemeToggle } from './ThemeToggle';
 
 const links: { id: SecaoId; label: string; title: string; icon: string }[] = [
   { id: 'sobre', label: 'SOBRE', title: 'Sobre Pedro Santos', icon: 'helm' },
-  { id: 'projetos', label: 'PROJS', title: 'Projetos', icon: 'castle' },
-  { id: 'experiencia', label: 'EXP', title: 'Experiência', icon: 'shield' },
-  { id: 'academico', label: 'EDU', title: 'Formação acadêmica', icon: 'grimoire' },
+  { id: 'projetos', label: 'PROJETOS', title: 'Projetos', icon: 'castle' },
+  { id: 'experiencia', label: 'EXPERIÊNCIA', title: 'Experiência', icon: 'shield' },
+  { id: 'academico', label: 'FORMAÇÃO', title: 'Formação acadêmica', icon: 'grimoire' },
 ];
 interface NavbarProps {
   activeSection: SecaoId; theme: Theme; onToggleTheme: () => void;

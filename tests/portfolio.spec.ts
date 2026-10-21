@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 
 const sections = [
   { hash: 'sobre', link: 'Sobre Pedro Santos', heading: 'PEDRO SANTOS' },
@@ -33,7 +33,7 @@ test('hashes select sections and browser history restores navigation', async ({ 
 
 test('project details isolate the background, trap keyboard focus and restore it on Escape', async ({ page }) => {
   await page.goto('/#projetos');
-  const trigger = page.getByRole('button', { name: 'Abrir detalhes do projeto SMART MODEL ROUTER', exact: true });
+  const trigger = page.getByRole('button', { name: /SMART MODEL ROUTER/ });
   await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'SMART MODEL ROUTER', exact: true });
   const close = dialog.getByRole('button', { name: 'Fechar detalhes', exact: true });
@@ -54,14 +54,14 @@ test('project details isolate the background, trap keyboard focus and restore it
 
 test('the backdrop closes details and a different project opens with its own content', async ({ page }) => {
   await page.goto('/#projetos');
-  const first = page.getByRole('button', { name: 'Abrir detalhes do projeto SMART MODEL ROUTER', exact: true });
+  const first = page.getByRole('button', { name: /SMART MODEL ROUTER/ });
   await first.click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.locator('.guilda-detalhes').click({ position: { x: 2, y: 2 } });
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(first).toBeFocused();
 
-  await page.getByRole('button', { name: 'Abrir detalhes do projeto GREENCITY SDGP', exact: true }).click();
+  await page.getByRole('button', { name: /GREENCITY SDGP/ }).click();
   const dialog = page.getByRole('dialog', { name: 'GREENCITY SDGP', exact: true });
   await expect(dialog).toContainText('dimensionamento fotovoltaico');
   await expect(dialog).toContainText('Firebase');
@@ -72,7 +72,7 @@ test('the backdrop closes details and a different project opens with its own con
 
 test('the archive filters the shared catalog and restores all projects', async ({ page }) => {
   await page.goto('/#projetos');
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page).toHaveURL(/\/projetos$/);
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   const cards = page.locator('.arquivo-grid').getByRole('article');
@@ -124,7 +124,7 @@ test('the selected theme survives reloads and a visit to the archive', async ({ 
   await expect(page.locator('body')).toHaveClass(/modo-claro/);
   await page.reload();
   await expect(page.getByRole('button', { name: 'Ativar tema escuro', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   await page.getByRole('link', { name: '← VOLTAR AO PORTFÓLIO', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Ativar tema escuro', exact: true })).toBeVisible();
@@ -142,7 +142,7 @@ test('reduced motion keeps every scene static without requesting GIFs', async ({
   await expect(page.getByRole('heading', { name: 'PEDRO SANTOS', exact: true })).toBeVisible();
   for (const section of sections.slice(1)) await navigateTo(page, section);
   await navigateTo(page, sections[1]);
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   expect(gifRequests).toEqual([]);
 });
@@ -159,10 +159,10 @@ test('animated scenes can be mounted repeatedly without JavaScript runtime error
     }
   }
   await navigateTo(page, sections[1]);
-  await page.getByRole('button', { name: 'Abrir detalhes do projeto LITHOLOGY', exact: true }).click();
+  await page.getByRole('button', { name: /LITHOLOGY/ }).click();
   await expect(page.getByRole('dialog', { name: 'LITHOLOGY', exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   expect(runtimeErrors).toEqual([]);
 });
@@ -181,7 +181,7 @@ for (const width of [320, 375]) {
       expect(overflowingControls, `Controls must remain readable and reachable in ${section.hash}`).toEqual([]);
     }
     await navigateTo(page, sections[1]);
-    await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+    await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
     await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
     await page.getByRole('button', { name: 'Ver detalhes de SMART MODEL ROUTER', exact: true }).click();

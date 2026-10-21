@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 
 interface MaskSample {
   theme: string;
@@ -138,7 +138,7 @@ test.describe('animated theme transition', () => {
 
   test('leaving the portfolio cancels the circle without leaving an overlay or stale theme change', async ({ page }) => {
     await page.goto('/#projetos');
-    const archiveLink = page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' });
+    const archiveLink = page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ });
     await archiveLink.scrollIntoViewIfNeeded();
     await observeTransition(page);
     await page.locator('#themeToggleBtn').click();

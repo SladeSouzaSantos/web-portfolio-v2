@@ -40,7 +40,7 @@ export function Experiencia() {
                   <div className={`cronicas-capitulo__medalhao cronicas-capitulo__medalhao--${experiencia.id}`} aria-hidden="true">
                     <EmpresaIcone experiencia={experiencia} className="cronicas-capitulo__logo" />
                   </div>
-                  <button className="cronicas-capitulo__cartao" type="button" aria-label={`Abrir crônica ${experiencia.empresa}`} onClick={() => setSelecionada(experiencia)}>
+                  <button className="cronicas-capitulo__cartao" type="button" onClick={() => setSelecionada(experiencia)}>
                     <span className="cronicas-capitulo__interior">
                       <span className="cronicas-capitulo__periodo">CAPÍTULO {String(index + 1).padStart(2, '0')} · {experiencia.periodo}</span>
                       <span className="cronicas-capitulo__empresa">{experiencia.empresa}</span>

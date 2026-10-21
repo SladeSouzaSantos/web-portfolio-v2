@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 
 const archiveHeading = 'ARQUIVO DE MISSÕES';
 const guildHeading = 'QUADRO DE MISSÕES';
@@ -42,7 +42,7 @@ test('archive links and browser history navigate within the same document', asyn
   await expect(page.getByRole('heading', { name: guildHeading, exact: true })).toBeVisible();
   await expectSameDocument();
 
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page).toHaveURL(/\/projetos$/);
   await expect(page.getByRole('heading', { name: archiveHeading, exact: true })).toBeVisible();
   await expectSameDocument();
@@ -91,7 +91,7 @@ for (const route of [
 test('title and description follow the active page and browser history', async ({ page }) => {
   await page.goto('/#projetos');
   await expectMetadata(page, false);
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: archiveHeading, exact: true })).toBeVisible();
   await expectMetadata(page, true);
   await page.getByRole('link', { name: '← VOLTAR AO PORTFÓLIO', exact: true }).click();

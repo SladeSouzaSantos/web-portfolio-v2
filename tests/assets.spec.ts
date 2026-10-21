@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 
 interface ImageAsset {
   url: string;
@@ -109,7 +109,7 @@ test('local images and computed scene textures load across every desktop section
     }
   }
   await page.getByRole('link', { name: 'Projetos', exact: true }).click();
-  await page.getByRole('link', { name: 'Explorar outros projetos no Arquivo de Missões' }).click();
+  await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   failures.push(...await inspectLocalImages(page, 'ARQUIVO DE MISSÕES'));
   expect(failures, 'Local image assets must respond with HTTP 200/image MIME and decode correctly').toEqual([]);
