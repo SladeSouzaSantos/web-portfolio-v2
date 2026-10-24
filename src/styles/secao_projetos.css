@@ -325,6 +325,7 @@ body.guilda-modal-aberto { overflow: hidden !important; }
         justify-self: center;
     }
     .guilda-cartaz__conteudo { gap: 6px; }
+    .guilda-arquivo{ margin: 20px auto 100px !important;}
 }
 
 @media (max-width: 768px) {
@@ -366,6 +367,11 @@ body.guilda-modal-aberto { overflow: hidden !important; }
         grid-template-columns: minmax(0, 1fr);
         gap: 18px;
     }
+    .guilda-arquivo{ margin: 20px auto 80px !important;}
+    .guilda-mural {
+            border-image-slice: 250 200 200 200 fill;
+
+    }
 }
 
 @media (max-width: 440px) {
@@ -401,7 +407,7 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 24px auto 0;
+    margin: 24px auto 80px;
     padding: 0;
     /* A placa permanece no fluxo e cresce com o texto em qualquer largura. */
     position: relative;

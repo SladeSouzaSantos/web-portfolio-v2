@@ -13,7 +13,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "playwright test",
     "test:smoke": "playwright test --config playwright.smoke.config.ts",
-    "test:visual": "playwright test --config playwright.visual.config.ts"
+    "test:visual": "playwright test --config playwright.visual.config.ts",
+    "test:orbe": "playwright test --config playwright.orbe.config.ts"
   },
   "dependencies": {
     "gsap": "^3.13.0",

@@ -170,6 +170,34 @@
 
 .orb-chat-send-btn:hover { opacity: 0.9; }
 
+.orb-chat-privacy, .orb-chat-status, .orb-chat-error, .orb-chat-cooldown {
+    font-size: 8px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+    margin-bottom: 12px;
+}
+.orb-chat-privacy { color: var(--texto-secundario); }
+.orb-chat-status, .orb-chat-cooldown { color: var(--texto-destaque-ouro); }
+.orb-chat-error { color: var(--texto-principal); border-left: 3px solid var(--acento-ouro); padding-left: 10px; }
+.orb-chat-error small { display: block; margin-top: 6px; font-size: 7px; }
+.chat-text { white-space: pre-wrap; }
+.orb-chat-simulated, .orb-chat-sources { margin-top: 10px; font-size: 8px; line-height: 1.9; }
+.orb-chat-simulated { color: var(--texto-destaque-ouro); }
+.orb-chat-sources ul { list-style: none; padding: 0; }
+.orb-chat-sources li { margin-top: 6px; }
+.orb-chat-sources a { color: var(--texto-ciano); text-underline-offset: 3px; }
+.orb-chat-actions { display: flex; flex-wrap: wrap; margin-bottom: 10px; }
+.orb-chat-reset-btn {
+    background: var(--bg-caixa-interna);
+    color: var(--texto-destaque-ouro);
+    border: 2px solid var(--borda-suave);
+    padding: 10px;
+    min-height: 44px;
+    font: inherit;
+    font-size: 8px;
+    line-height: 1.8;
+}
+
 @media (max-width: 400px) {
     .orb-chat-form {
         flex-direction: column;
