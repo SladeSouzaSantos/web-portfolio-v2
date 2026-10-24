@@ -48,6 +48,9 @@ jobs:
             git log -1 --format=%B "$COMMIT_HEAD" | npx commitlint
           fi
 
+      - name: Select Orbe API configuration for the destination branch
+        run: node scripts/orbe-build-policy.mjs --github-env
+
       - name: Validate TypeScript and compile Vite
         run: npm run build
 
@@ -56,6 +59,9 @@ jobs:
 
       - name: Run end-to-end browser tests
         run: npm test
+
+      - name: Test Orbe API integration with mocked requests only
+        run: npm run test:orbe
 
       - name: Upload Playwright report
         if: always()

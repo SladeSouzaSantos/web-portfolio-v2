@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { startOrbRenderer, type OrbRenderer } from '../effects/orbRenderer';
 import { useReducedMotion } from '../hooks/useMediaQuery';
+import { useOrbeChat } from '../hooks/useOrbeChat';
+import { getOrbeSources } from '../services/orbeSources';
 import { Modal } from './Modal';
 
 const GREETINGS = [
@@ -11,42 +13,21 @@ const GREETINGS = [
   'O sistema opera com estabilidade máxima nas runas de código. Em que posso ajudar?',
 ];
 
-interface ChatMessage {
-  id: number;
-  sender: 'orb' | 'user';
-  text: string;
-}
-
-function getReply(query: string): string {
-  const normalized = query.toLocaleLowerCase('pt-BR');
-  if (normalized.includes('projeto')) {
-    return 'Pedro desenvolveu projetos como o SDGP (Dimensionamento Solar em Flutter), o Lithology (Logs Geológicos em Java) e o ReserGas (Cálculos de Fluidos de Reservatórios).';
-  }
-  if (normalized.includes('contato') || normalized.includes('contacto') || normalized.includes('email') || normalized.includes('e-mail')) {
-    return 'Você pode entrar em contato diretamente pelo LinkedIn ou GitHub oficial de Pedro Santos! Os links estão na apresentação do portfólio.';
-  }
-  return 'Este guia tem respostas demonstrativas. Pedro Santos possui experiência em Engenharia e Desenvolvimento de Software (Java, Dart, Flutter, Python, PHP e C++). Experimente perguntar sobre projetos ou contato.';
-}
-
 export function OrbAssistant() {
   const reducedMotion = useReducedMotion();
+  const {
+    messages, query, setQuery, isLoading, error, sendMessage, cancelPending, resetConversation,
+    cooldownSeconds, maxMessageLength, apiEnabled,
+  } = useOrbeChat(reducedMotion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const rendererRef = useRef<OrbRenderer | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
-  const replyTimersRef = useRef(new Set<number>());
-  const nextMessageId = useRef(1);
   const [touchDevice, setTouchDevice] = useState(false);
   const [near, setNear] = useState(false);
   const [bubbleDismissed, setBubbleDismissed] = useState(false);
   const [greeting, setGreeting] = useState(GREETINGS[0]);
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([{
-    id: 0,
-    sender: 'orb',
-    text: 'Saudações! Sou o Orbe Guardião. Como posso auxiliar sua jornada pelo portfólio de Pedro Santos?',
-  }]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(hover: none), (max-width: 768px)');
@@ -77,20 +58,15 @@ export function OrbAssistant() {
   }, [reducedMotion, handleProximity]);
 
   useEffect(() => {
-    const timers = replyTimersRef.current;
-    return () => {
-      timers.forEach((timer) => window.clearTimeout(timer));
-      timers.clear();
-    };
-  }, []);
-
-  useEffect(() => {
     if (open && historyRef.current) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
     }
-  }, [messages, open]);
+  }, [messages, open, isLoading]);
 
-  const closeChat = useCallback(() => setOpen(false), []);
+  const closeChat = useCallback(() => {
+    cancelPending();
+    setOpen(false);
+  }, [cancelPending]);
   const showBubble = !open && !bubbleDismissed && (touchDevice || near);
 
   function openChat() {
@@ -100,15 +76,7 @@ export function OrbAssistant() {
 
   function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) return;
-    setMessages((current) => [...current, { id: nextMessageId.current++, sender: 'user', text: trimmedQuery }]);
-    setQuery('');
-    const timer = window.setTimeout(() => {
-      replyTimersRef.current.delete(timer);
-      setMessages((current) => [...current, { id: nextMessageId.current++, sender: 'orb', text: getReply(trimmedQuery) }]);
-    }, reducedMotion ? 0 : 700);
-    replyTimersRef.current.add(timer);
+    void sendMessage();
   }
 
   return (
@@ -144,17 +112,39 @@ export function OrbAssistant() {
             <button type="button" className="login-close-btn" aria-label="Fechar guia do portfólio" onClick={closeChat}>×</button>
           </div>
           <div className="login-modal-body" style={{ padding: 16 }}>
-            <p id="orbChatDescription" className="login-subtitle" style={{ marginBottom: 12 }}>Guia interativo em demonstração, com respostas predefinidas sobre habilidades, projetos e contato.</p>
-            <div ref={historyRef} className="orb-chat-history" role="log" aria-label="Conversa com o orbe" aria-live="polite" aria-relevant="additions text" tabIndex={0}>
+            <p id="orbChatDescription" className="login-subtitle" style={{ marginBottom: 12 }}>{apiEnabled
+              ? 'Converse com o Orbe sobre o portfólio e a trajetória profissional de Pedro Santos.'
+              : 'Guia interativo em demonstração, com respostas predefinidas sobre habilidades, projetos e contato.'}</p>
+            {apiEnabled && <p id="orbChatPrivacy" className="orb-chat-privacy">
+              Suas perguntas podem ser enviadas ao provedor de IA utilizado pelo backend.
+              O histórico pode ser armazenado temporariamente. Não informe dados pessoais sensíveis.
+            </p>}
+            <div ref={historyRef} className="orb-chat-history" role="log" aria-label="Conversa com o orbe" aria-live="polite" aria-relevant="additions text" aria-busy={isLoading} tabIndex={0}>
               {messages.map((message) => (
                 <div key={message.id} className={`chat-msg ${message.sender === 'orb' ? 'orb-msg' : 'user-msg'}`}>
-                  <span className="chat-sender">{message.sender === 'orb' ? '[ORBE]:' : '[VOCÊ]:'}</span> {message.text}
+                  <span className="chat-sender">{message.sender === 'orb' ? '[ORBE]:' : '[VOCÊ]:'}</span> <span className="chat-text">{message.text}</span>
+                  {message.simulated && <p className="orb-chat-simulated">[ Resposta simulada ]</p>}
+                  {!!message.sources?.length && <div className="orb-chat-sources">
+                    <p>[ FONTES CONSULTADAS ]</p>
+                    <ul>{getOrbeSources(message.sources).map((source, index) => <li key={`${source.type}-${source.id}-${index}`}>
+                      {source.href ? <a href={source.href} target="_blank" rel="noopener noreferrer">{source.title}</a> : source.title}
+                    </li>)}</ul>
+                  </div>}
                 </div>
               ))}
             </div>
+            {isLoading && <p className="orb-chat-status" role="status">[ ORBE CONSULTANDO OS REGISTROS... ]</p>}
+            {error && <div className="orb-chat-error" role="alert">
+              <p>{error.message}</p>
+              {error.correlationId && <small>Referência: {error.correlationId}</small>}
+            </div>}
+            {cooldownSeconds > 0 && <p className="orb-chat-cooldown">Aguarde {cooldownSeconds}s antes de enviar outra pergunta.</p>}
+            <div className="orb-chat-actions">
+              <button type="button" className="orb-chat-reset-btn" onClick={resetConversation}>NOVA CONVERSA</button>
+            </div>
             <form className="orb-chat-form" onSubmit={submitMessage}>
-              <input type="text" aria-label="Sua pergunta ao orbe" placeholder="Sua pergunta..." autoComplete="off" required maxLength={1000} value={query} onChange={(event) => setQuery(event.target.value)} />
-              <button type="submit" className="orb-chat-send-btn">ENVIAR</button>
+              <input type="text" aria-label="Sua pergunta ao orbe" aria-describedby={apiEnabled ? 'orbChatPrivacy' : undefined} placeholder="Sua pergunta..." autoComplete="off" required readOnly={isLoading} maxLength={maxMessageLength} value={query} onChange={(event) => setQuery(event.target.value)} />
+              <button type="submit" className="orb-chat-send-btn" disabled={isLoading || cooldownSeconds > 0}>ENVIAR</button>
             </form>
           </div>
         </Modal>

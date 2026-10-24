@@ -475,7 +475,6 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
     .cronicas-capitulo__medalhao {
         position: absolute;
         left: 0;
-        top: -24px;
         width: 48px;
         height: 48px;
     }

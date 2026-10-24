@@ -33,6 +33,9 @@ No Windows, a configuração utiliza o Microsoft Edge instalado. Nos demais sist
 
 Os testes também verificam erros JavaScript, recursos do site, responsividade em tablet/desktop e acessibilidade com axe. A suíte separada `npm run test:smoke` verifica a URL publicada após o deploy; `npm run test:visual` compara capturas com referências revisadas. Consulte [os comandos e as configurações dos testes](docs/testes.md).
 
+`npm run test:orbe` gera um build isolado com a integração HTTP habilitada e executa o chat
+com respostas interceptadas pelo Playwright. Os testes não chamam a OpenRouter.
+
 ## Organização
 
 ```text
@@ -44,6 +47,8 @@ src/
 ├── effects/                # Desenho e interação do orbe em canvas
 ├── hooks/                  # Navegação, tema, media queries e fundos
 ├── lib/                    # Resolução de URLs dos assets
+├── config/                 # Ativação e URL pública do Orbe por ambiente
+├── services/               # Cliente HTTP, demonstração e fontes do Orbe
 ├── styles/                 # CSS original e ajustes da aplicação
 └── types/                  # Contratos dos dados do portfólio
 public/assets/img/          # Imagens e símbolos SVG
@@ -57,7 +62,7 @@ A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descri
 
 Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
 
-O baú mantém uma **simulação de login em memória** para demonstrar a interface. Nenhuma credencial é enviada ou autenticada. O orbe é um **guia com respostas predefinidas**, sem integração com um modelo de IA ou serviço externo. O site permanece um front-end estático, sem backend, banco de dados ou área administrativa real.
+O baú mantém uma **simulação de login em memória** para demonstrar a interface. Nenhuma credencial é enviada ou autenticada. O Orbe possui integração opcional com o PHASSCODE Platform: o build da branch `dev` usa `https://devapi.phasscode.com`, enquanto `main` mantém as respostas demonstrativas até a autorização da API produtiva. ID e token de conversa ficam apenas em memória. Veja [configuração, privacidade e homologação do Orbe](docs/orbe-api.md).
 
 ## Rotas e navegação
 

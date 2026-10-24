@@ -41,7 +41,7 @@ body.taverna-ativa { background-image: linear-gradient(rgba(8,13,18,.35),rgba(8,
 body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/assets/img/taverna_table.webp')) !important; }
 @media (max-width: 1023px) { .portfolio-main { padding-top: 14rem; } }
 @media (max-width: 640px) {
-  .portfolio-main { padding-left: .5rem; padding-right: .5rem; padding-bottom: 11rem; }
+  .portfolio-main { padding-left: .5rem; padding-right: .5rem; padding-bottom: 0rem; }
   #contentDisplay.moldura-taverna { width: 100% !important; }
   .painel-perfil { padding: 8px !important; }
   .login-modal-header { padding: 10px; }

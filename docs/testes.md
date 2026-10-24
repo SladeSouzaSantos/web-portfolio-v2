@@ -19,6 +19,27 @@ As falhas incluem URL, status ou tipo do recurso e são anexadas ao relatório P
 
 O axe complementa os testes de teclado e foco. Uma execução sem violações não comprova conformidade completa: leitura por tecnologias assistivas, clareza do conteúdo e outros aspectos ainda precisam de avaliação humana. [Documentação Playwright](https://playwright.dev/docs/accessibility-testing).
 
+## Orbe com API simulada
+
+```sh
+npm run test:orbe
+```
+
+Essa suíte compila em `dist-orbe-test/`, habilita a API com a URL sintética
+`https://orbe-api.invalid` e inicia o preview na porta 4175. Interceptações Playwright
+cobrem criação/continuação, tokens, loading, fontes, reset, erros, cancelamento,
+teclado e mobile. Não utiliza a API real nem a OpenRouter.
+
+A suíte padrão inclui testes puros do cliente com `fetch` simulado e testes da política
+de build por branch, inclusive inspeção de bundles de produção gerados em memória.
+Os testes de diagnóstico usam o WebSocket de desenvolvimento real do Vite em
+loopback e uma conversa HTTP interceptada, verificando que o terminal recebe
+metadados úteis sem perguntas, respostas ou tokens. Também verificam que o
+plugin não participa do build de produção e que falhas no logger não afetam o chat.
+O fixture compartilhado também intercepta chat nas suítes funcional, visual e smoke,
+mesmo quando o build contém a URL de desenvolvimento. Nenhum teste deve usar
+`route.continue()` no endpoint de chat. Consulte [os detalhes da integração](orbe-api.md).
+
 ## Smoke da aplicação publicada
 
 O arquivo `playwright.smoke.config.ts` **não inicia servidor local**. A URL é obrigatória para evitar executar acidentalmente contra o preview.
