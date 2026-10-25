@@ -41,7 +41,7 @@ evitando um 400 inesperado ao enviar muitos emojis ao backend atual.
 - `src/hooks/useOrbeChat.ts`: histórico, loading, texto, erros, cooldown e ciclo
   de vida das consultas, sem acesso direto às credenciais da conversa.
 - `src/components/OrbAssistant.tsx` e `src/styles/orbe_assistant.css`: interface,
-  aviso de privacidade, fontes e botão NOVA CONVERSA. Canvas, animações, modal,
+  aviso de privacidade e fontes. Canvas, animações, modal,
   tipografia e navegação continuam utilizando a implementação existente.
 - `src/config/orbe.ts` e `src/vite-env.d.ts`: configuração pública tipada.
 - `.env.example`: exemplo local sem segredos.
@@ -100,14 +100,14 @@ inclui o token. Não há `Authorization`, cookies, storage, URL ou logs da sess�
 Fechar/reabrir mantém o histórico e a sessão já estabelecida enquanto o componente
 continuar montado. Fechar durante uma consulta aborta a espera, preserva a pergunta
 e ignora respostas tardias. Desmontar limpa a sessão e aborta a consulta.
-NOVA CONVERSA limpa o histórico, o texto, o ID e o token locais. Recarregar o site
-também perde essa sessão. Reset não é uma solicitação de exclusão no servidor:
+O botão NOVA CONVERSA foi retirado a pedido do proprietário. Recarregar o site
+perde a sessão local; a próxima mensagem inicia outra conversa. Isso não solicita exclusão no servidor:
 o contrato atual não fornece endpoint de exclusão de conversa.
 
 Cancelar ou atingir timeout não prova que o servidor deixou de processar a
 mensagem. Por isso não há retry automático, polling ou reenvio em background.
-O visitante decide se deseja reenviar o texto preservado. Nova conversa também
-não elimina um cooldown global informado por `Retry-After`.
+O visitante decide se deseja reenviar o texto preservado. Os limites globais
+continuam sob responsabilidade da API.
 
 ## Erros, fontes e privacidade
 

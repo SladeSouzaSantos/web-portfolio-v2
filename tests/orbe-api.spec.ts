@@ -18,7 +18,6 @@ async function openChat(page: Page) {
     dialog,
     input: dialog.getByRole('textbox', { name: 'Sua pergunta ao orbe', exact: true }),
     send: dialog.getByRole('button', { name: 'ENVIAR', exact: true }),
-    reset: dialog.getByRole('button', { name: 'NOVA CONVERSA', exact: true }),
     close: dialog.getByRole('button', { name: 'Fechar guia do portfólio', exact: true }),
     history: dialog.getByRole('log', { name: 'Conversa com o orbe' }),
   };
@@ -34,6 +33,7 @@ test('legado mantém chat público sem capacidade ou confirmação de reuniões'
     actions: [{ type: 'confirm_meeting_request', proposal: meetingProposal() }],
   }) }]);
   const { dialog, input, send, history } = await openChat(page);
+  await expect(dialog.getByRole('button', { name: 'NOVA CONVERSA', exact: true })).toHaveCount(0);
   await input.fill('Quais tecnologias Pedro utiliza?');
   await send.click();
   await expect(history).toContainText('A resposta pública permanece disponível');
@@ -49,13 +49,19 @@ test('cria e continua a conversa sem persistir ou expor o token', async ({ page,
   const continued = chatResponse({ answer: 'A continuação utiliza a mesma conversa.' });
   delete (continued as Partial<typeof continued>).conversationToken;
   const mock = await mockChat(page, [{}, { body: continued }]);
-  const { dialog, input, send, history } = await openChat(page);
+  const { dialog, trigger, close, input, send, history } = await openChat(page);
   await expect(dialog).toContainText(/provedor de IA/i);
   await expect(dialog).toContainText(/temporariamente/i);
   await expect(dialog).toContainText(/dados pessoais sensíveis/i);
   await input.fill('Quais tecnologias Pedro utiliza?');
   await send.click();
   await expect(history).toContainText('Java, Spring Boot e TypeScript');
+  await close.click();
+  await expect(dialog).toHaveCount(0);
+  await trigger.click();
+  await expect(history).toContainText('Quais tecnologias Pedro utiliza?');
+  await expect(history).toContainText('Java, Spring Boot e TypeScript');
+  expect(mock.requests).toHaveLength(1);
   await input.fill('Quais projetos utilizam Java?');
   await send.click();
   await expect(history).toContainText('A continuação utiliza a mesma conversa.');
@@ -144,21 +150,29 @@ test('sinaliza resposta simulada sem apresentá-la como resposta real', async ({
   await expect(dialog).toContainText(/resposta simulada/i);
 });
 
-test('nova conversa descarta histórico, ID e token mesmo com consulta pendente', async ({ page }) => {
+test('recarregar a página descarta histórico, ID e token mesmo com consulta pendente', async ({ page }) => {
   const pending = deferredReply();
   const mock = await mockChat(page, [{}, { waitFor: pending.promise, body: chatResponse({ answer: 'Resposta antiga descartada.' }) }, {}]);
-  const { input, send, reset, history } = await openChat(page);
+  const { dialog, trigger, input, send, history } = await openChat(page);
   await input.fill('Primeira pergunta');
   await send.click();
   await expect(history).toContainText('Java, Spring Boot e TypeScript');
   await input.fill('Pergunta antiga pendente');
   await send.click();
   await expect.poll(() => mock.requests.length).toBe(2);
-  await reset.click();
+  await page.reload();
+  pending.release();
+  await trigger.click();
+  await expect(dialog).toBeVisible();
   await expect(history.locator('.user-msg')).toHaveCount(0);
+  await expect(history.locator('.orb-msg')).toHaveCount(1);
   await expect(input).toHaveValue('');
   await expect(send).toBeEnabled();
-  pending.release();
+  await expect(dialog.getByRole('button', { name: 'NOVA CONVERSA', exact: true })).toHaveCount(0);
+  expect(mock.requests[1].postDataJSON()).toEqual({
+    conversationId: MOCK_CONVERSATION_ID, message: 'Pergunta antiga pendente',
+  });
+  expect(mock.requests[1].headers()['x-conversation-token']).toBe(MOCK_CONVERSATION_TOKEN);
   await input.fill('Nova consulta');
   await send.click();
   await expect(history).toContainText('Java, Spring Boot e TypeScript');
@@ -258,6 +272,9 @@ test('fechar cancela a consulta, ignora a resposta tardia e preserva o históric
   await send.click();
   await expect(input).toHaveValue('');
   await expect.poll(() => mock.requests.length).toBe(3);
+  expect(mock.requests[2].postDataJSON()).toEqual({
+    conversationId: MOCK_CONVERSATION_ID, message: 'Consulta após reabrir',
+  });
   expect(mock.requests[2].headers()['x-conversation-token']).toBe(MOCK_CONVERSATION_TOKEN);
 });
 
@@ -292,7 +309,7 @@ test('desmontar o Orbe cancela a consulta e uma montagem nova inicia outra sess�
 test('teclado, celular e movimento reduzido preservam acesso aos controles', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await mockChat(page, [{}]);
-  const { dialog, input, send, close, reset, trigger, history } = await openChat(page);
+  const { dialog, input, send, close, trigger, history } = await openChat(page);
   await expect(close).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(send).toBeFocused();
@@ -305,8 +322,8 @@ test('teclado, celular e movimento reduzido preservam acesso aos controles', asy
     await page.setViewportSize(viewport);
     await expect(dialog).toBeVisible();
     expect(await dialog.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1);
-    await reset.scrollIntoViewIfNeeded();
-    await expect(reset).toBeInViewport();
+    await close.scrollIntoViewIfNeeded();
+    await expect(close).toBeInViewport();
     await input.scrollIntoViewIfNeeded();
     await expect(input).toBeInViewport();
     await send.scrollIntoViewIfNeeded();

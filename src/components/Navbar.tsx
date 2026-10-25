@@ -14,16 +14,15 @@ const links: { id: SecaoId; label: string; title: string; icon: string }[] = [
 interface NavbarProps {
   activeSection: SecaoId; theme: Theme; onToggleTheme: () => void;
   onNavigate: () => void; onOpenPanel: () => void; onLogout: () => void;
-  onOpenMeetings?: () => void;
 }
-export function Navbar({ activeSection, theme, onToggleTheme, onNavigate, onOpenPanel, onLogout, onOpenMeetings }: NavbarProps) {
+export function Navbar({ activeSection, theme, onToggleTheme, onNavigate, onOpenPanel, onLogout }: NavbarProps) {
   return <nav id="gbcNavbar" className="barra-navegacao" aria-label="Navegação principal">
     <div className="barra-navegacao-container">
       <Link to="/#sobre" className="bloco-heroi" onClick={onNavigate} aria-label="PHASSCODE — início">
         <span className="indicador-status" aria-hidden="true" /><span className="texto-logo">PHASSCODE</span>
       </Link>
       <div className="bloco-utilitarios">
-        <ChestAccess onOpenPanel={onOpenPanel} onLogout={onLogout} onOpenMeetings={onOpenMeetings} />
+        <ChestAccess onOpenPanel={onOpenPanel} onLogout={onLogout} />
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </div>
       <div className="bloco-navegacao-centro sem-barra-rolagem">

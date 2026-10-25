@@ -7,10 +7,9 @@ import { Modal } from './Modal';
 interface ChestAccessProps {
   onOpenPanel: () => void;
   onLogout: () => void;
-  onOpenMeetings?: () => void;
 }
-export function ChestAccess({ onOpenPanel, onLogout, onOpenMeetings }: ChestAccessProps) {
-  const { state, client, login, logout, refresh, reload } = useAuth();
+export function ChestAccess({ onOpenPanel, onLogout }: ChestAccessProps) {
+  const { state, client, login, logout, reload } = useAuth();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -35,14 +34,13 @@ export function ChestAccess({ onOpenPanel, onLogout, onOpenMeetings }: ChestAcce
     }, Math.max(0, retryAt - Date.now()));
     return () => { window.clearInterval(timer); window.clearTimeout(finish); };
   }, [open, retryAt]);
-  async function action(operation: 'refresh' | 'logout' | 'reload') {
+  async function action(operation: 'logout' | 'reload') {
     if (pending.current || Date.now() < retryAt) return;
     pending.current = true;
     setBusy(true);
     setFeedback('Consultando as runas da sessão...');
     try {
       if (operation === 'logout') { await logout(); onLogout(); }
-      else if (operation === 'refresh') await refresh();
       else await reload();
       if (mounted.current) setFeedback(operation === 'logout' ? 'Sessão encerrada.' : 'Sessão atualizada.');
     } catch (error) {
@@ -69,22 +67,17 @@ export function ChestAccess({ onOpenPanel, onLogout, onOpenMeetings }: ChestAcce
         {authenticated ? <>
           <p id="login-description" className="login-subtitle">Bem-vindo, {state.user!.displayName || 'aventureiro'}.
             {' '}Papel: {admin ? 'administrador' : 'usuário'}.</p>
-          {onOpenMeetings && <button type="button" className="login-submit-btn" disabled={busy}
-            onClick={() => { close(); onOpenMeetings(); }}>[ SOLICITAR REUNIÃO ]</button>}
+          {!admin && <p className="login-subtitle">Esta conta não tem permissão para acessar a sala do administrador. Use a conta autorizada.</p>}
           {admin && <button type="button" className="login-submit-btn chest-open-panel" disabled={busy}
-            onClick={() => { close(); onOpenPanel(); }}>[ PAINEL DO MESTRE ]</button>}
-          <button type="button" className="login-submit-btn" disabled={busy || coolingDown} onClick={() => { void action('reload'); }}>[ ATUALIZAR SESSÃO ]</button>
-          <button type="button" className="login-submit-btn" disabled={busy || coolingDown} onClick={() => { void action('refresh'); }}>[ RENOVAR SESSÃO ]</button>
+            onClick={() => { close(); onOpenPanel(); }}>[ IR PARA A SALA DO ADMINISTRADOR ]</button>}
           <button type="button" className="login-submit-btn chest-logout" disabled={busy || coolingDown} onClick={() => { void action('logout'); }}>[ TRANCAR BAÚ (LOGOUT) ]</button>
         </> : <>
           <p id="login-description" className="login-subtitle">{unavailable
             ? 'O portal de autenticação está indisponível neste ambiente. Nenhuma credencial é solicitada ou enviada.'
-            : 'Entre com sua conta Google. A autenticação ocorre no Google e a sessão é administrada pelo servidor. Você não precisa entrar para solicitar uma reunião.'}</p>
+            : 'Acesso exclusivo à administração. Entre com a conta Google autorizada; a permissão é verificada pelo servidor.'}</p>
           {state.status === 'loading' && <p className="login-subtitle" role="status">Consultando sessão...</p>}
           {!unavailable && <button type="button" className="login-submit-btn" disabled={busy || coolingDown || state.status === 'loading'}
             onClick={login}>[ ENTRAR COM GOOGLE ]</button>}
-          {client && onOpenMeetings && <button type="button" className="login-submit-btn" disabled={busy}
-            onClick={() => { close(); onOpenMeetings(); }}>[ SOLICITAR REUNIÃO SEM LOGIN ]</button>}
           {state.status === 'error' && <button type="button" className="login-submit-btn" disabled={busy || coolingDown}
             onClick={() => { void action('reload'); }}>[ CONSULTAR SESSÃO NOVAMENTE ]</button>}
         </>}

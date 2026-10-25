@@ -120,15 +120,21 @@ test('closing and reopening an Orbe proposal preserves review and prevents anoth
   expect(platform.unexpected).toEqual([]);
 });
 
-test('new conversation removes old actions, resets chat credentials and leaves meetings unconfirmed', async ({ page }) => {
-  const platform = await mockPlatform(page, [{ path: '/api/v1/auth/session', body: anonymousSession() }]);
+test('page reload removes old actions and chat credentials while leaving meetings unconfirmed', async ({ page }) => {
+  const platform = await mockPlatform(page, [
+    { path: '/api/v1/auth/session', body: anonymousSession() },
+    { path: '/api/v1/auth/session', body: anonymousSession() },
+  ]);
   const chat = await mockChat(page, [{ body: actionReply() }, {}]);
   const { dialog, input, send } = await openOrbe(page);
   await input.fill('Prepare uma proposta sem confirmar.');
   await send.click();
   await expect(dialog.getByRole('button', { name: REVIEW_ACTION })).toBeVisible();
-  await dialog.getByRole('button', { name: 'NOVA CONVERSA', exact: true }).click();
+  await expect(dialog.getByRole('button', { name: 'NOVA CONVERSA', exact: true })).toHaveCount(0);
+  await page.reload();
+  await page.getByRole('button', { name: 'Abrir guia do portfólio', exact: true }).click();
   await expect(dialog.getByRole('button', { name: REVIEW_ACTION })).toHaveCount(0);
+  await expect(dialog.getByRole('log').locator('.user-msg')).toHaveCount(0);
   await input.fill('Quais tecnologias Pedro utiliza?');
   await send.click();
   await expect(dialog.getByRole('log')).toContainText('Java, Spring Boot e TypeScript');
@@ -136,6 +142,7 @@ test('new conversation removes old actions, resets chat credentials and leaves m
   expect(chat.requests[1].headers()['x-conversation-token']).toBeUndefined();
   expect(chat.requests[1].headers()['x-orbe-capabilities']).toBe('meetings-v1');
   expect(requestCreations(platform.requests)).toHaveLength(0);
+  expect(platform.unexpected).toEqual([]);
 });
 
 test('Orbe proposal review works on mobile using keyboard and reduced motion without automatic requests', async ({ page }) => {
