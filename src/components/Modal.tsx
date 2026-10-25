@@ -60,7 +60,11 @@ export function Modal({ children, overlayClassName, panelClassName, labelledBy, 
       document.body.classList.remove('portfolio-modal-open');
       if (bodyClassName) document.body.classList.remove(bodyClassName);
       if (root) root.inert = previousInert;
-      if (origin?.isConnected) origin.focus();
+      // A dialog opened in the same commit must capture the original trigger.
+      if (origin?.isConnected && !root?.inert) origin.focus();
+      // React may enable the launching control later in this same commit.
+      // A newly opened dialog keeps the root inert and must retain its focus.
+      queueMicrotask(() => { if (origin?.isConnected && !root?.inert) origin.focus(); });
     };
   }, [bodyClassName]);
 

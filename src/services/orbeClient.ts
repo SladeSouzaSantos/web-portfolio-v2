@@ -1,4 +1,5 @@
-import type { ChatApiError, ChatApiResponse, ChatMeta, ChatReply, ChatSource } from '../types/orbe';
+import type { ChatApiError, ChatApiResponse, ChatMeta, ChatReply, ChatSource, MeetingChatAction } from '../types/orbe';
+import { parseMeetingProposal } from '../types/meetings';
 import { reportOrbeDiagnostic } from './orbeDiagnostics';
 import { sanitizeOrbeDiagnostic, type OrbeDiagnosticEvent } from './orbeDiagnosticEvent';
 
@@ -51,6 +52,7 @@ export interface OrbeClientOptions {
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
   onDiagnostic?: (event: OrbeDiagnosticEvent) => void;
+  meetingCapabilities?: boolean;
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -97,6 +99,20 @@ function parseResponse(value: unknown): ChatApiResponse {
     throw new OrbeClientError('protocol', 'O Orbe recebeu uma resposta inválida. Inicie uma nova conversa.');
   }
 
+  let actions: MeetingChatAction[] | undefined;
+  if (value.actions !== undefined) {
+    try {
+      if (!Array.isArray(value.actions) || value.actions.length > 1) throw new Error();
+      actions = value.actions.map(action => {
+        if (!isObject(action) || action.type !== 'confirm_meeting_request'
+          || Object.keys(action).some(key => !['type', 'proposal'].includes(key))) throw new Error();
+        return { type: 'confirm_meeting_request', proposal: parseMeetingProposal(action.proposal) };
+      });
+    } catch {
+      throw new OrbeClientError('protocol', 'O Orbe recebeu uma proposta inválida. Consulte a agenda para preparar outra.');
+    }
+  }
+
   return {
     conversationId: value.conversationId,
     conversationToken: value.conversationToken as string | undefined,
@@ -109,6 +125,7 @@ function parseResponse(value: unknown): ChatApiResponse {
       simulated: value.meta.simulated,
       promptVersion: value.meta.promptVersion,
     },
+    ...(actions !== undefined && { actions }),
   };
 }
 
@@ -223,6 +240,7 @@ export function createOrbeClient(baseUrl: string, options: OrbeClientOptions = {
     try {
       diagnose({ phase: 'started' });
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (options.meetingCapabilities) headers['X-Orbe-Capabilities'] = 'meetings-v1';
       if (session) headers['X-Conversation-Token'] = session.token;
       const response = await fetchRequest(apiUrl.toString(), {
         method: 'POST',
@@ -267,7 +285,8 @@ export function createOrbeClient(baseUrl: string, options: OrbeClientOptions = {
         conversation = { id: data.conversationId, token: data.conversationToken };
       }
       diagnose({ phase: 'succeeded', status: responseStatus, durationMs: Math.max(0, Date.now() - startedAt) });
-      return { conversationId: data.conversationId, answer: data.answer, sources: data.sources, meta: data.meta };
+      return { conversationId: data.conversationId, answer: data.answer, sources: data.sources, meta: data.meta,
+        ...(options.meetingCapabilities && data.actions !== undefined && { actions: data.actions }) };
     } catch (error) {
       try { ensureActive(); } catch (activeError) { error = activeError; }
       const failure = error instanceof OrbeClientError ? error

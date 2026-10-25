@@ -1,5 +1,11 @@
 # Integração do Orbe Mágico
 
+As ações de reunião da Fase 3 estão documentadas na
+[integração de sessão e agendamento](phase3-integracao.md). Elas utilizam o mesmo
+chat sem streaming, com `X-Orbe-Capabilities: meetings-v1` somente quando a interface
+da Fase 3 está habilitada. Uma proposta exige revisão e consentimento no fluxo
+comum; nenhuma chegada de resposta confirma um pedido automaticamente.
+
 Implementação restrita ao frontend `web-portfolio-v2`, na branch `dev`. O backend é
 um serviço separado e não foi alterado nesta tarefa. Não foram criados commits,
 pushes, deploys, autenticação ou infraestrutura adicional.
@@ -195,13 +201,16 @@ Para uso manual local, a origem exata precisa estar autorizada no CORS do backen
 `localhost` e `127.0.0.1`, assim como portas diferentes, são origens diferentes.
 Os testes locais usam mocks e não dependem dessa autorização.
 
-## Resultado da validação local
+## Histórico da validação local da integração inicial
+
+Os resultados abaixo pertencem à integração inicial do chat. A validação atual,
+incluindo autenticação e reuniões, está em [Integração da Fase 3](phase3-integracao.md).
 
 - `npm run typecheck`: aprovado.
 - `npm run build`: aprovado com a integração de dev habilitada e também com a
   configuração demonstrativa de produção. O bundle real de dev contém
   `https://devapi.phasscode.com`; o demonstrativo não contém a URL de dev nem a de testes.
-- `npm test`: 66 aprovados na validação mais recente, contra o build demonstrativo,
+- `npm test`: 66 aprovados naquela validação, contra o build demonstrativo,
   incluindo cliente, configuração e diagnóstico no Vite real com chat interceptado.
   O build de dev também passou pela regressão funcional durante a integração inicial.
 - `npm run test:orbe`: 21 aprovados com API fictícia e respostas simuladas.

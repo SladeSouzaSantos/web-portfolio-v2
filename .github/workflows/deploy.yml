@@ -63,6 +63,9 @@ jobs:
       - name: Test Orbe API integration with mocked requests only
         run: npm run test:orbe
 
+      - name: Test authentication and meetings with mocked requests only
+        run: npm run test:phase3
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v6

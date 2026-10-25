@@ -4,6 +4,7 @@ import { useReducedMotion } from '../hooks/useMediaQuery';
 import { useOrbeChat } from '../hooks/useOrbeChat';
 import { getOrbeSources } from '../services/orbeSources';
 import { Modal } from './Modal';
+import type { MeetingProposal } from '../types/meetings';
 
 const GREETINGS = [
   'Saudações, Herói! Sou o Orbe de Acesso. Clique em mim para abrir o guia do portfólio!',
@@ -13,7 +14,7 @@ const GREETINGS = [
   'O sistema opera com estabilidade máxima nas runas de código. Em que posso ajudar?',
 ];
 
-export function OrbAssistant() {
+export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (proposal: MeetingProposal) => void }) {
   const reducedMotion = useReducedMotion();
   const {
     messages, query, setQuery, isLoading, error, sendMessage, cancelPending, resetConversation,
@@ -129,6 +130,13 @@ export function OrbAssistant() {
                     <ul>{getOrbeSources(message.sources).map((source, index) => <li key={`${source.type}-${source.id}-${index}`}>
                       {source.href ? <a href={source.href} target="_blank" rel="noopener noreferrer">{source.title}</a> : source.title}
                     </li>)}</ul>
+                  </div>}
+                  {!!message.actions?.length && onMeetingProposal && <div className="orb-meeting-actions">
+                    <p>Proposta preparada. Nenhuma solicitação foi confirmada.</p>
+                    {message.actions.map(action => <button type="button" className="orb-chat-reset-btn" key={action.proposal.proposalId}
+                      onClick={() => { closeChat(); onMeetingProposal(action.proposal); }}>
+                      REVISAR PROPOSTA DE REUNIÃO
+                    </button>)}
                   </div>}
                 </div>
               ))}

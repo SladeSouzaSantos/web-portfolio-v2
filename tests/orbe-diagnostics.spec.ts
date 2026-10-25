@@ -171,9 +171,22 @@ test('consulta HTTP simulada percorre cliente, HMR e terminal no Vite real sem r
     envDir: false,
     mode: 'development',
     customLogger: logger,
-    cacheDir: testInfo.outputPath('vite-cache'),
+    // Keep optimized dependencies under node_modules so React's DEV plugin
+    // does not re-transform the generated vendor bundle as application code.
+    cacheDir: resolve('node_modules/.vite-orbe-diagnostics', `worker-${testInfo.parallelIndex}`),
+    // These are the app's actual bare imports, including JSX's implicit runtime.
+    // Skip repository-wide HTML crawling and late dependency discovery; the
+    // isolated server can finish its explicit prebundle before browser navigation.
+    optimizeDeps: {
+      noDiscovery: true,
+      include: [
+        'react', 'react/jsx-runtime', 'react/jsx-dev-runtime',
+        'react-dom', 'react-dom/client', 'react-router', 'gsap', 'gsap/ScrollTrigger',
+      ],
+    },
     define: {
       'import.meta.env.VITE_ORBE_API_ENABLED': JSON.stringify('true'),
+      'import.meta.env.VITE_PHASE3_ENABLED': JSON.stringify('false'),
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://orbe-api.invalid'),
     },
     server: { host: '127.0.0.1', port: 0, strictPort: true, watch: null },
@@ -193,7 +206,11 @@ test('consulta HTTP simulada percorre cliente, HMR e terminal no Vite real sem r
       },
     ]);
     const origin = await listenOnEphemeralPort(server);
-    await page.goto(`${origin}/#sobre`);
+    // Transform the static module graph before requesting the page. This only
+    // prepares Vite's cache; the real browser still mounts React and uses HMR.
+    await server.environments.client.warmupRequest('/src/main.tsx');
+    await server.environments.client.waitForRequestsIdle();
+    await page.goto(`${origin}/#sobre`, { waitUntil: 'domcontentloaded' });
     await page.getByRole('button', { name: 'Abrir guia do portfólio', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ });
     const input = dialog.getByRole('textbox', { name: 'Sua pergunta ao orbe', exact: true });
