@@ -1,0 +1,19 @@
+.phase3-admin { color: var(--texto-principal); font-size: 10px; line-height: 2; overflow-wrap: anywhere; }
+.phase3-admin h1 { color: var(--texto-destaque-ouro); font-size: clamp(13px, 2vw, 18px); margin-bottom: 20px; }
+.phase3-admin-controls, .phase3-admin-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 18px 0; }
+.phase3-admin-controls > *, .phase3-admin-actions > * { flex: 1 1 160px; min-width: 0; }
+.phase3-admin-controls label { display: grid; gap: 10px; text-align: left; }
+.phase3-admin-filter { display: grid; gap: 10px; }
+.phase3-admin select { width: 100%; max-width: 100%; min-height: 44px; padding: 10px; background: var(--bg-caixa-interna); color: var(--texto-principal); border: 2px solid var(--borda-ouro); font: inherit; }
+.phase3-admin .login-submit-btn { margin-top: 0; font-size: 9px; line-height: 1.8; white-space: normal; min-height: 44px; }
+.phase3-admin-list { display: grid; gap: 18px; }
+.phase3-admin-card { border: 2px solid var(--borda-ouro); padding: clamp(12px, 3vw, 24px); background: var(--bg-card-elevado); text-align: left; min-width: 0; }
+.phase3-admin-card h2 { font-size: 12px; color: var(--texto-destaque-ouro); }
+.phase3-admin-card p { margin: 12px 0; }
+.phase3-admin-topic { white-space: pre-wrap; }
+.phase3-error { border-left: 3px solid var(--acento-vermelho); padding: 12px; margin: 14px 0; }
+.phase3-error small { overflow-wrap: anywhere; }
+.phase3-decision-panel { max-width: 540px; font-size: 10px; line-height: 2; }
+.phase3-decision-panel .login-submit-btn { font-size: 9px; line-height: 1.8; white-space: normal; }
+.phase3-decision-panel .login-modal-body > * + * { margin-top: 16px; }
+@media (max-width: 640px) { .phase3-admin-controls, .phase3-admin-actions { flex-direction: column; align-items: stretch; } .phase3-admin-controls > *, .phase3-admin-actions > * { flex-basis: auto; } }

@@ -5,6 +5,7 @@ import {
   chatError, chatResponse, deferredReply, mockChat,
   MOCK_CONVERSATION_ID, MOCK_CONVERSATION_TOKEN, MOCK_CORRELATION_ID,
 } from './helpers/orbe-mock';
+import { meetingProposal } from './helpers/platform-mock';
 
 async function openChat(page: Page) {
   await page.goto('/#sobre');
@@ -22,6 +23,25 @@ async function openChat(page: Page) {
     history: dialog.getByRole('log', { name: 'Conversa com o orbe' }),
   };
 }
+
+test('legado mantém chat público sem capacidade ou confirmação de reuniões', async ({ page }) => {
+  const meetingMutations: string[] = [];
+  page.on('request', request => {
+    if (request.method() === 'POST' && /\/api\/v1\/meetings(?:\/|$)/.test(request.url())) meetingMutations.push(request.url());
+  });
+  const mock = await mockChat(page, [{ body: chatResponse({
+    answer: 'A resposta pública permanece disponível sem os recursos opcionais.',
+    actions: [{ type: 'confirm_meeting_request', proposal: meetingProposal() }],
+  }) }]);
+  const { dialog, input, send, history } = await openChat(page);
+  await input.fill('Quais tecnologias Pedro utiliza?');
+  await send.click();
+  await expect(history).toContainText('A resposta pública permanece disponível');
+  await expect(dialog.getByRole('button', { name: 'REVISAR PROPOSTA DE REUNIÃO' })).toHaveCount(0);
+  expect(mock.requests).toHaveLength(1);
+  expect(mock.requests[0].headers()['x-orbe-capabilities']).toBeUndefined();
+  expect(meetingMutations).toEqual([]);
+});
 
 test('cria e continua a conversa sem persistir ou expor o token', async ({ page, context }) => {
   const consoleMessages: string[] = [];

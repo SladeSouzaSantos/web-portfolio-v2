@@ -207,3 +207,5 @@
         width: 100%;
     }
 }
+.orb-meeting-actions { margin-top: 12px; border-top: 1px solid var(--borda-ouro); padding-top: 10px; }
+.orb-meeting-actions .orb-chat-reset-btn { margin-top: 10px; width: 100%; white-space: normal; line-height: 1.8; }

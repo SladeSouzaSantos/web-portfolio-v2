@@ -123,17 +123,35 @@ test.describe('animated theme transition', () => {
     await page.goto('/');
     const origin = await buttonCenter(page);
     await observeTransition(page);
-    await page.locator('#themeToggleBtn').click();
-    await expect(page.locator('#themeToggleBtn')).toBeDisabled();
-    await page.locator('#themeToggleBtn').evaluate(button => {
-      for (let index = 0; index < 10; index++) (button as HTMLButtonElement).click();
-    });
-    await expect(page.locator('body')).toHaveClass(/modo-claro/);
-    await expect(page.locator('#themeToggleBtn')).toBeDisabled();
-    await page.locator('#themeToggleBtn').evaluate(button => {
-      for (let index = 0; index < 10; index++) (button as HTMLButtonElement).click();
+    await page.locator('#themeToggleBtn').evaluate(element => {
+      const button = element as HTMLButtonElement;
+      const bursts: Array<{ phase: 'expansion' | 'contraction'; theme: string; disabled: boolean; stillDisabled: boolean }> = [];
+      const theme = () => document.body.classList.contains('modo-claro') ? 'light' : 'dark';
+      const burst = (phase: 'expansion' | 'contraction') => {
+        const before = { phase, theme: theme(), disabled: button.disabled };
+        for (let index = 0; index < 10; index++) button.click();
+        bursts.push({ ...before, stillDisabled: button.disabled });
+      };
+      // Observe in the browser before the initial click. Separate Playwright RPCs
+      // can arrive after a phase ends when the browser or CI worker is busy.
+      const observer = new MutationObserver(() => {
+        if (theme() === 'light') {
+          burst('contraction');
+          observer.disconnect();
+        } else if (button.disabled && !bursts.length) burst('expansion');
+      });
+      observer.observe(button, { attributes: true, attributeFilter: ['disabled'] });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      Reflect.set(window, '__themeClickBursts', bursts);
+      button.click();
+      // React may commit disabled at the end of this event or its microtask.
+      if (button.disabled) burst('expansion');
     });
     await expectCompletedTransition(page, 'dark', 'light', origin);
+    expect(await page.evaluate(() => Reflect.get(window, '__themeClickBursts'))).toEqual([
+      { phase: 'expansion', theme: 'dark', disabled: true, stillDisabled: true },
+      { phase: 'contraction', theme: 'light', disabled: true, stillDisabled: true },
+    ]);
   });
 
   test('leaving the portfolio cancels the circle without leaving an overlay or stale theme change', async ({ page }) => {

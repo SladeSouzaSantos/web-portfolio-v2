@@ -71,7 +71,7 @@ test('abrir e fechar login mantém a seção selecionada e restaura o foco', asy
 
   const dialog = page.getByRole('dialog', { name: /PORTAL DE AUTENTICAÇÃO/ });
   await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText('nenhuma credencial é enviada ou validada');
+  await expect(dialog).toContainText(/Google|Nenhuma credencial é solicitada ou enviada\./);
   await expect(page.locator('#restricted-title')).toHaveCount(0);
 
   await page.keyboard.press('Escape');
@@ -87,45 +87,18 @@ test('abrir e fechar login mantém a seção selecionada e restaura o foco', asy
   await expect(heading).toBeVisible();
 });
 
-test('login demonstrativo alterna senha, libera menu e permite visitar painel e sair', async ({ page }) => {
+test('portal não solicita senha nem libera administração para um visitante', async ({ page }) => {
   await page.goto('/#projetos');
   await page.getByRole('button', { name: 'Abrir prévia de login', exact: true }).click();
   const login = page.getByRole('dialog', { name: /PORTAL DE AUTENTICAÇÃO/ });
-  const username = login.getByLabel('IDENTIFICAÇÃO (USER):', { exact: true });
-  const password = login.getByLabel('CHAVE MÁGICA (SENHA):', { exact: true });
-  await username.fill('visitante-demo');
-  await password.fill('senha-ficticia');
-  await expect(password).toHaveAttribute('type', 'password');
-
-  await login.getByRole('button', { name: 'Mostrar senha', exact: true }).click();
-  await expect(password).toHaveAttribute('type', 'text');
-  const hidePassword = login.getByRole('button', { name: 'Ocultar senha', exact: true });
-  await expect(hidePassword).toHaveAttribute('aria-pressed', 'true');
-  await hidePassword.click();
-  await expect(password).toHaveAttribute('type', 'password');
-
-  await login.getByRole('button', { name: 'DESTRAVAR PORTAL', exact: true }).click();
-  await expect(username).toBeDisabled();
-  await expect(password).toBeDisabled();
-  await expect(login.getByRole('button', { name: 'AGUARDE...', exact: true })).toBeDisabled();
-  await expect(login.getByRole('status')).toHaveText('Verificando runas ancestrais...');
-  await expect(login).toHaveCount(0, { timeout: 5000 });
-  const chest = page.getByRole('button', { name: 'Abrir baú do mestre', exact: true });
-  await expect(chest).toBeFocused();
-  await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES', exact: true })).toBeVisible();
-
-  await chest.click();
-  const menu = page.getByRole('dialog', { name: /BAÚ DO MESTRE: ATIVO/ });
-  await menu.getByRole('button', { name: /IR PARA ÁREA RESTRITA/ }).click();
-  await expect(menu).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: '[ ÁREA RESTRITA ]', exact: true })).toBeVisible();
-  await expect(page.getByText('Prévia visual do painel do Mestre.', { exact: false })).toBeVisible();
-  await page.getByRole('button', { name: 'VOLTAR AO PORTFÓLIO', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES', exact: true })).toBeVisible();
-
-  await chest.click();
-  await menu.getByRole('button', { name: /TRANCAR BAÚ \(LOGOUT\)/ }).click();
-  await expect(menu).toHaveCount(0);
+  await expect(login).toContainText(/Google|O portal de autenticação está indisponível neste ambiente\./);
+  await expect(login.locator('input')).toHaveCount(0);
+  await expect(login.getByRole('button', { name: /PAINEL DO MESTRE|DESTRAVAR PORTAL/ })).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(login).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Abrir prévia de login', exact: true })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES', exact: true })).toBeVisible();
+  await page.goto('/administracao');
+  await expect(page).toHaveURL(/\/#sobre$/);
+  await expect(page.getByRole('heading', { name: /PAINEL DO MESTRE/ })).toHaveCount(0);
 });

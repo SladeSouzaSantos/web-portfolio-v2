@@ -45,11 +45,11 @@ test('política do CI mantém dev ativo e PRs para main em demonstração', asyn
     resolveOrbeBuildEnvironment(branch: string): typeof enabledEnvironment;
   };
   expect(policy.resolveOrbeBuildEnvironment('dev')).toEqual({
-    VITE_ORBE_API_ENABLED: 'true', VITE_API_BASE_URL: 'https://devapi.phasscode.com',
+    VITE_ORBE_API_ENABLED: 'true', VITE_PHASE3_ENABLED: 'true', VITE_API_BASE_URL: 'https://devapi.phasscode.com',
   });
   for (const branch of ['main', '', 'feature/orbe']) {
     expect(policy.resolveOrbeBuildEnvironment(branch)).toEqual({
-      VITE_ORBE_API_ENABLED: 'false', VITE_API_BASE_URL: '',
+      VITE_ORBE_API_ENABLED: 'false', VITE_PHASE3_ENABLED: 'false', VITE_API_BASE_URL: '',
     });
   }
 
@@ -60,7 +60,7 @@ test('política do CI mantém dev ativo e PRs para main em demonstração', asyn
       env: { ...process.env, GITHUB_BASE_REF: 'main', GITHUB_REF_NAME: 'dev', GITHUB_ENV: githubEnvironmentFile },
     });
     expect(readFileSync(githubEnvironmentFile, 'utf8'))
-      .toBe('VITE_ORBE_API_ENABLED=false\nVITE_API_BASE_URL=\n');
+      .toBe('VITE_ORBE_API_ENABLED=false\nVITE_PHASE3_ENABLED=false\nVITE_API_BASE_URL=\n');
   } finally {
     rmSync(githubEnvironmentFile, { force: true });
     rmdirSync(temporaryDirectory);
