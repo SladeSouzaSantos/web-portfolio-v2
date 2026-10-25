@@ -36,6 +36,11 @@ Os testes também verificam erros JavaScript, recursos do site, responsividade e
 `npm run test:orbe` gera um build isolado com a integração HTTP habilitada e executa o chat
 com respostas interceptadas pelo Playwright. Os testes não chamam a OpenRouter.
 
+`npm run test:phase3` valida Google/sessão, agendamento público, administração e
+ações do Orbe com uma API `.invalid` inteiramente interceptada. Não cria eventos
+nem envia notificações. Consulte a [integração da Fase 3](docs/phase3-integracao.md)
+e o [roteiro de homologação controlada](docs/phase3-homologacao.md).
+
 ## Organização
 
 ```text
@@ -62,7 +67,13 @@ A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descri
 
 Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
 
-O baú mantém uma **simulação de login em memória** para demonstrar a interface. Nenhuma credencial é enviada ou autenticada. O Orbe possui integração opcional com o PHASSCODE Platform: o build da branch `dev` usa `https://devapi.phasscode.com`, enquanto `main` mantém as respostas demonstrativas até a autorização da API produtiva. ID e token de conversa ficam apenas em memória. Veja [configuração, privacidade e homologação do Orbe](docs/orbe-api.md).
+O baú utiliza Google e cookies de sessão no build da `dev`, com agendamento público
+sem login e painel de reuniões apenas para `admin`. A produção mantém esses
+recursos explicitamente indisponíveis e o Orbe demonstrativo. A URL compartilhada
+é `VITE_API_BASE_URL`; `VITE_PHASE3_ENABLED` habilita sessão/reuniões e
+`VITE_ORBE_API_ENABLED` habilita o chat. Não coloque segredos em `VITE_*`.
+ID/token do chat, CSRF e tokens privados de reunião ficam apenas em memória.
+Veja a [arquitetura, os ambientes e as limitações](docs/phase3-integracao.md).
 
 ## Rotas e navegação
 

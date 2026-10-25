@@ -84,3 +84,18 @@ npm run test:visual -- --update-snapshots
 ```
 
 O comando normal usa `updateSnapshots: 'none'`: não aceita automaticamente uma imagem nova como referência. As imagens `actual`, `expected` e `diff`, quando houver divergência, ficam em `test-results/visual/` e no relatório `playwright-report/visual/`.
+
+## Fase 3
+
+`npm run test:phase3` gera `dist-phase3-test/`, usa `https://phase3-api.invalid` e
+inicia preview em 4176. A suíte cobre sessão e Google simulados, papel administrativo,
+CSRF, reuniões públicas, idempotência, todos os estados, decisões e ações do Orbe.
+Nenhum endpoint de autenticação, agenda, chat ou notificação pode escapar para a
+rede real: a guarda compartilhada é instalada antes de navegar, inclusive em smoke
+e visual. Os mocks com cookies usam origem explícita e credenciais autorizadas.
+
+Relatórios: `playwright-report/phase3/`. Artefatos: `test-results/phase3/`.
+Os testes puros de auth, reuniões e configuração entram em `npm test`.
+Ambos os builds de API simulada (`test:orbe` e `test:phase3`) funcionam também em
+PRs para main por uma exceção limitada às URLs `.invalid` conhecidas. O `dist`
+principal continua protegido e nunca é substituído por esses builds.
