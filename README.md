@@ -67,13 +67,25 @@ A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descri
 
 Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
 
-O baú utiliza Google e cookies de sessão no build da `dev`, com agendamento público
-sem login e painel de reuniões apenas para `admin`. A produção mantém esses
+O baú é exclusivo da administração: utiliza Google e cookies de sessão no build
+da `dev` e oferece ao administrador apenas acesso à sala e logout. O papel `admin`
+retornado pela API abre `/administracao` ao iniciar uma sessão na página principal.
+O agendamento público continua pelo Orbe, separado do baú. Restringir o login ao
+e-mail do proprietário depende da [política no backend](docs/admin-access-handoff.md).
+A produção mantém esses
 recursos explicitamente indisponíveis e o Orbe demonstrativo. A URL compartilhada
 é `VITE_API_BASE_URL`; `VITE_PHASE3_ENABLED` habilita sessão/reuniões e
 `VITE_ORBE_API_ENABLED` habilita o chat. Não coloque segredos em `VITE_*`.
 ID/token do chat, CSRF e tokens privados de reunião ficam apenas em memória.
 Veja a [arquitetura, os ambientes e as limitações](docs/phase3-integracao.md).
+
+A sala administrativa reúne a agenda com busca/ordenação dos pedidos carregados,
+resumo por situação e decisões confirmadas. Os relatórios do Orbe e o
+reagendamento ainda dependem de novos contratos publicados pelo backend; a
+interface identifica essas indisponibilidades. Veja o
+[handoff dos relatórios e da agenda](docs/admin-dashboard-handoff.md).
+Fechar e reabrir o Orbe preserva a conversa; o botão NOVA CONVERSA foi retirado.
+Recarregar a página descarta o histórico local e permite iniciar outra conversa.
 
 ## Rotas e navegação
 
@@ -81,6 +93,7 @@ Veja a [arquitetura, os ambientes e as limitações](docs/phase3-integracao.md).
 - `/#sobre`, `/#projetos`, `/#experiencia` e `/#academico`: seções da página principal, com suporte ao histórico do navegador.
 - `/#portfolio` e `/#formacao`: aliases para Projetos e Formação.
 - `/projetos`: Arquivo de Missões com filtros e detalhes dos projetos.
+- `/administracao`: sala protegida pelo papel `admin`, com registros do Orbe e agenda.
 - `/index.html` e `/projetos.html`: endereços antigos, redirecionados para `/` e `/projetos`, respectivamente, preservando os parâmetros de consulta e o fragmento.
 
 O React Router usa `BrowserRouter` para navegar entre a página principal e o catálogo sem recarregar o documento. O `index.html` é a única entrada do Vite, e o build gera apenas esse HTML em `dist/`. Para publicar, sirva **o conteúdo de `dist/`** e configure o servidor para retornar `index.html` nas rotas da aplicação. Esse fallback permite abrir `/projetos` diretamente ou atualizar a página nessa rota. A configuração atual assume publicação na raiz do domínio; publicar em um subdiretório exige revisar `base` do Vite, o roteador e as URLs absolutas das imagens no CSS.

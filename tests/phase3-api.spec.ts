@@ -4,21 +4,36 @@ import {
   anonymousSession, authenticatedSession, meetingProposal, meetingStatus, mockPlatform, platformError,
   MOCK_CONFIRMATION_TOKEN, MOCK_CSRF_TOKEN, MOCK_MEETING_TOKEN,
 } from './helpers/platform-mock';
-import { deferredReply } from './helpers/orbe-mock';
+import { chatResponse, deferredReply, mockChat } from './helpers/orbe-mock';
 import type { MeetingProposal, MeetingStatus } from '../src/types/meetings';
 
 const loginTrigger = (page: Page) => page.getByRole('button', { name: 'Abrir prévia de login', exact: true });
 const meetingDialog = (page: Page) => page.getByRole('dialog', { name: '[ CONSELHO DA JORNADA ]', exact: true });
+const orbTrigger = (page: Page) => page.getByRole('button', { name: 'Abrir guia do portfólio', exact: true });
+
+async function reopenMeetings(page: Page) {
+  await orbTrigger(page).click();
+  await page.getByRole('button', { name: 'REVISAR PROPOSTA DE REUNIÃO', exact: true }).click();
+  await expect(meetingDialog(page)).toBeVisible();
+}
 
 async function openMeetings(page: Page, lightTheme = false) {
+  await mockChat(page, [{ body: chatResponse({
+    answer: 'Revise a proposta antes de enviar qualquer solicitação.',
+    actions: [{ type: 'confirm_meeting_request', proposal: meetingProposal() }],
+  }) }]);
   await page.goto('/');
   if (lightTheme) {
     await page.getByRole('button', { name: 'Ativar tema claro', exact: true }).click();
     await expect(page.locator('body')).toHaveClass(/modo-claro/);
   }
-  await loginTrigger(page).click();
-  await page.getByRole('button', { name: '[ SOLICITAR REUNIÃO SEM LOGIN ]', exact: true }).click();
+  await orbTrigger(page).click();
+  const orbe = page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ });
+  await orbe.getByRole('textbox', { name: 'Sua pergunta ao orbe' }).fill('Quero revisar uma proposta de reunião.');
+  await orbe.getByRole('button', { name: 'ENVIAR', exact: true }).click();
+  await orbe.getByRole('button', { name: 'REVISAR PROPOSTA DE REUNIÃO', exact: true }).click();
   await expect(meetingDialog(page)).toBeVisible();
+  await meetingDialog(page).getByRole('button', { name: 'Alterar dados / novo horário', exact: true }).click();
 }
 
 function availability(proposal: MeetingProposal, simulated = false) {
@@ -58,7 +73,7 @@ test('visitante consulta sessão e inicia Google por navegação interceptada, s
   await loginTrigger(page).click();
   const dialog = page.getByRole('dialog', { name: '[ PORTAL DE AUTENTICAÇÃO ]', exact: true });
   await expect(dialog.locator('input')).toHaveCount(0);
-  await expect(dialog.getByRole('button', { name: /PAINEL DO MESTRE/ })).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: /IR PARA A SALA DO ADMINISTRADOR/ })).toHaveCount(0);
   await dialog.getByRole('button', { name: '[ ENTRAR COM GOOGLE ]', exact: true }).click();
   await expect(page).toHaveURL('https://phase3-api.invalid/api/v1/auth/login/google');
   await expect(page.getByText('OAuth de teste', { exact: true })).toBeVisible();
@@ -66,33 +81,27 @@ test('visitante consulta sessão e inicia Google por navegação interceptada, s
   expect(api.unexpected).toEqual([]);
 });
 
-test('sessão user abre o baú, renova CSRF em memória e encerra a sessão sem conceder administração', async ({ page }) => {
-  const rotatedToken = 'r'.repeat(43);
+test('sessão user informa falta de permissão e permite somente logout sem conceder administração', async ({ page }) => {
   const session = authenticatedSession();
   const api = await mockPlatform(page, [
     { path: '/api/v1/auth/session', body: session },
-    { method: 'POST', path: '/api/v1/auth/refresh', body: { ...session, csrfToken: rotatedToken } },
     { method: 'POST', path: '/api/v1/auth/logout', status: 204 },
   ]);
   await page.goto('/');
   await page.getByRole('button', { name: 'Abrir baú do aventureiro', exact: true }).click();
   const menu = page.getByRole('dialog', { name: '[ BAÚ DO AVENTUREIRO ]', exact: true });
   await expect(menu).toContainText('Visitante de teste');
-  await expect(menu).toContainText('Papel: usuário.');
-  await expect(menu.getByRole('button', { name: /PAINEL DO MESTRE/ })).toHaveCount(0);
-  await menu.getByRole('button', { name: '[ RENOVAR SESSÃO ]', exact: true }).click();
-  await expect(menu.getByRole('status')).toHaveText('Sessão atualizada.');
+  await expect(menu).toContainText(/não tem permissão/i);
+  await expect(menu.getByRole('button', { name: /IR PARA A SALA DO ADMINISTRADOR|ENTRAR COM GOOGLE|SOLICITAR REUNIÃO|ATUALIZAR SESSÃO|RENOVAR SESSÃO/ })).toHaveCount(0);
   await menu.getByRole('button', { name: '[ TRANCAR BAÚ (LOGOUT) ]', exact: true }).click();
   await expect(page.getByRole('dialog', { name: '[ PORTAL DE AUTENTICAÇÃO ]', exact: true })).toBeVisible();
   await expect(loginTrigger(page)).toBeVisible();
   const mutations = api.requests.filter(request => request.method() === 'POST');
-  expect(mutations).toHaveLength(2);
+  expect(mutations).toHaveLength(1);
   expect(mutations[0].headers()['x-csrf-token']).toBe(MOCK_CSRF_TOKEN);
-  expect(mutations[1].headers()['x-csrf-token']).toBe(rotatedToken);
   expect(mutations.every(request => request.postData() === null)).toBe(true);
   const storage = await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage } }));
   expect(storage).not.toContain(MOCK_CSRF_TOKEN);
-  expect(storage).not.toContain(rotatedToken);
   expect(await page.content()).not.toContain(MOCK_CSRF_TOKEN);
   expect(api.unexpected).toEqual([]);
 });
@@ -121,8 +130,7 @@ for (const scenario of [
     const dialog = page.getByRole('dialog', { name: '[ PORTAL DE AUTENTICAÇÃO ]', exact: true });
     await expect(dialog.getByRole('alert')).toBeVisible();
     await expect(dialog.getByRole('button', { name: '[ ENTRAR COM GOOGLE ]', exact: true })).toHaveCount(scenario.google ? 1 : 0);
-    // Public scheduling stays available even when the optional auth service is disabled.
-    await expect(dialog.getByRole('button', { name: '[ SOLICITAR REUNIÃO SEM LOGIN ]', exact: true })).toBeEnabled();
+    await expect(dialog.getByRole('button', { name: /SOLICITAR REUNIÃO|ATUALIZAR SESSÃO|RENOVAR SESSÃO/ })).toHaveCount(0);
     expect(api.requests).toHaveLength(1);
     expect(api.unexpected).toEqual([]);
   });
@@ -255,8 +263,7 @@ test('nova tentativa consciente após 503 reutiliza corpo e chave de idempotênc
   await expect(meetingDialog(page).getByRole('alert')).toBeVisible();
   expect(api.requests.filter(request => request.url().endsWith('/meetings/requests'))).toHaveLength(1);
   await meetingDialog(page).getByRole('button', { name: 'Fechar agendamento', exact: true }).click();
-  await loginTrigger(page).click();
-  await page.getByRole('button', { name: '[ SOLICITAR REUNIÃO SEM LOGIN ]', exact: true }).click();
+  await reopenMeetings(page);
   await meetingDialog(page).getByRole('checkbox').check();
   await meetingDialog(page).getByRole('button', { name: 'Tentar confirmar novamente', exact: true }).click();
   await expect(meetingDialog(page).getByRole('heading', { name: 'Aguardando análise', exact: true })).toBeVisible();
@@ -335,10 +342,10 @@ test('fechar cancela disponibilidade pendente e ignora resposta tardia ao reabri
   await expect.poll(() => api.requests.filter(request => request.url().includes('/meetings/availability')).length).toBe(1);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
-  await expect(loginTrigger(page)).toBeFocused();
+  await expect(orbTrigger(page)).toBeFocused();
   pending.release();
-  await loginTrigger(page).click();
-  await page.getByRole('button', { name: '[ SOLICITAR REUNIÃO SEM LOGIN ]', exact: true }).click();
+  await reopenMeetings(page);
+  await dialog.getByRole('button', { name: 'Alterar dados / novo horário', exact: true }).click();
   await expect(dialog.getByRole('radio')).toHaveCount(0);
   await expect(dialog.getByRole('button', { name: 'Consultar horários', exact: true })).toBeEnabled();
   expect(api.requests.filter(request => request.url().includes('/meetings/availability'))).toHaveLength(1);
@@ -353,6 +360,7 @@ for (const width of [320, 375, 768, 1440]) {
     await openMeetings(page, width === 375 || width === 1440);
     const dialog = meetingDialog(page);
     const close = dialog.getByRole('button', { name: 'Fechar agendamento', exact: true });
+    await close.focus();
     await expect(close).toBeFocused();
     await prepareMeeting(page);
     await page.evaluate(() => document.fonts.ready);
@@ -372,7 +380,7 @@ for (const width of [320, 375, 768, 1440]) {
     await expect(close).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
-    await expect(loginTrigger(page)).toBeFocused();
+    await expect(orbTrigger(page)).toBeFocused();
     expect(api.unexpected).toEqual([]);
   });
 }

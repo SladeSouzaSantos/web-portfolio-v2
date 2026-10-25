@@ -36,11 +36,12 @@ a homologação dos cookies nem a execução de uma reunião pelo proprietário.
 | `src/types/auth.ts`, `src/types/meetings.ts` | DTOs locais e validação de respostas externas |
 | `src/services/authClient.ts` | Sessão/cookies, CSRF privado, refresh compartilhado e coordenação das mutações |
 | `src/contexts/AuthContext.tsx` | Sessão compartilhada acima das rotas e expiração da interface |
-| `src/components/ChestAccess.tsx` | Baú, Google, papel, atualização/renovação e logout |
+| `src/components/ChestAccess.tsx` | Acesso administrativo pelo Google, entrada na sala e logout |
 | `src/components/Modal.tsx` | Restauração de foco entre diálogos e após operações canceladas |
 | `src/services/meetingsClient.ts`, `src/contexts/MeetingsContext.tsx` | API pública, draft em memória e ledger de idempotência |
 | `src/components/meetings/` | Disponibilidade, formulário, revisão comum, consentimento, estado e formatação de fuso |
 | `src/services/adminMeetingsClient.ts`, `src/components/AdminMeetings.tsx` | Cursor, filtros e decisões administrativas explícitas |
+| `src/components/AdminDashboard.tsx`, `src/styles/admin_dashboard.css` | Sala administrativa, navegação interna e indicadores do Orbe sem dados fictícios |
 | `src/types/orbe.ts`, `src/services/orbeClient.ts`, `src/hooks/useOrbeChat.ts`, `src/components/OrbAssistant.tsx` | Action de reunião validada, opt-in e acesso à revisão comum |
 | `src/App.tsx`, `src/main.tsx`, `src/components/Navbar.tsx` | Providers, rota protegida e composição dos fluxos |
 | `src/styles/meetings.css`, `src/styles/admin_meetings.css`, `src/styles/orbe_assistant.css` | Novos controles com tipografia, cores e modais do portfólio |
@@ -63,11 +64,12 @@ O retorno do backend leva ao frontend DEV, cujo provider consulta a sessão.
 CSRF fica na closure privada do cliente, fora do contexto React. Renovação e
 comandos autenticados coordenam a rotação: não reutilizam CSRF antigo em paralelo.
 Não há renovação infinita nem repetição automática de uma mutação após 401.
-Renovação ocorre por ação explícita ou antes de uma operação autenticada próxima
-da expiração; o relógio local apenas atualiza o estado expirado.
+O cliente mantém a renovação antes de uma operação autenticada próxima da
+expiração; o baú não oferece botões de atualização ou renovação. O relógio local
+apenas atualiza o estado expirado.
 
 401 remove a identidade local; 403 mostra uma orientação pública; `404 AUTH_DISABLED`
-desabilita Google sem esconder o agendamento público. Se refresh falhar de modo
+desabilita Google; o agendamento pelo Orbe permanece independente. Se refresh falhar de modo
 incerto, o cliente abandona o CSRF anterior e exige consulta explícita da sessão
 ou novo login. Rede/timeout não provam que o backend deixou de processar uma operação.
 
@@ -76,9 +78,24 @@ O baú aberto representa autenticação; o papel `admin` controla a apresentaç�
 painel e a rota `/administracao`. O backend continua autorizando cada requisição.
 Usuários comuns não são promovidos pelo frontend.
 
+Na primeira sessão administrativa reconhecida na página principal, incluindo
+`/#sobre`, o React abre `/administracao`. Esse redirecionamento ocorre uma vez por
+identidade autenticada durante a montagem: **VOLTAR AO PORTFÓLIO** continua
+funcionando e o baú permite reabrir a sala. Links diretos para outras rotas são
+preservados. O menu administrativo oferece somente **IR PARA A SALA DO
+ADMINISTRADOR** e **TRANCAR BAÚ (LOGOUT)**, além do controle de fechar o diálogo.
+
+Uma sessão legada com papel `user` recebe uma mensagem de acesso não autorizado
+e a opção de logout, sem consultar os endpoints administrativos. O backend
+atualmente aceita outras contas Google verificadas; somente ele pode impedir a
+criação dessas sessões. Consulte a [pendência de acesso exclusivo ao proprietário](admin-access-handoff.md).
+
 ## Reuniões públicas e consentimento
 
-O baú oferece agendamento sem login. O cliente público utiliza `credentials: 'omit'`:
+O agendamento não aparece no baú. O Orbe continua oferecendo a revisão de propostas
+de reunião sem login; **Alterar dados / novo horário** permite consultar a agenda
+e preparar outra proposta pelo formulário existente. O cliente público utiliza
+`credentials: 'omit'`:
 
 1. `GET /api/v1/meetings/availability?from=ISO&to=ISO`: intervalo de até sete dias.
 2. `POST /api/v1/meetings/proposals`: nome, e-mail, assunto e um slot retornado pela API.
@@ -117,11 +134,21 @@ paginação numérica. Aprovar, rejeitar e cancelar exigem confirmação visual 
 corpo. Há bloqueio de duplicação, tratamento de 401/403/409 e atualização da lista.
 Atualizações assíncronas são consultadas manualmente, sem polling.
 
+A sala também oferece busca por nome/e-mail/assunto, ordenação e resumo por
+situação dos pedidos carregados. Esses controles são locais; os números não são
+totais globais, e outra página é sinalizada. O contrato publicado não fornece
+relatórios de conversas/perguntas/intenção nem edição/reagendamento. Os quatro
+indicadores do Orbe mostram **Aguardando dados** e **ALTERAR REUNIÃO** permanece
+indisponível, com explicação. O [handoff dos relatórios e da agenda](admin-dashboard-handoff.md)
+registra os contratos necessários e a definição de conversa única do proprietário.
+
 O chat permanece `POST /api/v1/chat`, com seu token próprio e `credentials: 'omit'`.
 Somente com Fase 3 habilitada ele envia `X-Orbe-Capabilities: meetings-v1`.
 `actions` admite no máximo uma proposta validada. O botão **REVISAR PROPOSTA DE
 REUNIÃO** fecha o chat e abre o mesmo fluxo público; nenhum token volta ao texto
 da LLM. O histórico do chat e o Canvas permanecem preservados.
+O botão **NOVA CONVERSA** foi retirado: fechar/reabrir preserva a sessão em memória;
+recarregar a página descarta o histórico local e a próxima pergunta inicia outra.
 
 ## Ambientes
 
@@ -173,7 +200,7 @@ npm run test:visual
 
 ## Resultados da validação
 
-Validação local concluída em 25/10/2026, no Windows com Edge/Playwright:
+Validação inicial concluída em 25/10/2026, no Windows com Edge/Playwright:
 
 | Verificação | Resultado |
 | --- | --- |
@@ -212,3 +239,25 @@ abas diferentes. Não há recuperação de tokens públicos após reload. A conf
 efetiva no Calendar, destinatários e notificações dependem do backend e devem ser
 homologados pelo proprietário com o [roteiro controlado](phase3-homologacao.md).
 SAST/DAST continuam no pipeline existente; nenhuma regra foi relaxada.
+
+Na revisão posterior do baú exclusivo da administração, `npm run typecheck`, o
+build DEV e `git diff --check` passaram. A regressão geral passou em 111 testes e
+a suíte Fase 3 em 49 (23 administrativos, 21 públicos/sessão e 5 do Orbe). Os novos
+cenários conferem a entrada administrativa automática a partir de `/` e
+`/#sobre`, a volta ao portfólio sem ciclo e o menu sem agendamento ou controles
+manuais de sessão. As requisições continuam inteiramente simuladas; a política
+de login por e-mail no backend permanece pendente.
+Os quatro casos responsivos administrativos foram ampliados e reexecutados com
+sucesso: baú em 320/375/768/1440 px nos dois temas, texto do botão sem overflow,
+foco, Tab/Escape e axe em 320 px nos dois temas.
+
+Na ampliação posterior da sala e retirada do botão de nova conversa, o build DEV,
+TypeScript e `git diff --check` passaram. O bundle final contém a URL DEV, sem URL
+de mock nem o botão retirado. Validação atual: 111 testes gerais, 22 testes do Orbe
+e uma rodada completa de 54 testes da Fase 3 aprovados. Duas auditorias do painel
+foram separadas dos casos responsivos para evitar concentrar cinco scans axe no
+mesmo teste; os seis casos afetados passaram novamente, cobrindo 56 cenários
+únicos na Fase 3, com o timeout e as verificações preservados.
+As capturas de 1440 e 375 px, nos dois temas, também foram conferidas com sessão
+administrativa e reuniões fictícias. Nenhum provedor real foi consumido. Relatórios
+e edição de reuniões permanecem pendentes de contrato publicado e integração.

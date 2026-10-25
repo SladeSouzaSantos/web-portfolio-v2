@@ -71,16 +71,6 @@ export function useOrbeChat(reducedMotion: boolean) {
     }
   }, []);
 
-  const resetConversation = useCallback(() => {
-    cancelPending();
-    clientRef.current?.reset();
-    nextId.current = 1;
-    setMessages([greeting]);
-    setQuery('');
-    setError(null);
-    // A new local conversation does not bypass a global Retry-After period.
-  }, [cancelPending]);
-
   async function sendMessage() {
     if (pendingRef.current || Date.now() < retryAt) return;
     const text = query.trim();
@@ -131,7 +121,7 @@ export function useOrbeChat(reducedMotion: boolean) {
   }
 
   return {
-    messages, query, setQuery, isLoading, error, sendMessage, cancelPending, resetConversation,
+    messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
     cooldownSeconds: Math.max(0, Math.ceil((retryAt - now) / 1000)),
     maxMessageLength: CHAT_MAX_MESSAGE_LENGTH,
     apiEnabled: orbeConfig.enabled,

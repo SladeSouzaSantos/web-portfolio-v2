@@ -10,6 +10,9 @@ import type { MeetingStatus } from '../src/types/meetings';
 const ADMIN_PATH = '/api/v1/admin/meetings';
 const adminHeading = (page: Page) => page.getByRole('heading', { name: '[ PAINEL DO MESTRE ]', exact: true });
 const confirmation = (page: Page) => page.getByRole('dialog', { name: '[ CONFIRMAR DECISÃO ]', exact: true });
+const meetingSummary = (page: Page) => page.getByRole('region', { name: 'Resumo dos pedidos carregados', exact: true });
+const meetingMetric = (page: Page, label: string) => meetingSummary(page)
+  .getByText(label, { exact: true }).locator('..').locator('dd');
 const item = () => adminMeeting('PENDING');
 const list = (items = [item()], nextCursor: string | null = null) => ({ items, nextCursor });
 
@@ -19,22 +22,17 @@ async function visitAdmin(page: Page) {
   await expect(page.getByRole('button', { name: 'ATUALIZAR PEDIDOS', exact: true })).toBeEnabled();
 }
 
-test('autenticação desabilitada preserva o agendamento público independente de login', async ({ page }) => {
+test('autenticação desabilitada mantém o baú restrito e não consulta agenda nem administração', async ({ page }) => {
   const api = await mockPlatform(page, [
     { path: '/api/v1/auth/session', status: 404, body: platformError('AUTH_DISABLED') },
-    { path: '/api/v1/meetings/availability', body: { timeZone: 'America/Fortaleza', durationMinutes: 30, simulated: false, slots: [] } },
   ]);
   await page.goto('/');
   await page.getByRole('button', { name: 'Abrir prévia de login', exact: true }).click();
   const portal = page.getByRole('dialog', { name: '[ PORTAL DE AUTENTICAÇÃO ]', exact: true });
   await expect(portal.getByRole('alert')).toContainText('A autenticação está indisponível');
   await expect(portal.getByRole('button', { name: '[ ENTRAR COM GOOGLE ]', exact: true })).toHaveCount(0);
-  await portal.getByRole('button', { name: '[ SOLICITAR REUNIÃO SEM LOGIN ]', exact: true }).click();
-  const agenda = page.getByRole('dialog', { name: '[ CONSELHO DA JORNADA ]', exact: true });
-  await expect(agenda).toBeVisible();
-  await agenda.getByRole('button', { name: 'Consultar horários', exact: true }).click();
-  await expect(agenda.getByText('Nenhum horário disponível neste período. Escolha outra data.', { exact: true })).toBeVisible();
-  expect(api.requests.filter(request => request.method() === 'POST')).toHaveLength(0);
+  await expect(portal.getByRole('button', { name: /SOLICITAR REUNIÃO|IR PARA A SALA DO ADMINISTRADOR|ATUALIZAR SESSÃO|RENOVAR SESSÃO/ })).toHaveCount(0);
+  expect(api.requests).toHaveLength(1);
   expect(api.unexpected).toEqual([]);
 });
 
@@ -80,12 +78,47 @@ for (const role of ['anonymous', 'user'] as const) {
     expect(api.requests.filter(request => request.url().includes('/admin/'))).toHaveLength(0);
     const triggerName = role === 'anonymous' ? 'Abrir prévia de login' : 'Abrir baú do aventureiro';
     await page.getByRole('button', { name: triggerName, exact: true }).click();
-    await expect(page.getByRole('button', { name: '[ PAINEL DO MESTRE ]', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '[ IR PARA A SALA DO ADMINISTRADOR ]', exact: true })).toHaveCount(0);
+    if (role === 'user') {
+      const chest = page.getByRole('dialog', { name: '[ BAÚ DO AVENTUREIRO ]', exact: true });
+      await expect(chest).toContainText(/não tem permissão/i);
+      await expect(chest.getByRole('button', { name: '[ ENTRAR COM GOOGLE ]', exact: true })).toHaveCount(0);
+      await expect(chest.getByRole('button', { name: '[ TRANCAR BAÚ (LOGOUT) ]', exact: true })).toBeVisible();
+    }
     expect(api.unexpected).toEqual([]);
   });
 }
 
-test('administrador abre painel pelo baú, pagina por cursor e filtra a situação sem acumular páginas antigas', async ({ page }) => {
+for (const entry of ['/', '/#sobre']) {
+  test(`sessão admin em ${entry} entra na administração uma vez e permite voltar ao portfólio`, async ({ page }) => {
+    const api = await mockPlatform(page, [
+      { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+      { path: ADMIN_PATH, body: list([]) },
+      { path: ADMIN_PATH, body: list([]) },
+    ]);
+    await page.goto(entry);
+    await expect(page).toHaveURL(/\/administracao$/);
+    await expect(adminHeading(page)).toBeVisible();
+    await expect(page.getByText('Nenhum pedido encontrado para este filtro.', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'VOLTAR AO PORTFÓLIO', exact: true }).click();
+    await expect(page).toHaveURL(/\/#sobre$/);
+    const trigger = page.getByRole('button', { name: 'Abrir baú do aventureiro', exact: true });
+    await trigger.click();
+    const chest = page.getByRole('dialog', { name: '[ BAÚ DO AVENTUREIRO ]', exact: true });
+    await expect(chest.getByRole('button', { name: /SOLICITAR REUNIÃO|ATUALIZAR SESSÃO|RENOVAR SESSÃO|ENTRAR COM GOOGLE/ })).toHaveCount(0);
+    await expect(chest.getByRole('button', { name: '[ TRANCAR BAÚ (LOGOUT) ]', exact: true })).toBeEnabled();
+    expect(api.requests.filter(request => new URL(request.url()).pathname === ADMIN_PATH)).toHaveLength(1);
+    await chest.getByRole('button', { name: '[ IR PARA A SALA DO ADMINISTRADOR ]', exact: true }).click();
+    await expect(page).toHaveURL(/\/administracao$/);
+    await expect(adminHeading(page)).toBeVisible();
+    await expect.poll(() => api.requests.filter(request => new URL(request.url()).pathname === ADMIN_PATH).length).toBe(2);
+    expect(api.requests.filter(request => request.url().endsWith('/auth/session'))).toHaveLength(1);
+    expect(api.requests.every(request => request.method() === 'GET')).toBe(true);
+    expect(api.unexpected).toEqual([]);
+  });
+}
+
+test('administrador pagina por cursor e filtra a situação sem acumular páginas antigas', async ({ page }) => {
   const second = adminMeeting('PENDING', { id: '22111111-1111-4111-8111-111111111111', name: 'Segundo visitante' });
   const failed = adminMeeting('FAILED', { id: '33111111-1111-4111-8111-111111111111', name: 'Pedido falho', failureCode: 'CALENDAR_UNAVAILABLE' });
   const cursor = 'opaque-cursor+from-server';
@@ -95,10 +128,7 @@ test('administrador abre painel pelo baú, pagina por cursor e filtra a situaç�
     { path: ADMIN_PATH, body: list([second]) },
     { path: ADMIN_PATH, body: list([failed]) },
   ]);
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Abrir baú do aventureiro', exact: true }).click();
-  await page.getByRole('button', { name: '[ PAINEL DO MESTRE ]', exact: true }).click();
-  await expect(adminHeading(page)).toBeVisible();
+  await visitAdmin(page);
   await expect(page.locator('.phase3-admin-card')).toHaveCount(1);
   await page.getByRole('button', { name: 'CARREGAR MAIS PEDIDOS', exact: true }).click();
   await expect(page.locator('.phase3-admin-card')).toHaveCount(2);
@@ -133,6 +163,153 @@ test('listagem vazia é informativa e conteúdo HTML de visitante permanece text
   await expect(page.locator('.phase3-admin-topic')).toHaveText(payload);
   await expect(page.locator('.phase3-admin-topic img')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveAttribute('data-admin-injected');
+  expect(api.unexpected).toEqual([]);
+});
+
+test('registros do Orbe indicam dados indisponíveis sem inventar métricas ou consultar novas APIs', async ({ page }) => {
+  const requests: string[] = [];
+  page.on('request', request => {
+    const path = new URL(request.url()).pathname;
+    if (path.startsWith('/api/v1/') && request.method() !== 'OPTIONS') requests.push(`${request.method()} ${path}`);
+  });
+  const api = await mockPlatform(page, [
+    { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+    { path: ADMIN_PATH, body: list([]) },
+  ]);
+  await visitAdmin(page);
+  const records = page.getByRole('region', { name: '[ REGISTROS DO ORBE ]', exact: true });
+  await expect(records.getByText('Aguardando dados', { exact: true })).toHaveCount(4);
+  for (const label of ['PERGUNTAS RESPONDIDAS', 'CONVERSAS ÚNICAS', 'PERGUNTAS MAIS FREQUENTES', 'INTENÇÕES DAS CONVERSAS']) {
+    await expect(records.getByText(label, { exact: true })).toBeVisible();
+  }
+  await expect(records.locator('dd').filter({ hasText: /^0$/ })).toHaveCount(0);
+  await expect(records).toContainText('Fechar e reabrir o Orbe mantém a mesma conversa.');
+  await page.getByRole('link', { name: 'REGISTROS DO ORBE', exact: true }).click();
+  await expect(records).toBeFocused();
+  await page.getByRole('link', { name: 'AGENDA E PEDIDOS', exact: true }).click();
+  await expect(page.locator('#admin-meeting-agenda')).toBeFocused();
+  await expect(page).toHaveURL(/\/administracao$/);
+  expect(requests).toEqual(['GET /api/v1/auth/session', `GET ${ADMIN_PATH}`]);
+  expect(api.unexpected).toEqual([]);
+});
+
+test('resumo contabiliza somente pedidos carregados e confirmações, com escopo parcial até terminar a paginação', async ({ page }) => {
+  const confirmed = adminMeeting('CONFIRMED', { name: 'Confirmada de teste' });
+  const pending = adminMeeting('PENDING', { id: '22111111-1111-4111-8111-111111111111' });
+  const approved = adminMeeting('APPROVED', { id: '33111111-1111-4111-8111-111111111111' });
+  const cancelled = adminMeeting('CANCELLED', { id: '44111111-1111-4111-8111-111111111111' });
+  const api = await mockPlatform(page, [
+    { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+    { path: ADMIN_PATH, body: list([confirmed, pending], 'second-page') },
+    // The repeated item must not inflate either the list or the summary.
+    { path: ADMIN_PATH, body: list([confirmed, approved, cancelled]) },
+  ]);
+  await visitAdmin(page);
+  await expect(meetingMetric(page, 'Pedidos carregados')).toHaveText('2');
+  await expect(meetingMetric(page, 'Confirmadas')).toHaveText('1');
+  await expect(meetingMetric(page, 'Aguardando análise')).toHaveText('1');
+  await expect(meetingMetric(page, 'Aguardando agenda')).toHaveText('0');
+  await expect(meetingMetric(page, 'Canceladas')).toHaveText('0');
+  await expect(meetingSummary(page)).toContainText(/parcial/i);
+  await page.getByRole('button', { name: 'CARREGAR MAIS PEDIDOS', exact: true }).click();
+  await expect(page.locator('.phase3-admin-card')).toHaveCount(4);
+  await expect(meetingMetric(page, 'Pedidos carregados')).toHaveText('4');
+  await expect(meetingMetric(page, 'Confirmadas')).toHaveText('1');
+  await expect(meetingMetric(page, 'Aguardando análise')).toHaveText('1');
+  await expect(meetingMetric(page, 'Aguardando agenda')).toHaveText('1');
+  await expect(meetingMetric(page, 'Canceladas')).toHaveText('1');
+  await expect(meetingSummary(page)).not.toContainText(/parcial/i);
+  await expect(page.getByRole('button', { name: 'CARREGAR MAIS PEDIDOS', exact: true })).toHaveCount(0);
+  expect(api.requests.filter(request => new URL(request.url()).pathname === ADMIN_PATH)).toHaveLength(2);
+  expect(api.unexpected).toEqual([]);
+});
+
+test('busca e ordenação atuam nos registros carregados sem novas requisições nem ocultar paginação', async ({ page }) => {
+  const ana = adminMeeting('PENDING', { name: 'Ana Silva', email: 'ana@example.test', topic: 'Backend Java',
+    createdAt: '2026-10-01T12:00:00.000Z', start: '2027-01-20T12:00:00.000Z', end: '2027-01-20T12:30:00.000Z' });
+  const bruno = adminMeeting('CONFIRMED', { id: '22111111-1111-4111-8111-111111111111',
+    name: 'Bruno Alves', email: 'bruno@example.test', topic: 'Mobile Flutter',
+    createdAt: '2026-10-03T12:00:00.000Z', start: '2027-01-19T12:00:00.000Z', end: '2027-01-19T12:30:00.000Z' });
+  const cecilia = adminMeeting('APPROVED', { id: '33111111-1111-4111-8111-111111111111',
+    name: 'Cecilia Ramos', email: 'talentos@empresa.test', topic: 'Backend TypeScript',
+    createdAt: '2026-10-02T12:00:00.000Z', start: '2027-01-21T12:00:00.000Z', end: '2027-01-21T12:30:00.000Z' });
+  const api = await mockPlatform(page, [
+    { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+    { path: ADMIN_PATH, body: list([ana, bruno, cecilia], 'another-page') },
+  ]);
+  await visitAdmin(page);
+  const cards = page.locator('.phase3-admin-card');
+  const search = page.getByLabel('BUSCAR NOS PEDIDOS CARREGADOS', { exact: true });
+  const sort = page.getByLabel('ORDENAR PEDIDOS CARREGADOS', { exact: true });
+  await expect(sort).toHaveValue('received');
+  await expect(cards).toHaveText([/Bruno Alves/, /Cecilia Ramos/, /Ana Silva/]);
+  await sort.selectOption('start');
+  await expect(cards).toHaveText([/Bruno Alves/, /Ana Silva/, /Cecilia Ramos/]);
+  await search.fill('  ANA SILVA  ');
+  await expect(cards).toHaveCount(1);
+  await expect(cards).toHaveAttribute('aria-label', 'Pedido de Ana Silva');
+  await search.fill(' TALENTOS@EMPRESA.TEST ');
+  await expect(cards).toHaveCount(1);
+  await expect(cards).toHaveAttribute('aria-label', 'Pedido de Cecilia Ramos');
+  await search.fill(' BACKEND ');
+  await expect(cards).toHaveCount(2);
+  await expect(meetingMetric(page, 'Pedidos carregados')).toHaveText('3');
+  await expect(meetingMetric(page, 'Confirmadas')).toHaveText('1');
+  await search.fill('nenhum resultado esperado');
+  await expect(cards).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'CARREGAR MAIS PEDIDOS', exact: true })).toBeEnabled();
+  await search.fill('');
+  await expect(cards).toHaveCount(3);
+  const edit = cards.first().getByRole('button', { name: 'ALTERAR REUNIÃO', exact: true });
+  await expect(edit).toBeDisabled();
+  await expect(edit).toHaveAttribute('aria-describedby', 'admin-edit-unavailable');
+  await expect(page.locator('#admin-edit-unavailable')).toContainText('ainda não está disponível');
+  expect(api.requests).toHaveLength(2);
+  expect(api.requests.every(request => request.method() === 'GET')).toBe(true);
+  expect(api.unexpected).toEqual([]);
+});
+
+test('loading e erro não apresentam resumo sem dados nem inventam métricas zero', async ({ page }) => {
+  const pending = deferredReply();
+  const api = await mockPlatform(page, [
+    { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+    { path: ADMIN_PATH, status: 503, body: platformError(), waitFor: pending.promise },
+  ]);
+  try {
+    await page.goto('/administracao');
+    await expect(adminHeading(page)).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: '[ CONSULTANDO PEDIDOS... ]' })).toBeVisible();
+    await expect(meetingSummary(page)).toHaveCount(0);
+  } finally { pending.release(); }
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(meetingSummary(page)).toHaveCount(0);
+  expect(api.requests.filter(request => new URL(request.url()).pathname === ADMIN_PATH)).toHaveLength(1);
+  expect(api.unexpected).toEqual([]);
+});
+
+test('cancelar reunião CONFIRMED exige confirmação explícita e envia CSRF sem corpo', async ({ page }) => {
+  const confirmed = adminMeeting('CONFIRMED', { name: 'Reunião confirmada' });
+  const cancelled = { ...confirmed, ...meetingStatus('CANCELLED') };
+  const api = await mockPlatform(page, [
+    { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+    { path: ADMIN_PATH, body: list([confirmed]) },
+    { method: 'POST', path: `${ADMIN_PATH}/${confirmed.id}/cancel`, body: meetingStatus('CANCELLED') },
+    { path: ADMIN_PATH, body: list([cancelled]) },
+  ]);
+  await visitAdmin(page);
+  const card = page.getByRole('article', { name: 'Pedido de Reunião confirmada', exact: true });
+  await expect(card.getByRole('heading', { name: 'Confirmada na agenda', exact: true })).toBeVisible();
+  await card.getByRole('button', { name: 'CANCELAR', exact: true }).click();
+  await expect(confirmation(page)).toContainText('Reunião confirmada');
+  expect(api.requests.filter(request => request.method() === 'POST')).toHaveLength(0);
+  await confirmation(page).getByRole('button', { name: 'CONFIRMAR CANCELAR', exact: true }).click();
+  await expect(confirmation(page)).toHaveCount(0);
+  await expect(card.getByRole('heading', { name: 'Cancelamento registrado', exact: true })).toBeVisible();
+  const commands = api.requests.filter(request => request.method() === 'POST');
+  expect(commands).toHaveLength(1);
+  expect(commands[0].postData()).toBeNull();
+  expect(commands[0].headers()['x-csrf-token']).toBe(MOCK_CSRF_TOKEN);
+  expect(commands[0].headers().authorization).toBeUndefined();
   expect(api.unexpected).toEqual([]);
 });
 
@@ -262,7 +439,7 @@ test('sair e reabrir o painel durante Retry-After preserva o prazo original sem 
   await page.getByRole('button', { name: 'VOLTAR AO PORTFÓLIO', exact: true }).click();
   await expect(page).toHaveURL(/\/#sobre$/);
   await page.getByRole('button', { name: 'Abrir baú do aventureiro', exact: true }).click();
-  await page.getByRole('button', { name: '[ PAINEL DO MESTRE ]', exact: true }).click();
+  await page.getByRole('button', { name: '[ IR PARA A SALA DO ADMINISTRADOR ]', exact: true }).click();
   await expect(adminHeading(page)).toBeVisible();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(update).toBeDisabled();
@@ -301,6 +478,27 @@ test('Escape interrompe espera de decisão e informa incerteza sem atualizar pel
   expect(api.unexpected).toEqual([]);
 });
 
+for (const theme of ['escuro', 'claro'] as const) {
+  test(`dashboard mantém acessibilidade em 320px no tema ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    const api = await mockPlatform(page, [
+      { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
+      { path: ADMIN_PATH, body: list([adminMeeting('PENDING', { email: 'endereco.longo.para.validar.quebra.de.linha@example.test' })]) },
+    ]);
+    await visitAdmin(page);
+    if (theme === 'claro') {
+      await page.getByRole('button', { name: 'Ativar tema claro', exact: true }).click();
+      await expect(page.locator('body')).toHaveClass(/modo-claro/);
+    }
+    await expect(meetingSummary(page)).toBeVisible();
+    const audit = await new AxeBuilder({ page }).include('.admin-dashboard').analyze();
+    expect(audit.violations).toEqual([]);
+    expect(api.requests).toHaveLength(2);
+    expect(api.requests.every(request => request.method() === 'GET')).toBe(true);
+    expect(api.unexpected).toEqual([]);
+  });
+}
+
 for (const width of [320, 375, 768, 1440]) {
   test(`painel e confirmação mantêm layout e teclado em ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -310,6 +508,60 @@ for (const width of [320, 375, 768, 1440]) {
     ]);
     await visitAdmin(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const chestTrigger = page.getByRole('button', { name: 'Abrir baú do aventureiro', exact: true });
+    for (const theme of ['escuro', 'claro'] as const) {
+      if (theme === 'claro') {
+        await page.getByRole('button', { name: 'Ativar tema claro', exact: true }).click();
+        await expect(page.locator('body')).toHaveClass(/modo-claro/);
+      }
+      await page.getByRole('link', { name: 'REGISTROS DO ORBE', exact: true }).focus();
+      await page.keyboard.press('Enter');
+      const records = page.getByRole('region', { name: '[ REGISTROS DO ORBE ]', exact: true });
+      await expect(records).toBeFocused();
+      await expect(records.getByRole('heading', { name: '[ REGISTROS DO ORBE ]', exact: true, level: 2 })).toBeVisible();
+      await expect(records.getByText('Aguardando dados', { exact: true })).toHaveCount(4);
+      await page.getByRole('link', { name: 'AGENDA E PEDIDOS', exact: true }).focus();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#admin-meeting-agenda')).toBeFocused();
+      await expect(page.getByRole('heading', { name: '[ AGENDA E PEDIDOS ]', exact: true, level: 2 })).toBeVisible();
+      await expect(page).toHaveURL(/\/administracao$/);
+      for (const section of [records, meetingSummary(page), page.locator('#admin-meeting-agenda')]) {
+        const sectionBounds = await section.boundingBox();
+        expect(sectionBounds).not.toBeNull();
+        expect(sectionBounds!.x).toBeGreaterThanOrEqual(0);
+        expect(sectionBounds!.x + sectionBounds!.width).toBeLessThanOrEqual(width + 1);
+        expect(await section.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+      }
+      await chestTrigger.click();
+      const chest = page.getByRole('dialog', { name: '[ BAÚ DO AVENTUREIRO ]', exact: true });
+      const chestClose = chest.getByRole('button', { name: 'Fechar baú', exact: true });
+      const enterRoom = chest.getByRole('button', { name: '[ IR PARA A SALA DO ADMINISTRADOR ]', exact: true });
+      const logout = chest.getByRole('button', { name: '[ TRANCAR BAÚ (LOGOUT) ]', exact: true });
+      await expect(chest.getByRole('button')).toHaveCount(3);
+      await expect(enterRoom).toBeEnabled();
+      await expect(logout).toBeEnabled();
+      await expect(chestClose).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(logout).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(chestClose).toBeFocused();
+      const chestBounds = await chest.boundingBox();
+      expect(chestBounds).not.toBeNull();
+      expect(chestBounds!.x).toBeGreaterThanOrEqual(0);
+      expect(chestBounds!.x + chestBounds!.width).toBeLessThanOrEqual(width + 1);
+      expect(await chest.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+      expect(await enterRoom.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      if (width === 320) {
+        const audit = await new AxeBuilder({ page }).analyze();
+        expect(audit.violations).toEqual([]);
+      }
+      await page.keyboard.press('Escape');
+      await expect(chest).toHaveCount(0);
+      await expect(chestTrigger).toBeFocused();
+    }
+    await page.getByRole('button', { name: 'Ativar tema escuro', exact: true }).click();
+    await expect(page.locator('body')).not.toHaveClass(/modo-claro/);
     const trigger = page.locator('.phase3-admin-card').getByRole('button', { name: 'APROVAR', exact: true });
     await trigger.click();
     const dialog = confirmation(page);

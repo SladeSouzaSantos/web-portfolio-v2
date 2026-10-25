@@ -132,6 +132,10 @@
     margin-right: 4px;
 }
 
+body.modo-claro .orb-chat-panel .chat-sender {
+    color: var(--texto-destaque-ouro);
+}
+
 .orb-chat-form {
     display: flex;
     gap: 8px;

@@ -17,7 +17,7 @@ const GREETINGS = [
 export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (proposal: MeetingProposal) => void }) {
   const reducedMotion = useReducedMotion();
   const {
-    messages, query, setQuery, isLoading, error, sendMessage, cancelPending, resetConversation,
+    messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
     cooldownSeconds, maxMessageLength, apiEnabled,
   } = useOrbeChat(reducedMotion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -147,9 +147,6 @@ export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (propo
               {error.correlationId && <small>Referência: {error.correlationId}</small>}
             </div>}
             {cooldownSeconds > 0 && <p className="orb-chat-cooldown">Aguarde {cooldownSeconds}s antes de enviar outra pergunta.</p>}
-            <div className="orb-chat-actions">
-              <button type="button" className="orb-chat-reset-btn" onClick={resetConversation}>NOVA CONVERSA</button>
-            </div>
             <form className="orb-chat-form" onSubmit={submitMessage}>
               <input type="text" aria-label="Sua pergunta ao orbe" aria-describedby={apiEnabled ? 'orbChatPrivacy' : undefined} placeholder="Sua pergunta..." autoComplete="off" required readOnly={isLoading} maxLength={maxMessageLength} value={query} onChange={(event) => setQuery(event.target.value)} />
               <button type="submit" className="orb-chat-send-btn" disabled={isLoading || cooldownSeconds > 0}>ENVIAR</button>
