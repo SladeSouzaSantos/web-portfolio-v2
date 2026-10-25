@@ -4,8 +4,8 @@ import { pathToFileURL } from 'node:url';
 /** Deployment policy is based on the destination branch, not Vite's production mode. */
 export function resolveOrbeBuildEnvironment(branch) {
   return branch === 'dev'
-    ? { VITE_ORBE_API_ENABLED: 'true', VITE_API_BASE_URL: 'https://devapi.phasscode.com' }
-    : { VITE_ORBE_API_ENABLED: 'false', VITE_API_BASE_URL: '' };
+    ? { VITE_ORBE_API_ENABLED: 'true', VITE_PHASE3_ENABLED: 'true', VITE_API_BASE_URL: 'https://devapi.phasscode.com' }
+    : { VITE_ORBE_API_ENABLED: 'false', VITE_PHASE3_ENABLED: 'false', VITE_API_BASE_URL: '' };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

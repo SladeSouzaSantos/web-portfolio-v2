@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-orbe-test/
+dist-phase3-test/
 /dist
 /nginx.conf
 .releases/

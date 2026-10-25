@@ -171,9 +171,12 @@ test('consulta HTTP simulada percorre cliente, HMR e terminal no Vite real sem r
     envDir: false,
     mode: 'development',
     customLogger: logger,
-    cacheDir: testInfo.outputPath('vite-cache'),
+    // Keep optimized dependencies under node_modules so React's DEV plugin
+    // does not re-transform the generated vendor bundle as application code.
+    cacheDir: resolve('node_modules/.vite-orbe-diagnostics', `${process.pid}-${testInfo.parallelIndex}`),
     define: {
       'import.meta.env.VITE_ORBE_API_ENABLED': JSON.stringify('true'),
+      'import.meta.env.VITE_PHASE3_ENABLED': JSON.stringify('false'),
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://orbe-api.invalid'),
     },
     server: { host: '127.0.0.1', port: 0, strictPort: true, watch: null },

@@ -1,4 +1,10 @@
 /** DTOs from the published /api/v1/openapi.json; independent of React/backend packages. */
+import type { MeetingProposal } from './meetings';
+
+export interface MeetingChatAction {
+  type: 'confirm_meeting_request';
+  proposal: MeetingProposal;
+}
 export interface ChatSource {
   type: 'profile' | 'project' | 'service' | 'platform';
   id: string;
@@ -19,6 +25,7 @@ export interface ChatResponse {
   answer: string;
   sources: ChatSource[];
   meta: ChatMeta;
+  actions?: MeetingChatAction[];
 }
 
 /** Safe result exposed to the UI. Conversation credentials stay inside the client. */

@@ -1,3 +1,5 @@
+import { resolveApiBaseUrl } from './platform';
+
 export interface OrbeConfig {
   readonly enabled: boolean;
   readonly apiBaseUrl: string;
@@ -14,22 +16,8 @@ const demoConfig: OrbeConfig = Object.freeze({ enabled: false, apiBaseUrl: '' })
 export function resolveOrbeConfig(environment: OrbeEnvironment, siteHostname = ''): OrbeConfig {
   if (environment.VITE_ORBE_API_ENABLED !== 'true') return demoConfig;
 
-  const configuredUrl = environment.VITE_API_BASE_URL?.trim();
-  if (!configuredUrl) return demoConfig;
-
-  try {
-    const url = new URL(configuredUrl);
-    if (!['http:', 'https:'].includes(url.protocol)
-      || url.username || url.password || configuredUrl.includes('?') || configuredUrl.includes('#')) return demoConfig;
-
-    // A mistakenly configured development build must never call dev from the public site.
-    const isProductionSite = siteHostname.toLowerCase().replace(/\.$/, '') === 'gbc.phasscode.com';
-    if (isProductionSite && url.origin !== 'https://api.phasscode.com') return demoConfig;
-
-    return Object.freeze({ enabled: true, apiBaseUrl: url.href.replace(/\/+$/, '') });
-  } catch {
-    return demoConfig;
-  }
+  const apiBaseUrl = resolveApiBaseUrl(environment.VITE_API_BASE_URL, siteHostname);
+  return apiBaseUrl ? Object.freeze({ enabled: true, apiBaseUrl }) : demoConfig;
 }
 
 export const orbeConfig = resolveOrbeConfig({

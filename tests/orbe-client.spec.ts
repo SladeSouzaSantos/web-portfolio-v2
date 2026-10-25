@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { createOrbeClient, OrbeClientError } from '../src/services/orbeClient';
 import type { ChatResponse } from '../src/types/orbe';
 import type { OrbeDiagnosticEvent } from '../src/services/orbeDiagnosticEvent';
+import { meetingProposal, MOCK_CONFIRMATION_TOKEN } from './helpers/platform-mock';
 
 const API_URL = 'https://api.example.test';
 const FIRST_ID = '11111111-1111-4111-8111-111111111111';
@@ -53,6 +54,76 @@ function rejectWhenAborted(options: RequestInit | undefined): Promise<Response> 
     }, { once: true });
   });
 }
+
+test('meeting-capable Orbe opts in on every message while proposal secrets stay out of the model and diagnostics', async () => {
+  const actions = [{ type: 'confirm_meeting_request' as const, proposal: meetingProposal() }];
+  const fake = queuedFetch(json(reply({ actions })), json(reply({ actions, conversationToken: undefined })));
+  const events: OrbeDiagnosticEvent[] = [];
+  const client = createOrbeClient(API_URL, { fetch: fake.fetch, meetingCapabilities: true,
+    onDiagnostic: event => events.push(event) });
+  const first = await client.send('Quero preparar uma proposta.');
+  const second = await client.send('A proposta exige confirmação?');
+  expect(first.actions).toEqual(actions);
+  expect(second.actions).toEqual(actions);
+  expect(first).not.toHaveProperty('conversationToken');
+  for (const { options, url } of fake.calls) {
+    expect(new Headers(options?.headers).get('X-Orbe-Capabilities')).toBe('meetings-v1');
+    expect(options?.credentials).toBe('omit');
+    expect(String(options?.body)).not.toContain(MOCK_CONFIRMATION_TOKEN);
+    expect(String(options?.body)).not.toContain('visitor@example.test');
+    expect(url).not.toContain(MOCK_CONFIRMATION_TOKEN);
+  }
+  expect(JSON.parse(String(fake.calls[1].options?.body))).toEqual({
+    conversationId: FIRST_ID, message: 'A proposta exige confirmação?',
+  });
+  expect(JSON.stringify(events)).not.toContain(MOCK_CONFIRMATION_TOKEN);
+  expect(JSON.stringify(events)).not.toContain(FIRST_TOKEN);
+  expect(JSON.stringify(events)).not.toContain('visitor@example.test');
+});
+
+test('legacy Orbe disables capabilities and does not expose unsolicited meeting actions', async () => {
+  const fake = queuedFetch(json(reply({ actions: [{ type: 'confirm_meeting_request', proposal: meetingProposal() }] })),
+    json(reply({ conversationToken: undefined })));
+  const client = createOrbeClient(API_URL, { fetch: fake.fetch, meetingCapabilities: false });
+  expect(await client.send('Quais tecnologias Pedro usa?')).not.toHaveProperty('actions');
+  expect(await client.send('Quais projetos usam Java?')).not.toHaveProperty('actions');
+  for (const { options } of fake.calls) expect(new Headers(options?.headers).has('X-Orbe-Capabilities')).toBe(false);
+});
+
+for (const [name, actions] of [
+  ['more than one action', [{ type: 'confirm_meeting_request', proposal: meetingProposal() }, { type: 'confirm_meeting_request', proposal: meetingProposal() }]],
+  ['unknown action type', [{ type: 'approve_meeting', proposal: meetingProposal() }]],
+  ['extra action property', [{ type: 'confirm_meeting_request', proposal: meetingProposal(), unexpected: true }]],
+  ['short private token', [{ type: 'confirm_meeting_request', proposal: meetingProposal({ confirmationToken: 'short' }) }]],
+  ['unsafe private token', [{ type: 'confirm_meeting_request', proposal: meetingProposal({ confirmationToken: `${'p'.repeat(42)}\n` }) }]],
+  ['invalid summary', [{ type: 'confirm_meeting_request', proposal: { ...meetingProposal(), summary: { ...meetingProposal().summary, email: 'invalid-email' } } }]],
+  ['invalid expiry', [{ type: 'confirm_meeting_request', proposal: { ...meetingProposal(), expiresAt: '2030-02-30T10:00:00Z' } }]],
+] as const) {
+  test(`meeting-capable Orbe rejects ${name} without adopting credentials or logging proposal secrets`, async () => {
+    const fake = queuedFetch(json({ ...reply(), actions }), json(reply({ conversationId: NEXT_ID, conversationToken: NEXT_TOKEN })));
+    const events: OrbeDiagnosticEvent[] = [];
+    const client = createOrbeClient(API_URL, { fetch: fake.fetch, meetingCapabilities: true,
+      onDiagnostic: event => events.push(event) });
+    await expect(client.send('Prepare uma proposta.')).rejects.toMatchObject({ kind: 'protocol' });
+    await client.send('Pergunta nova após resposta inválida.');
+    expect(JSON.parse(String(fake.calls[1].options?.body))).toEqual({ message: 'Pergunta nova após resposta inválida.' });
+    expect(new Headers(fake.calls[1].options?.headers).has('X-Conversation-Token')).toBe(false);
+    expect(JSON.stringify(events)).not.toContain(MOCK_CONFIRMATION_TOKEN);
+  });
+}
+
+test('reset removes an established chat capability while preserving explicit meetings opt-in', async () => {
+  const fake = queuedFetch(json(reply({ actions: [{ type: 'confirm_meeting_request', proposal: meetingProposal() }] })),
+    json(reply({ conversationId: NEXT_ID, conversationToken: NEXT_TOKEN })));
+  const client = createOrbeClient(API_URL, { fetch: fake.fetch, meetingCapabilities: true });
+  await client.send('Prepare uma proposta.');
+  client.reset();
+  const replyAfterReset = await client.send('Começar outra conversa.');
+  expect(replyAfterReset.actions).toBeUndefined();
+  expect(JSON.parse(String(fake.calls[1].options?.body))).toEqual({ message: 'Começar outra conversa.' });
+  expect(new Headers(fake.calls[1].options?.headers).has('X-Conversation-Token')).toBe(false);
+  expect(new Headers(fake.calls[1].options?.headers).get('X-Orbe-Capabilities')).toBe('meetings-v1');
+});
 
 test('isolated client creates and continues a session without exposing its token', async () => {
   const fake = queuedFetch(json(reply()), json(reply({ conversationToken: undefined })));

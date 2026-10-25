@@ -24,6 +24,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     reducedMotion: 'reduce',
+    serviceWorkers: 'block',
     navigationTimeout: 30_000,
   },
   projects: [{
