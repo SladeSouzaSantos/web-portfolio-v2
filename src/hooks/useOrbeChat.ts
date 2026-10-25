@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { orbeConfig } from '../config/orbe';
+import { platformConfig } from '../config/platform';
 import { CHAT_MAX_MESSAGE_LENGTH, createOrbeClient, OrbeClientError } from '../services/orbeClient';
 import { sendDemoMessage } from '../services/orbeDemo';
-import type { ChatSource } from '../types/orbe';
+import type { ChatSource, MeetingChatAction } from '../types/orbe';
 
 interface ChatMessage {
   id: number;
@@ -10,6 +11,7 @@ interface ChatMessage {
   text: string;
   sources?: ChatSource[];
   simulated?: boolean;
+  actions?: MeetingChatAction[];
 }
 
 interface ChatNotice { message: string; correlationId?: string }
@@ -93,7 +95,9 @@ export function useOrbeChat(reducedMotion: boolean) {
     setError(null);
     setIsLoading(true);
     try {
-      if (orbeConfig.enabled && !clientRef.current) clientRef.current = createOrbeClient(orbeConfig.apiBaseUrl);
+      if (orbeConfig.enabled && !clientRef.current) clientRef.current = createOrbeClient(orbeConfig.apiBaseUrl, {
+        meetingCapabilities: platformConfig.enabled,
+      });
       const reply = orbeConfig.enabled
         ? await clientRef.current!.send(text, { signal: request.controller.signal })
         : await sendDemoMessage(text, request.controller.signal, reducedMotion);
@@ -101,6 +105,7 @@ export function useOrbeChat(reducedMotion: boolean) {
       setMessages(current => [...current, {
         id: nextId.current++, sender: 'orb', text: reply.answer,
         sources: reply.sources, simulated: reply.meta.simulated,
+        actions: reply.actions,
       }]);
     } catch (failure) {
       if (!mountedRef.current || pendingRef.current !== request || request.controller.signal.aborted) return;
