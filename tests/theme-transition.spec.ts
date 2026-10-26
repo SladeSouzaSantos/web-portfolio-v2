@@ -159,14 +159,40 @@ test.describe('animated theme transition', () => {
     const archiveLink = page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ });
     await archiveLink.scrollIntoViewIfNeeded();
     await observeTransition(page);
-    await page.locator('#themeToggleBtn').click();
+    const toggleButton = page.locator('#themeToggleBtn');
+    await expect(toggleButton).toBeVisible();
+    await expect(toggleButton).toBeEnabled();
+    // Hold the real animation inside the same browser task as the click. A
+    // historical frame plus a later RPC does not guarantee navigation happens
+    // before the expansion finishes, particularly on a busy CI worker.
+    await toggleButton.evaluate(async element => {
+      (element as HTMLButtonElement).click();
+      const animation = document.getElementById('themeTransitionMask')?.getAnimations()[0];
+      if (!animation) throw new Error('A real expansion animation is required.');
+      animation.pause();
+      await animation.ready;
+      const duration = animation.effect?.getTiming().duration;
+      if (typeof duration !== 'number' || duration <= 0) throw new Error('A finite expansion duration is required.');
+      animation.currentTime = duration / 4;
+    });
     await page.waitForFunction(() => {
+      const animation = document.getElementById('themeTransitionMask')?.getAnimations()[0];
+      const duration = animation?.effect?.getTiming().duration;
       const probe = Reflect.get(window, '__themeTransitionProbe') as TransitionProbe;
-      return probe.frames.some(frame => frame.radius > 0 && frame.radius < frame.farthestCorner / 2);
+      return animation?.playState === 'paused' && typeof duration === 'number'
+        && animation.currentTime === duration / 4
+        && probe.frames.some(frame => frame.radius > 0 && frame.radius < frame.farthestCorner / 2);
     });
     const themeBeforeNavigation = await archiveLink.evaluate(link => {
       const mask = document.getElementById('themeTransitionMask');
-      Reflect.set(window, '__cancelledThemeAnimations', mask?.getAnimations() ?? []);
+      const animations = mask?.getAnimations() ?? [];
+      const animation = animations[0];
+      const duration = animation?.effect?.getTiming().duration;
+      if (animation?.playState !== 'paused' || typeof duration !== 'number'
+        || animation.currentTime !== duration / 4) {
+        throw new Error('Navigation must begin during the paused native expansion.');
+      }
+      Reflect.set(window, '__cancelledThemeAnimations', animations);
       const theme = document.body.classList.contains('modo-claro') ? 'light' : 'dark';
       (link as HTMLAnchorElement).click();
       return theme;

@@ -96,6 +96,9 @@ test('sessão user informa falta de permissão e permite somente logout sem conc
   await menu.getByRole('button', { name: '[ TRANCAR BAÚ (LOGOUT) ]', exact: true }).click();
   await expect(page.getByRole('dialog', { name: '[ PORTAL DE AUTENTICAÇÃO ]', exact: true })).toBeVisible();
   await expect(loginTrigger(page)).toBeVisible();
+  // Local identity is discarded before the locked preflight and POST complete.
+  // Only the confirmed ACK proves the server operation finished.
+  await expect(page.getByRole('status').filter({ hasText: 'Sessão encerrada.' })).toBeVisible();
   const mutations = api.requests.filter(request => request.method() === 'POST');
   expect(mutations).toHaveLength(1);
   expect(mutations[0].headers()['x-csrf-token']).toBe(MOCK_CSRF_TOKEN);
