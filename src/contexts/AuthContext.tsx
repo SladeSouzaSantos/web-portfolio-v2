@@ -40,6 +40,18 @@ export function AuthProvider({ children, initialCallbackNotice = null }: {
     return () => { disposalTimer.current = setTimeout(() => client?.dispose(), 0); };
   }, [client]);
   useEffect(() => {
+    if (!client) return;
+    const revalidate = () => {
+      if (document.visibilityState === 'visible') void client.revalidate().catch(() => {});
+    };
+    window.addEventListener('focus', revalidate);
+    document.addEventListener('visibilitychange', revalidate);
+    return () => {
+      window.removeEventListener('focus', revalidate);
+      document.removeEventListener('visibilitychange', revalidate);
+    };
+  }, [client]);
+  useEffect(() => {
     if (!client || state.status !== 'authenticated' || !state.expiresAt) return;
     const delay = Math.max(0, Date.parse(state.expiresAt) - Date.now());
     const timer = setTimeout(() => client.expire(), Math.min(delay, 2_147_483_647));

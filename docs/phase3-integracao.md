@@ -6,6 +6,11 @@ O incremento é restrito ao frontend e não declara publicação ou homologaçã
 Os resultados desta revisão ficam em [f1-validacao-local.md](f1-validacao-local.md).
 F2 (coordenação entre abas/logout) e B2/F3 (E2E real conjunto) não integram F1.
 
+O incremento **F2 — 26/10/2026** implementa localmente sessão/CSRF entre abas e
+feedback de logout não confirmado. Escopo, testes e limitações ficam em
+[f2-validacao-local.md](f2-validacao-local.md); publicação e homologação são separadas.
+O backend B1 e o registro histórico de F1 são preservados.
+
 ## Contrato e divergências
 
 Na integração inicial de 22–25/10/2026, a fonte foi o
@@ -39,7 +44,9 @@ a homologação dos cookies nem a execução de uma reunião pelo proprietário.
 | `src/config/platform.ts`, `src/config/orbe.ts` | URL validada compartilhada; auth, reuniões e chat independentes; bloqueio do domínio produtivo contra a API DEV |
 | `src/services/platformHttp.ts` | HTTP sem retries, timeout/cancelamento, erros públicos e `Retry-After` |
 | `src/types/auth.ts`, `src/types/meetings.ts` | DTOs locais e validação de respostas externas |
-| `src/services/authClient.ts` | Sessão/cookies, CSRF privado, refresh compartilhado e coordenação das mutações |
+| `src/services/authClient.ts`, `authSessionClient.ts` | Validação, sessão/cookies, CSRF privado, gerações de leitura e coordenação das mutações |
+| `src/services/authCoordination.ts` | Web Locks por API, eventos sem segredos, deduplicação, cancelamento e limite de espera |
+| `src/components/AuthSessionNotice.tsx` | Aviso acima das rotas, resultado incerto e recuperação deliberada por GET |
 | `src/services/authNavigation.ts`, `src/components/AuthCallbackNotice.tsx` | Allowlist de retorno/erros, mensagem pública acessível e limpeza do marcador antes do roteador |
 | `src/contexts/AuthContext.tsx` | Sessão compartilhada acima das rotas e expiração da interface |
 | `src/components/ChestAccess.tsx` | Acesso administrativo pelo Google, entrada na sala e logout |
@@ -95,13 +102,14 @@ com o destino configurado no backend.
 - `POST /api/v1/auth/refresh`: cookies e CSRF atual, sem corpo; uma Promise compartilhada.
 - `POST /api/v1/auth/logout`: cookies e CSRF atual, sem corpo; limpa a sessão local.
 
-CSRF fica na closure privada do cliente, fora do contexto React. Dentro da própria
-aba, renovação e comandos autenticados coordenam a rotação. A coordenação entre
-abas continua F2; F1 não resolve o CSRF obsoleto após rotação em outra aba.
+CSRF fica na closure privada do cliente, fora do contexto React. F1 coordenava
+renovação e comandos autenticados somente dentro da própria aba. O incremento F2
+descrito abaixo trata o CSRF obsoleto após rotação em outra aba; seus resultados
+locais são registrados separadamente.
 Não há renovação infinita nem repetição automática de uma mutação após 401.
 O cliente mantém a renovação antes de uma operação autenticada próxima da
 expiração; o baú não oferece botões de atualização ou renovação. O relógio local
-apenas atualiza o estado expirado.
+oculta a identidade vencida e pode reconsultar a API, sem POST disparado pelo timer.
 
 401 remove a identidade local; 403 mostra uma orientação pública; `404 AUTH_DISABLED`
 desabilita Google; o agendamento pelo Orbe permanece independente. Se refresh falhar de modo
@@ -128,6 +136,43 @@ antes de criar sessão e revalida admissão/papel no servidor. O frontend não
 contém allowlist de e-mail nem promove o usuário. O
 [handoff administrativo](admin-access-handoff.md) preserva a observação histórica
 anterior à implementação dessa política, identificada por sua atualização datada.
+
+## F2 — Coordenação entre abas
+
+F2 usa exclusão mútua do navegador para refresh, logout e POSTs
+autenticados, incluindo a reconsulta de `GET /api/v1/auth/session` dentro do lock
+antes de usar CSRF. Após esperar outra aba, o cliente adota a sessão atual
+em vez de reutilizar a credencial antiga ou renovar novamente sem necessidade.
+Sem Web Locks utilizável, esses POSTs não são enviados; uma consulta consciente
+de sessão continua disponível. BroadcastChannel é opcional e não substitui o
+lock.
+
+O canal transporta somente eventos e metadados não secretos, validados e
+deduplicados. Identidade, CSRF e respostas privadas não são compartilhados. A
+API é reconsultada ao carregar a página e quando necessário após evento,
+foco/visibilidade ou antes de mutações, para não depender de mensagens entregues.
+Respostas antigas não restauram identidade após logout ou revogação conhecida.
+O namespace usa a URL-base canônica da API; eventos contêm somente
+`version`, `id`, `source` e `type`. GET não gera novo evento de rotação.
+Foco/visibilidade coalescem consultas feitas há menos de um segundo; não há polling.
+O timeout de aquisição é de 10 segundos e não libera uma operação em execução;
+o timeout HTTP permanece de 30 segundos.
+
+Logout incerto exige aviso global acima das rotas/modal, conservado ao navegar
+e reabrir o baú. Timeout, falha de rede e limpeza local não comprovam revogação.
+A recuperação manual usa GET de sessão; nenhum refresh ou POST ambíguo é repetido
+automaticamente. F5 inicia nova consulta à API, sem persistir credenciais nem o
+aviso anterior em storage.
+
+A coordenação cobre abas cooperantes da mesma origem; não serializa frontends
+em origens diferentes, versões antigas ou clientes externos que compartilhem o
+cookie da API. Fechamento de aba/abort/timeout não garante cancelamento no
+servidor. O contrato B1 continua exigindo cookie ativo, Origin permitido e CSRF
+nos comandos administrativos, mesmo quando existe Bearer.
+
+Esta implementação local não constitui homologação. Consulte o
+[registro F2](f2-validacao-local.md) para a bateria efetivamente executada e seus
+limites; o E2E real de B2/F3 permanece separado.
 
 ## Reuniões públicas e consentimento
 

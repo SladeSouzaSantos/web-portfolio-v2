@@ -391,7 +391,7 @@ test('401 durante decisão remove identidade e redireciona sem repetir mutação
 
 for (const status of [403, 409] as const) {
   test(`${status} em decisão apresenta erro público e correlação sem reenviar automaticamente`, async ({ page }) => {
-    const code = status === 403 ? 'CSRF_INVALID' : 'MEETING_SLOT_UNAVAILABLE';
+    const code = status === 403 ? 'AUTH_CSRF' : 'MEETING_SLOT_UNAVAILABLE';
     const api = await mockPlatform(page, [
       { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
       { path: ADMIN_PATH, body: list() },

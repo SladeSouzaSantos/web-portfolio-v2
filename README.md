@@ -45,6 +45,14 @@ e o [roteiro de homologação controlada](docs/phase3-homologacao.md).
 retorno Google com respostas interceptadas. Sua etapa de CI foi preparada no
 workflow; editar esse arquivo não executa a CI. Resultados locais atuais e
 limitações ficam em [f1-validacao-local.md](docs/f1-validacao-local.md).
+
+`npm run test:f2` valida a coordenação de sessão/CSRF entre abas e a preservação
+do aviso de logout não confirmado durante a navegação. O harness usa duas páginas
+no mesmo contexto, cookies HttpOnly sintéticos e uma API HTTP loopback interceptada.
+Escopo, limitações de navegador e resultados locais ficam em
+[f2-validacao-local.md](docs/f2-validacao-local.md). O incremento não altera o
+backend nem antecipa o E2E real de B2/F3.
+
 Não há script/configuração de lint de código no frontend; `typecheck` verifica
 tipos e Commitlint verifica mensagens de commit, sem equivaler a um linter de código.
 

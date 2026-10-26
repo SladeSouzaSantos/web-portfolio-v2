@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   outputDir: 'test-results/functional',
-  testIgnore: ['**/smoke-deploy.spec.ts', '**/visual.spec.ts', '**/orbe-api.spec.ts', '**/phase3-api.spec.ts', '**/phase3-admin.spec.ts', '**/phase3-orbe.spec.ts', '**/f1-ui.spec.ts'],
+  testIgnore: ['**/smoke-deploy.spec.ts', '**/visual.spec.ts', '**/orbe-api.spec.ts', '**/phase3-api.spec.ts', '**/phase3-admin.spec.ts', '**/phase3-orbe.spec.ts', '**/f1-ui.spec.ts', '**/f2-session.spec.ts'],
   fullyParallel: true,
   timeout: 30_000,
   expect: { timeout: 10_000 },

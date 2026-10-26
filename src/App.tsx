@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AuthCallbackNotice } from './components/AuthCallbackNotice';
+import { AuthSessionNotice } from './components/AuthSessionNotice';
 import { platformConfig } from './config/platform';
 import { Navbar } from './components/Navbar';
 import { OrbAssistant } from './components/OrbAssistant';
@@ -102,7 +103,7 @@ export function App() {
   }, [pathname]);
 
   const pageProps = { theme, toggleTheme, onMeetingProposal: reviewMeeting };
-  return <><AuthCallbackNotice /><Routes>
+  return <><AuthCallbackNotice /><AuthSessionNotice /><Routes>
     <Route path="/" element={<PortfolioPage {...pageProps} />} />
     <Route path="/administracao" element={<RequireAdmin><PortfolioPage {...pageProps} adminView /></RequireAdmin>} />
     <Route path="/projetos" element={<ArquivoProjetos />} />
