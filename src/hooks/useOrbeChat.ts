@@ -86,7 +86,7 @@ export function useOrbeChat(reducedMotion: boolean) {
     setIsLoading(true);
     try {
       if (orbeConfig.enabled && !clientRef.current) clientRef.current = createOrbeClient(orbeConfig.apiBaseUrl, {
-        meetingCapabilities: platformConfig.enabled,
+        meetingCapabilities: platformConfig.meetingsEnabled,
       });
       const reply = orbeConfig.enabled
         ? await clientRef.current!.send(text, { signal: request.controller.signal })
@@ -95,7 +95,7 @@ export function useOrbeChat(reducedMotion: boolean) {
       setMessages(current => [...current, {
         id: nextId.current++, sender: 'orb', text: reply.answer,
         sources: reply.sources, simulated: reply.meta.simulated,
-        actions: reply.actions,
+        actions: platformConfig.meetingsEnabled ? reply.actions : undefined,
       }]);
     } catch (failure) {
       if (!mountedRef.current || pendingRef.current !== request || request.controller.signal.aborted) return;

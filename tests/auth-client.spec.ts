@@ -53,6 +53,42 @@ test('session initialization is shared and exposes no CSRF in public state', asy
   expect(client.googleLoginUrl).toBe(`${API}/api/v1/auth/login/google`);
 });
 
+test('manual Google login URL binds only a safe relative return path without making a request', () => {
+  const fake = fakeFetch(json(ANON));
+  const client = createAuthClient(`${API}/`, { fetch: fake.fetch });
+  const url = new URL(client.getGoogleLoginUrl('/administracao?origem=google#admin-orbe-records'));
+  expect(`${url.origin}${url.pathname}`).toBe(client.googleLoginUrl);
+  expect(url.searchParams.getAll('returnTo')).toEqual(['/administracao?origem=google#admin-orbe-records']);
+  expect(url.hash).toBe('');
+  expect(client.getGoogleLoginUrl('//evil.example.test')).toBe(client.googleLoginUrl);
+  expect(client.getGoogleLoginUrl('https://evil.example.test')).toBe(client.googleLoginUrl);
+  expect(client.getGoogleLoginUrl()).toBe(client.googleLoginUrl);
+  expect(fake.calls).toHaveLength(0);
+  expect(client.getState()).toMatchObject({ status: 'loading', user: null });
+  client.dispose();
+});
+
+test('manual login excludes callback errors, OAuth/private values and unrecognized fragments', () => {
+  const client = createAuthClient(API);
+  const url = new URL(client.getGoogleLoginUrl('/?origem=legado&auth_error=AUTH_ADMIN_ONLY&code=private&state=secret&access_token=secret&email=private%40example.test#private-token'));
+  expect(url.searchParams.get('returnTo')).toBe('/?origem=legado');
+  expect(client.getState().user).toBeNull();
+  client.dispose();
+});
+
+test('a login URL or error marker does not authenticate without the cookie-backed session API', async () => {
+  const fake = fakeFetch(json(ANON));
+  const client = createAuthClient(API, { fetch: fake.fetch });
+  client.getGoogleLoginUrl('/?auth_error=AUTH_ADMIN_ONLY#sobre');
+  expect(client.getState().status).toBe('loading');
+  await client.getSession();
+  expect(client.getState()).toMatchObject({ status: 'anonymous', user: null, expiresAt: null });
+  expect(fake.calls.map(call => call.url)).toEqual([`${API}/api/v1/auth/session`]);
+  expect(fake.calls[0].options?.credentials).toBe('include');
+  expect(new Headers(fake.calls[0].options?.headers).has('Authorization')).toBe(false);
+  client.dispose();
+});
+
 test('anonymous session cannot perform an authenticated mutation', async () => {
   const fake = fakeFetch(json(ANON));
   const client = createAuthClient(API, { fetch: fake.fetch });

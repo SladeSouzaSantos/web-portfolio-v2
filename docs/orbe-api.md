@@ -2,13 +2,17 @@
 
 As ações de reunião da Fase 3 estão documentadas na
 [integração de sessão e agendamento](phase3-integracao.md). Elas utilizam o mesmo
-chat sem streaming, com `X-Orbe-Capabilities: meetings-v1` somente quando a interface
-da Fase 3 está habilitada. Uma proposta exige revisão e consentimento no fluxo
+chat sem streaming, com `X-Orbe-Capabilities: meetings-v1` somente quando chat HTTP
+e reuniões estão habilitados. A flag de auth não controla essa capability.
+Uma proposta exige revisão e consentimento no fluxo
 comum; nenhuma chegada de resposta confirma um pedido automaticamente.
 
-Implementação restrita ao frontend `web-portfolio-v2`, na branch `dev`. O backend é
-um serviço separado e não foi alterado nesta tarefa. Não foram criados commits,
-pushes, deploys, autenticação ou infraestrutura adicional.
+Atualização local **F1 — 26/10/2026**: `VITE_ORBE_API_ENABLED` continua independente
+de `VITE_AUTH_ENABLED` e `VITE_MEETINGS_ENABLED`, usando a URL pública validada.
+`VITE_PHASE3_ENABLED` foi retirada da ativação e é ignorada, sem fallback.
+O backend é um serviço separado; esta documentação não declara deploy nem
+homologação de LLM/Google/Calendar. Resultados F1 são registrados em
+[f1-validacao-local.md](f1-validacao-local.md), separados do histórico abaixo.
 
 ## Contrato de referência
 
@@ -55,12 +59,16 @@ evitando um 400 inesperado ao enviar muitos emojis ao backend atual.
 
 ## Configuração do build
 
-| Destino | Ativação | URL |
-| --- | --- | --- |
-| Branch `dev`, incluindo PR para `dev` | `true` | `https://devapi.phasscode.com` |
-| Branch `main`, incluindo PR para `main` | `false` | vazia; demonstração |
-| Build local sem configuração | `false` | vazia; demonstração |
-| Suíte isolada de API | `true` | `https://orbe-api.invalid`, sempre interceptada |
+| Destino preparado | Orbe HTTP | Auth | Reuniões | URL |
+| --- | --- | --- | --- | --- |
+| Branch `dev`, incluindo PR para `dev` | `true` | `true` | `false` | `https://devapi.phasscode.com` |
+| Branch `main`, incluindo PR para `main` | `false` | `false` | `false` | vazia; demonstração |
+| Build local sem configuração | `false` | `false` | `false` | vazia, salvo configuração explícita |
+| Suíte isolada de API | conforme cenário | conforme cenário | conforme cenário | `.invalid` conhecida, sempre interceptada |
+
+Só a string exata `true`, com API válida, habilita uma flag. O perfil DEV F1
+habilita chat sem ferramentas de reunião, ainda que o login esteja disponível.
+Esses valores descrevem o código de build preparado; não comprovam uma publicação.
 
 O workflow executa `node scripts/orbe-build-policy.mjs --github-env` antes de
 `npm run build`. A branch de destino é `GITHUB_BASE_REF || GITHUB_REF_NAME`.
@@ -72,11 +80,17 @@ No domínio `gbc.phasscode.com`, a configuração em runtime bloqueia URLs que n
 sejam da origem futura `https://api.phasscode.com`. A política de build atual
 mantém a integração desativada na `main`, mesmo que existam arquivos `.env` locais.
 A ativação da API produtiva exige homologação e autorização posterior.
+Os defines de `main` forçam Orbe/auth/reuniões desligados e URL vazia, mesmo com
+variáveis locais herdadas. A exceção interna de testes exige
+`PHASSCODE_MOCK_API_BUILD=true` e exatamente `https://orbe-api.invalid` ou
+`https://phase3-api.invalid`; não permite chamar a API DEV/PROD em testes.
 
 Para desenvolvimento manual, copie `.env.example` para `.env.local` e configure:
 
 ```dotenv
 VITE_ORBE_API_ENABLED=true
+VITE_AUTH_ENABLED=false
+VITE_MEETINGS_ENABLED=false
 VITE_API_BASE_URL=https://devapi.phasscode.com
 ```
 
@@ -85,6 +99,13 @@ Use `.env.local` na raiz para a configuração desta máquina. O Vite também ac
 com as mesmas variáveis. O nome do arquivo é uma convenção do Vite, não da API.
 Arquivos específicos do modo e variáveis já definidas no processo podem ter
 prioridade maior. `.env.example` é apenas o modelo versionado, sem carregamento automático.
+
+Migrar configurações antigas escolhendo auth e reuniões explicitamente; manter
+apenas `VITE_PHASE3_ENABLED=true` não ativa esses módulos. Os
+[quatro perfis](phase3-integracao.md#ambientes-e-migração-das-flags) podem ter Orbe
+ligado ou desligado. Reuniões públicas não exigem login do visitante, mas continuam
+dependendo do módulo administrativo/Calendar no servidor. Uma entrada pública
+independente da LLM ainda é pendência separada de F1.
 
 Reinicie o Vite após alterar o ambiente. Essas variáveis são públicas, incorporadas
 ao JavaScript. Nunca inclua `LLM_API_KEY`, JWTs, tokens de conversa ou outras
@@ -170,11 +191,18 @@ configuração naquele serviço. Nenhum arquivo do backend foi alterado aqui.
 
 ## Testes e homologação pendente
 
+F1 acrescenta a matriz de flags e sua relação com capability, sem incluir F2
+(coordenação entre abas/logout) ou B2/F3 (E2E real conjunto). Os resultados locais
+atuais ficam em [f1-validacao-local.md](f1-validacao-local.md). As medições e
+contagens de 22–25/10/2026 abaixo são histórico das revisões iniciais do Orbe,
+não testes reexecutados nem homologação real da atualização F1.
+
 ```sh
 npm run typecheck
 npm run build
 npm test
 npm run test:orbe
+npm run test:f1
 npm run test:visual
 ```
 
@@ -188,10 +216,10 @@ uma suíte não limpar traces e screenshots da outra durante testes locais paral
 
 Após concluir o trabalho paralelo no backend, revisar novamente o OpenAPI
 efetivamente publicado e homologar manualmente uma conversa em `devgbc.phasscode.com`:
-criação, continuação, fontes, erro, reset e fechamento. Essa homologação real não
+criação, continuação, fontes, erro, recarregamento e fechamento. Essa homologação real não
 foi feita nesta tarefa, para não consumir cota nem antecipar publicação.
 
-O OpenAPI consultado ainda anuncia `http://localhost:3000` em `servers`.
+No snapshot inicial, o OpenAPI consultado anunciava `http://localhost:3000` em `servers`.
 Essa indicação não é usada pelo cliente: a URL vem do ambiente. O preflight
 OPTIONS de homologação foi conferido sem pergunta de chat: HTTP 204, origem
 `https://devgbc.phasscode.com`, headers `Content-Type` e `X-Conversation-Token`,
@@ -203,8 +231,9 @@ Os testes locais usam mocks e não dependem dessa autorização.
 
 ## Histórico da validação local da integração inicial
 
-Os resultados abaixo pertencem à integração inicial do chat. A validação atual,
-incluindo autenticação e reuniões, está em [Integração da Fase 3](phase3-integracao.md).
+Os resultados abaixo pertencem à integração inicial do chat. O histórico de
+autenticação/reuniões está em [Integração da Fase 3](phase3-integracao.md);
+o registro desta atualização está em [validação local F1](f1-validacao-local.md).
 
 - `npm run typecheck`: aprovado.
 - `npm run build`: aprovado com a integração de dev habilitada e também com a

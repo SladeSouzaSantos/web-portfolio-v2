@@ -42,14 +42,20 @@ test('Orbe rejeita configuração insegura e permite uma API HTTP local sem cred
 test('política do CI mantém dev ativo e PRs para main em demonstração', async () => {
   const policyPath = resolve('scripts/orbe-build-policy.mjs');
   const policy = await import(pathToFileURL(policyPath).href) as {
-    resolveOrbeBuildEnvironment(branch: string): typeof enabledEnvironment;
+    resolveOrbeBuildEnvironment(branch: string): {
+      VITE_ORBE_API_ENABLED: string;
+      VITE_AUTH_ENABLED: string;
+      VITE_MEETINGS_ENABLED: string;
+      VITE_API_BASE_URL: string;
+    };
   };
   expect(policy.resolveOrbeBuildEnvironment('dev')).toEqual({
-    VITE_ORBE_API_ENABLED: 'true', VITE_PHASE3_ENABLED: 'true', VITE_API_BASE_URL: 'https://devapi.phasscode.com',
+    VITE_ORBE_API_ENABLED: 'true', VITE_AUTH_ENABLED: 'true', VITE_MEETINGS_ENABLED: 'false',
+    VITE_API_BASE_URL: 'https://devapi.phasscode.com',
   });
   for (const branch of ['main', '', 'feature/orbe']) {
     expect(policy.resolveOrbeBuildEnvironment(branch)).toEqual({
-      VITE_ORBE_API_ENABLED: 'false', VITE_PHASE3_ENABLED: 'false', VITE_API_BASE_URL: '',
+      VITE_ORBE_API_ENABLED: 'false', VITE_AUTH_ENABLED: 'false', VITE_MEETINGS_ENABLED: 'false', VITE_API_BASE_URL: '',
     });
   }
 
@@ -60,7 +66,7 @@ test('política do CI mantém dev ativo e PRs para main em demonstração', asyn
       env: { ...process.env, GITHUB_BASE_REF: 'main', GITHUB_REF_NAME: 'dev', GITHUB_ENV: githubEnvironmentFile },
     });
     expect(readFileSync(githubEnvironmentFile, 'utf8'))
-      .toBe('VITE_ORBE_API_ENABLED=false\nVITE_PHASE3_ENABLED=false\nVITE_API_BASE_URL=\n');
+      .toBe('VITE_ORBE_API_ENABLED=false\nVITE_AUTH_ENABLED=false\nVITE_MEETINGS_ENABLED=false\nVITE_API_BASE_URL=\n');
   } finally {
     rmSync(githubEnvironmentFile, { force: true });
     rmdirSync(temporaryDirectory);

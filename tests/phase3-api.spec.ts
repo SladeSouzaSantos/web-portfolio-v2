@@ -66,7 +66,7 @@ function preparationReplies(proposal: MeetingProposal) {
 
 test('visitante consulta sessão e inicia Google por navegação interceptada, sem formulário de senha', async ({ page }) => {
   const api = await mockPlatform(page, [{ path: '/api/v1/auth/session', body: anonymousSession() }]);
-  await page.route('**/api/v1/auth/login/google', route => route.fulfill({
+  await page.route('**/api/v1/auth/login/google?*', route => route.fulfill({
     contentType: 'text/html', body: '<!doctype html><html lang="pt-BR"><title>Login interceptado</title><body>OAuth de teste</body></html>',
   }));
   await page.goto('/#experiencia');
@@ -75,7 +75,7 @@ test('visitante consulta sessão e inicia Google por navegação interceptada, s
   await expect(dialog.locator('input')).toHaveCount(0);
   await expect(dialog.getByRole('button', { name: /IR PARA A SALA DO ADMINISTRADOR/ })).toHaveCount(0);
   await dialog.getByRole('button', { name: '[ ENTRAR COM GOOGLE ]', exact: true }).click();
-  await expect(page).toHaveURL('https://phase3-api.invalid/api/v1/auth/login/google');
+  await expect(page).toHaveURL('https://phase3-api.invalid/api/v1/auth/login/google?returnTo=%2F%23experiencia');
   await expect(page.getByText('OAuth de teste', { exact: true })).toBeVisible();
   expect(api.requests.filter(request => request.url().includes('/auth/session'))).toHaveLength(1);
   expect(api.unexpected).toEqual([]);

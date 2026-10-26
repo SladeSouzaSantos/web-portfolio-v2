@@ -1,14 +1,16 @@
 export interface PlatformConfig {
-  readonly enabled: boolean;
+  readonly authEnabled: boolean;
+  readonly meetingsEnabled: boolean;
   readonly apiBaseUrl: string;
 }
 
 export interface PlatformEnvironment {
-  VITE_PHASE3_ENABLED?: string;
+  VITE_AUTH_ENABLED?: string;
+  VITE_MEETINGS_ENABLED?: string;
   VITE_API_BASE_URL?: string;
 }
 
-const unavailableConfig: PlatformConfig = Object.freeze({ enabled: false, apiBaseUrl: '' });
+const unavailableConfig: PlatformConfig = Object.freeze({ authEnabled: false, meetingsEnabled: false, apiBaseUrl: '' });
 
 /** A single URL policy is shared by chat and the cookie-based platform clients. */
 export function resolveApiBaseUrl(configuredUrl: string | undefined, siteHostname = ''): string | null {
@@ -30,12 +32,15 @@ export function resolveApiBaseUrl(configuredUrl: string | undefined, siteHostnam
 }
 
 export function resolvePlatformConfig(environment: PlatformEnvironment, siteHostname = ''): PlatformConfig {
-  if (environment.VITE_PHASE3_ENABLED !== 'true') return unavailableConfig;
+  const authEnabled = environment.VITE_AUTH_ENABLED === 'true';
+  const meetingsEnabled = environment.VITE_MEETINGS_ENABLED === 'true';
+  if (!authEnabled && !meetingsEnabled) return unavailableConfig;
   const apiBaseUrl = resolveApiBaseUrl(environment.VITE_API_BASE_URL, siteHostname);
-  return apiBaseUrl ? Object.freeze({ enabled: true, apiBaseUrl }) : unavailableConfig;
+  return apiBaseUrl ? Object.freeze({ authEnabled, meetingsEnabled, apiBaseUrl }) : unavailableConfig;
 }
 
 export const platformConfig = resolvePlatformConfig({
-  VITE_PHASE3_ENABLED: import.meta.env?.VITE_PHASE3_ENABLED,
+  VITE_AUTH_ENABLED: import.meta.env?.VITE_AUTH_ENABLED,
+  VITE_MEETINGS_ENABLED: import.meta.env?.VITE_MEETINGS_ENABLED,
   VITE_API_BASE_URL: import.meta.env?.VITE_API_BASE_URL,
 }, typeof window === 'undefined' ? '' : window.location.hostname);

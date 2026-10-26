@@ -1,4 +1,5 @@
 import type { AuthSessionResponse, AuthState, AuthUser } from '../types/auth';
+import { safeLoginReturnTo } from './authNavigation';
 import {
   createPlatformHttp, isIsoDateTime, isRecord, isUuid, PlatformApiError,
   type PlatformHttpOptions, type PlatformRequestOptions,
@@ -31,6 +32,7 @@ export function parseAuthSession(value: unknown): AuthSessionResponse {
 }
 export interface AuthClient {
   readonly googleLoginUrl: string;
+  getGoogleLoginUrl(returnTo?: string): string;
   getState(): AuthState;
   subscribe(listener: () => void): () => void;
   getSession(): Promise<AuthState>;
@@ -224,6 +226,11 @@ export function createAuthClient(baseUrl: string, options: PlatformHttpOptions =
   }
   return {
     googleLoginUrl: `${baseUrl.replace(/\/+$/, '')}/api/v1/auth/login/google`,
+    getGoogleLoginUrl: returnTo => {
+      const path = safeLoginReturnTo(returnTo);
+      const query = path === undefined ? '' : `?${new URLSearchParams({ returnTo: path })}`;
+      return `${baseUrl.replace(/\/+$/, '')}/api/v1/auth/login/google${query}`;
+    },
     getState: () => state,
     subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
     getSession, refresh, logout, request,

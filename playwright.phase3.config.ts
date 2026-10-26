@@ -16,7 +16,8 @@ export default defineConfig({
     env: {
       PHASSCODE_MOCK_API_BUILD: 'true',
       VITE_ORBE_API_ENABLED: 'true',
-      VITE_PHASE3_ENABLED: 'true',
+      VITE_AUTH_ENABLED: 'true',
+      VITE_MEETINGS_ENABLED: 'true',
       VITE_API_BASE_URL: 'https://phase3-api.invalid',
     },
     reuseExistingServer: false,

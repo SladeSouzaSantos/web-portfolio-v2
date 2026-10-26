@@ -66,6 +66,9 @@ jobs:
       - name: Test authentication and meetings with mocked requests only
         run: npm run test:phase3
 
+      - name: Test independent feature flags and Google callback with mocked requests only
+        run: npm run test:f1
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v6
