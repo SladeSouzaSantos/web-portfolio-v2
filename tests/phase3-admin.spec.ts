@@ -90,13 +90,20 @@ for (const role of ['anonymous', 'user'] as const) {
 }
 
 for (const entry of ['/', '/#sobre']) {
-  test(`sessão admin em ${entry} entra na administração uma vez e permite voltar ao portfólio`, async ({ page }) => {
+  test(`sessão admin em ${entry} respeita o destino e permite entrar e voltar da administração`, async ({ page }) => {
     const api = await mockPlatform(page, [
       { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
       { path: ADMIN_PATH, body: list([]) },
       { path: ADMIN_PATH, body: list([]) },
     ]);
     await page.goto(entry);
+    if (entry === '/#sobre') {
+      await expect(page).toHaveURL(/\/#sobre$/);
+      await expect(adminHeading(page)).toHaveCount(0);
+      expect(api.requests.filter(request => new URL(request.url()).pathname === ADMIN_PATH)).toHaveLength(0);
+      await page.getByRole('button', { name: 'Abrir baú do aventureiro', exact: true }).click();
+      await page.getByRole('button', { name: '[ IR PARA A SALA DO ADMINISTRADOR ]', exact: true }).click();
+    }
     await expect(page).toHaveURL(/\/administracao$/);
     await expect(adminHeading(page)).toBeVisible();
     await expect(page.getByText('Nenhum pedido encontrado para este filtro.', { exact: true })).toBeVisible();
@@ -384,7 +391,7 @@ test('401 durante decisão remove identidade e redireciona sem repetir mutação
 
 for (const status of [403, 409] as const) {
   test(`${status} em decisão apresenta erro público e correlação sem reenviar automaticamente`, async ({ page }) => {
-    const code = status === 403 ? 'CSRF_INVALID' : 'MEETING_SLOT_UNAVAILABLE';
+    const code = status === 403 ? 'AUTH_CSRF' : 'MEETING_SLOT_UNAVAILABLE';
     const api = await mockPlatform(page, [
       { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
       { path: ADMIN_PATH, body: list() },

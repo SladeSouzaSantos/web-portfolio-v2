@@ -32,6 +32,8 @@ export interface PlatformRequestOptions {
   headers?: Record<string, string>;
   credentials?: RequestCredentials;
   signal?: AbortSignal;
+  /** Synchronous internal bookkeeping immediately before fetch; not a server ACK. */
+  onDispatch?: () => void;
 }
 export interface PlatformHttpOptions { fetch?: typeof globalThis.fetch; timeoutMs?: number }
 export interface PlatformHttp {
@@ -59,6 +61,8 @@ export function parseRetryAfter(value: string | null): number | undefined {
 }
 function publicHttpMessage(status: number, code?: string) {
   if (code === 'AUTH_DISABLED') return 'A autenticação está indisponível neste ambiente.';
+  if (code === 'AUTH_ADMIN_ONLY') return 'Acesso negado. Apenas o administrador tem acesso.';
+  if (code === 'AUTH_CSRF') return 'A proteção da sessão mudou. Verifique a sessão antes de tentar a operação novamente.';
   if (status === 401) return 'Sua sessão expirou ou não está disponível. Entre novamente.';
   if (status === 403) return 'Operação não autorizada. Confira sua permissão e atualize a sessão.';
   if (status === 404) return 'O recurso não está disponível ou o acesso não foi reconhecido.';
@@ -91,11 +95,14 @@ export function createPlatformHttp(baseUrl: string, clientOptions: PlatformHttpO
       if (controller.signal.aborted) throw new PlatformApiError('aborted', 'A consulta foi cancelada.');
       const headers = new Headers(options.headers);
       if (options.body !== undefined) headers.set('Content-Type', 'application/json');
-      const response = await fetchRequest(`${root}${path}`, {
+      const request: RequestInit = {
         method: options.method ?? 'GET', credentials: options.credentials ?? 'omit',
         headers, ...(options.body !== undefined && { body: JSON.stringify(options.body) }),
         signal: controller.signal, cache: 'no-store', redirect: 'error',
-      });
+      };
+      if (controller.signal.aborted) throw new PlatformApiError('aborted', 'A consulta foi cancelada.');
+      options.onDispatch?.();
+      const response = await fetchRequest(`${root}${path}`, request);
       if (controller.signal.aborted) throw new PlatformApiError(timedOut ? 'timeout' : 'aborted', 'A consulta foi interrompida.');
       if (!response.ok) {
         let code: string | undefined;

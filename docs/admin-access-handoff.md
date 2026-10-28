@@ -3,6 +3,17 @@
 O proprietário definiu que o Google deve servir apenas à sua administração.
 O baú não é um cadastro de visitantes nem uma entrada para agendamento.
 
+**Atualização F1 — 26/10/2026:** o contrato backend incorporado pelo PR #13,
+referência `ba7299d`, já implementa admissão admin-only, bootstrap restrito/auditado
+e erros navegáveis. F1 trata esses erros no frontend, sem e-mail permitido no
+bundle e sem concessão de papel pela UI. Isso não comprova publicação ou login
+Google real. Veja [integração e migração de flags](phase3-integracao.md) e
+[validação local F1](f1-validacao-local.md).
+
+As seções abaixo preservam o handoff e as observações anteriores a essa política.
+Afirmações sobre allowlist ausente ou uma sessão específica com papel `user`
+descrevem aquele snapshot, não o estado atual do código ou do servidor.
+
 ## Implementado no frontend
 
 - A página principal abre `/administracao` quando a sessão inicial tem papel

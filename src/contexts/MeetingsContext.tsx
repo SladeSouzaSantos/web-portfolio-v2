@@ -31,7 +31,7 @@ export function MeetingsProvider({ children }: { children: ReactNode }) {
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const privateClient = useRef<Pick<MeetingsContextValue, 'client' | 'confirmations'> | null>(null);
   if (!privateClient.current) {
-    const client = platformConfig.enabled ? createMeetingsClient(platformConfig.apiBaseUrl) : null;
+    const client = platformConfig.meetingsEnabled ? createMeetingsClient(platformConfig.apiBaseUrl) : null;
     privateClient.current = { client, confirmations: client ? createMeetingConfirmationStore(client) : null };
   }
   return <MeetingsContext.Provider value={{ ...privateClient.current, flow, setFlow, cooldownUntil, setCooldownUntil }}>

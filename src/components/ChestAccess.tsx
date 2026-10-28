@@ -42,10 +42,10 @@ export function ChestAccess({ onOpenPanel, onLogout }: ChestAccessProps) {
     try {
       if (operation === 'logout') { await logout(); onLogout(); }
       else await reload();
-      if (mounted.current) setFeedback(operation === 'logout' ? 'Sessão encerrada.' : 'Sessão atualizada.');
+      if (mounted.current && operation !== 'logout') setFeedback('Sessão atualizada.');
     } catch (error) {
       if (operation === 'logout') onLogout();
-      if (mounted.current) setFeedback(error instanceof PlatformApiError ? error.publicMessage : 'Não foi possível consultar a sessão.');
+      if (mounted.current && operation !== 'logout') setFeedback(error instanceof PlatformApiError ? error.publicMessage : 'Não foi possível consultar a sessão.');
     } finally {
       pending.current = false;
       if (mounted.current) setBusy(false);

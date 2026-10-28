@@ -66,7 +66,7 @@ function preparationReplies(proposal: MeetingProposal) {
 
 test('visitante consulta sessão e inicia Google por navegação interceptada, sem formulário de senha', async ({ page }) => {
   const api = await mockPlatform(page, [{ path: '/api/v1/auth/session', body: anonymousSession() }]);
-  await page.route('**/api/v1/auth/login/google', route => route.fulfill({
+  await page.route('**/api/v1/auth/login/google?*', route => route.fulfill({
     contentType: 'text/html', body: '<!doctype html><html lang="pt-BR"><title>Login interceptado</title><body>OAuth de teste</body></html>',
   }));
   await page.goto('/#experiencia');
@@ -75,7 +75,7 @@ test('visitante consulta sessão e inicia Google por navegação interceptada, s
   await expect(dialog.locator('input')).toHaveCount(0);
   await expect(dialog.getByRole('button', { name: /IR PARA A SALA DO ADMINISTRADOR/ })).toHaveCount(0);
   await dialog.getByRole('button', { name: '[ ENTRAR COM GOOGLE ]', exact: true }).click();
-  await expect(page).toHaveURL('https://phase3-api.invalid/api/v1/auth/login/google');
+  await expect(page).toHaveURL('https://phase3-api.invalid/api/v1/auth/login/google?returnTo=%2F%23experiencia');
   await expect(page.getByText('OAuth de teste', { exact: true })).toBeVisible();
   expect(api.requests.filter(request => request.url().includes('/auth/session'))).toHaveLength(1);
   expect(api.unexpected).toEqual([]);
@@ -96,6 +96,9 @@ test('sessão user informa falta de permissão e permite somente logout sem conc
   await menu.getByRole('button', { name: '[ TRANCAR BAÚ (LOGOUT) ]', exact: true }).click();
   await expect(page.getByRole('dialog', { name: '[ PORTAL DE AUTENTICAÇÃO ]', exact: true })).toBeVisible();
   await expect(loginTrigger(page)).toBeVisible();
+  // Local identity is discarded before the locked preflight and POST complete.
+  // Only the confirmed ACK proves the server operation finished.
+  await expect(page.getByRole('status').filter({ hasText: 'Sessão encerrada.' })).toBeVisible();
   const mutations = api.requests.filter(request => request.method() === 'POST');
   expect(mutations).toHaveLength(1);
   expect(mutations[0].headers()['x-csrf-token']).toBe(MOCK_CSRF_TOKEN);

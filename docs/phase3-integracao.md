@@ -1,26 +1,36 @@
 # Integração da Fase 3
 
-Implementação do frontend em uma branch de trabalho criada a partir da `dev` limpa.
-O backend não foi alterado. Nenhuma reunião, mensagem LLM, login Google,
-notificação SMTP/Telegram ou operação no Calendar foi executada automaticamente.
+Atualização local **F1 — 26/10/2026**: autenticação, reuniões e chat têm flags
+independentes; o retorno Google trata os códigos públicos do contrato administrativo.
+O incremento é restrito ao frontend e não declara publicação ou homologação externa.
+Os resultados desta revisão ficam em [f1-validacao-local.md](f1-validacao-local.md).
+F2 (coordenação entre abas/logout) e B2/F3 (E2E real conjunto) não integram F1.
+
+O incremento **F2 — 26/10/2026** implementa localmente sessão/CSRF entre abas e
+feedback de logout não confirmado. Escopo, testes e limitações ficam em
+[f2-validacao-local.md](f2-validacao-local.md); publicação e homologação são separadas.
+O backend B1 e o registro histórico de F1 são preservados.
 
 ## Contrato e divergências
 
-A fonte inicial é o [OpenAPI implantado](https://devapi.phasscode.com/api/v1/openapi.json),
-versão `0.1.0`. O documento publicado e `packages/contracts/openapi.json` da
-branch `dev` do backend foram comparados e são estruturalmente iguais.
-Foram lidos também os contratos de autenticação/reuniões e os exemplos de cliente.
-O documento publicado foi consultado novamente em 25/10/2026, após a retomada
-da sessão, e continua estruturalmente idêntico ao snapshot inicial completo.
+Na integração inicial de 22–25/10/2026, a fonte foi o
+[OpenAPI implantado](https://devapi.phasscode.com/api/v1/openapi.json), versão
+`0.1.0`, comparado ao snapshot do backend usado naquela revisão. Os resultados
+históricos abaixo não comprovam que a mesma revisão permanece publicada.
+
+F1 considera o contrato de autenticação do backend incorporado pelo PR #13,
+referência `ba7299d`, incluindo admissão administrativa, `returnTo` e erros
+navegáveis. Código local, commit, publicação e homologação continuam evidências
+distintas; usar o contrato/revisão efetivos antes de homologar em DEV.
 
 Os guias [handoff](https://github.com/SladeSouzaSantos/phasscode-platform/blob/dev/docs/api/phase3-frontend-handoff.md)
 e [integração](https://github.com/SladeSouzaSantos/phasscode-platform/blob/dev/docs/api/phase3-integration.md)
-ainda descrevem provedores reais como não configurados. Isso diverge da validação
-operacional informada pelo proprietário, mas não muda o contrato HTTP confirmado.
+do backend descrevem o fluxo público. A existência de configuração ou relato
+operacional não substitui a homologação de Google, Calendar ou canais reais.
 O campo `servers` do OpenAPI ainda informa `localhost:3000`; a aplicação utiliza
 somente a URL pública configurada no ambiente.
 
-Preflights OPTIONS foram conferidos, sem efeitos externos, para a origem
+Historicamente, em 25/10/2026, preflights OPTIONS foram conferidos para a origem
 `https://devgbc.phasscode.com`: refresh, confirmação de reunião e chat respondem
 204, origem exata e `Access-Control-Allow-Credentials: true`. Os headers
 `X-CSRF-Token`, `X-Meeting-Token`, `Idempotency-Key` e `X-Orbe-Capabilities` são
@@ -31,10 +41,13 @@ a homologação dos cookies nem a execução de uma reunião pelo proprietário.
 
 | Arquivos | Responsabilidade |
 | --- | --- |
-| `src/config/platform.ts`, `src/config/orbe.ts` | Uma política de URL, flags independentes e bloqueio do domínio produtivo contra a API DEV |
+| `src/config/platform.ts`, `src/config/orbe.ts` | URL validada compartilhada; auth, reuniões e chat independentes; bloqueio do domínio produtivo contra a API DEV |
 | `src/services/platformHttp.ts` | HTTP sem retries, timeout/cancelamento, erros públicos e `Retry-After` |
 | `src/types/auth.ts`, `src/types/meetings.ts` | DTOs locais e validação de respostas externas |
-| `src/services/authClient.ts` | Sessão/cookies, CSRF privado, refresh compartilhado e coordenação das mutações |
+| `src/services/authClient.ts`, `authSessionClient.ts` | Validação, sessão/cookies, CSRF privado, gerações de leitura e coordenação das mutações |
+| `src/services/authCoordination.ts` | Web Locks por API, eventos sem segredos, deduplicação, cancelamento e limite de espera |
+| `src/components/AuthSessionNotice.tsx` | Aviso acima das rotas, resultado incerto e recuperação deliberada por GET |
+| `src/services/authNavigation.ts`, `src/components/AuthCallbackNotice.tsx` | Allowlist de retorno/erros, mensagem pública acessível e limpeza do marcador antes do roteador |
 | `src/contexts/AuthContext.tsx` | Sessão compartilhada acima das rotas e expiração da interface |
 | `src/components/ChestAccess.tsx` | Acesso administrativo pelo Google, entrada na sala e logout |
 | `src/components/Modal.tsx` | Restauração de foco entre diálogos e após operações canceladas |
@@ -52,21 +65,51 @@ a homologação dos cookies nem a execução de uma reunião pelo proprietário.
 
 ## Autenticação
 
-Google começa por navegação normal para `/api/v1/auth/login/google`. O React não
-implementa OAuth, não recebe códigos de autorização e não lê cookies HttpOnly.
-O retorno do backend leva ao frontend DEV, cujo provider consulta a sessão.
+Com `authEnabled`, Google começa por navegação normal para
+`/api/v1/auth/login/google`, com `returnTo` relativo para o destino do frontend.
+O React não implementa OAuth, não recebe códigos de autorização e não lê cookies
+HttpOnly. O backend valida o destino, a identidade e a sessão; o retorno não
+autoriza a UI até a confirmação por `GET /api/v1/auth/session`.
+
+O caminho de retorno usa uma allowlist de rotas, parâmetros/valores e fragmentos
+públicos do portfólio. Query/fragmento livres, credenciais e tokens são descartados;
+retornos inválidos não são enviados. A lista fica em `authNavigation.ts` e não
+transforma o caminho em prova de identidade. O backend resolve o retorno somente
+na origem autorizada, com suas
+próprias verificações; o cliente não escolhe issuer, callback, e-mail autorizado
+ou papel. Não há segunda implementação de OAuth no browser.
+
+O marcador `auth_error` é consumido antes de redirecionamentos que poderiam
+descartá-lo e removido por replace, preservando os demais parâmetros/fragmento
+pertinentes. Somente os códigos abaixo recebem mensagens constantes conhecidas:
+
+| Código público | Tratamento da UI |
+| --- | --- |
+| `AUTH_ADMIN_ONLY` | “Acesso negado. Apenas o administrador tem acesso.” |
+| `AUTH_REQUIRED` | Orientação local de autenticação necessária. |
+| `AUTH_LOGIN_FAILED` | Falha de login com nova tentativa manual. |
+| `AUTH_PROVIDER_UNAVAILABLE` | Provedor temporariamente indisponível. |
+| `AUTH_UNAVAILABLE` | Autenticação temporariamente indisponível. |
+| Código desconhecido ou marcador inválido | Mensagem genérica local; não refletir o valor recebido. |
+
+Nenhum valor da query é interpretado como HTML, perfil ou prova de autenticação.
+O aviso oferece continuidade manual; não inicia outro login nem repete uma
+mutação automaticamente. O sucesso padrão sem `returnTo` continua compatível
+com o destino configurado no backend.
 
 - `GET /api/v1/auth/session`: cookies, inicialização compartilhada inclusive em StrictMode.
 - `GET /api/v1/me`: cookies, disponível no cliente tipado.
 - `POST /api/v1/auth/refresh`: cookies e CSRF atual, sem corpo; uma Promise compartilhada.
 - `POST /api/v1/auth/logout`: cookies e CSRF atual, sem corpo; limpa a sessão local.
 
-CSRF fica na closure privada do cliente, fora do contexto React. Renovação e
-comandos autenticados coordenam a rotação: não reutilizam CSRF antigo em paralelo.
+CSRF fica na closure privada do cliente, fora do contexto React. F1 coordenava
+renovação e comandos autenticados somente dentro da própria aba. O incremento F2
+descrito abaixo trata o CSRF obsoleto após rotação em outra aba; seus resultados
+locais são registrados separadamente.
 Não há renovação infinita nem repetição automática de uma mutação após 401.
 O cliente mantém a renovação antes de uma operação autenticada próxima da
 expiração; o baú não oferece botões de atualização ou renovação. O relógio local
-apenas atualiza o estado expirado.
+oculta a identidade vencida e pode reconsultar a API, sem POST disparado pelo timer.
 
 401 remove a identidade local; 403 mostra uma orientação pública; `404 AUTH_DISABLED`
 desabilita Google; o agendamento pelo Orbe permanece independente. Se refresh falhar de modo
@@ -78,24 +121,68 @@ O baú aberto representa autenticação; o papel `admin` controla a apresentaç�
 painel e a rota `/administracao`. O backend continua autorizando cada requisição.
 Usuários comuns não são promovidos pelo frontend.
 
-Na primeira sessão administrativa reconhecida na página principal, incluindo
-`/#sobre`, o React abre `/administracao`. Esse redirecionamento ocorre uma vez por
-identidade autenticada durante a montagem: **VOLTAR AO PORTFÓLIO** continua
-funcionando e o baú permite reabrir a sala. Links diretos para outras rotas são
-preservados. O menu administrativo oferece somente **IR PARA A SALA DO
+Na primeira sessão administrativa reconhecida na raiz simples `/`, sem query,
+fragmento ou aviso de callback, o React abre `/administracao`. Isso não substitui
+destinos como `/#sobre` ou `/projetos` preservados no retorno. O redirecionamento
+ocorre uma vez por identidade autenticada durante a montagem:
+**VOLTAR AO PORTFÓLIO** continua funcionando e o baú permite reabrir a sala.
+O menu administrativo oferece somente **IR PARA A SALA DO
 ADMINISTRADOR** e **TRANCAR BAÚ (LOGOUT)**, além do controle de fechar o diálogo.
 
-Uma sessão legada com papel `user` recebe uma mensagem de acesso não autorizado
-e a opção de logout, sem consultar os endpoints administrativos. O backend
-atualmente aceita outras contas Google verificadas; somente ele pode impedir a
-criação dessas sessões. Consulte a [pendência de acesso exclusivo ao proprietário](admin-access-handoff.md).
+Uma sessão legada ou simulada com papel `user` recebe uma mensagem de acesso não
+autorizado e a opção de logout, sem consultar os endpoints administrativos.
+O contrato backend adotado por F1 é **admin-only**: recusa outras identidades
+antes de criar sessão e revalida admissão/papel no servidor. O frontend não
+contém allowlist de e-mail nem promove o usuário. O
+[handoff administrativo](admin-access-handoff.md) preserva a observação histórica
+anterior à implementação dessa política, identificada por sua atualização datada.
+
+## F2 — Coordenação entre abas
+
+F2 usa exclusão mútua do navegador para refresh, logout e POSTs
+autenticados, incluindo a reconsulta de `GET /api/v1/auth/session` dentro do lock
+antes de usar CSRF. Após esperar outra aba, o cliente adota a sessão atual
+em vez de reutilizar a credencial antiga ou renovar novamente sem necessidade.
+Sem Web Locks utilizável, esses POSTs não são enviados; uma consulta consciente
+de sessão continua disponível. BroadcastChannel é opcional e não substitui o
+lock.
+
+O canal transporta somente eventos e metadados não secretos, validados e
+deduplicados. Identidade, CSRF e respostas privadas não são compartilhados. A
+API é reconsultada ao carregar a página e quando necessário após evento,
+foco/visibilidade ou antes de mutações, para não depender de mensagens entregues.
+Respostas antigas não restauram identidade após logout ou revogação conhecida.
+O namespace usa a URL-base canônica da API; eventos contêm somente
+`version`, `id`, `source` e `type`. GET não gera novo evento de rotação.
+Foco/visibilidade coalescem consultas feitas há menos de um segundo; não há polling.
+O timeout de aquisição é de 10 segundos e não libera uma operação em execução;
+o timeout HTTP permanece de 30 segundos.
+
+Logout incerto exige aviso global acima das rotas/modal, conservado ao navegar
+e reabrir o baú. Timeout, falha de rede e limpeza local não comprovam revogação.
+A recuperação manual usa GET de sessão; nenhum refresh ou POST ambíguo é repetido
+automaticamente. F5 inicia nova consulta à API, sem persistir credenciais nem o
+aviso anterior em storage.
+
+A coordenação cobre abas cooperantes da mesma origem; não serializa frontends
+em origens diferentes, versões antigas ou clientes externos que compartilhem o
+cookie da API. Fechamento de aba/abort/timeout não garante cancelamento no
+servidor. O contrato B1 continua exigindo cookie ativo, Origin permitido e CSRF
+nos comandos administrativos, mesmo quando existe Bearer.
+
+Esta implementação local não constitui homologação. Consulte o
+[registro F2](f2-validacao-local.md) para a bateria efetivamente executada e seus
+limites; o E2E real de B2/F3 permanece separado.
 
 ## Reuniões públicas e consentimento
 
-O agendamento não aparece no baú. O Orbe continua oferecendo a revisão de propostas
+Com `meetingsEnabled`, o agendamento não aparece no baú. O Orbe oferece a revisão de propostas
 de reunião sem login; **Alterar dados / novo horário** permite consultar a agenda
 e preparar outra proposta pelo formulário existente. O cliente público utiliza
-`credentials: 'omit'`:
+`credentials: 'omit'`. Desligar a UI de auth não exige login do visitante para
+as APIs públicas de reuniões; o backend ainda precisa de auth administrativa e
+Calendar configurados para operar esse módulo. O acesso direto independente da
+LLM continua pendência fora de F1. O fluxo existente é:
 
 1. `GET /api/v1/meetings/availability?from=ISO&to=ISO`: intervalo de até sete dias.
 2. `POST /api/v1/meetings/proposals`: nome, e-mail, assunto e um slot retornado pela API.
@@ -128,7 +215,9 @@ perde o token local; não há recuperação por e-mail implementada ou prometida
 
 ## Administração e Orbe
 
-O painel consulta `/api/v1/admin/meetings` com filtro e cursor opaco. Não utiliza
+Com auth habilitada e reuniões desligadas, a sala administrativa mantém seu shell,
+mostra a indisponibilidade de agenda e não monta consultas de reuniões.
+Quando ambos estão habilitados, o painel consulta `/api/v1/admin/meetings` com filtro e cursor opaco. Não utiliza
 paginação numérica. Aprovar, rejeitar e cancelar exigem confirmação visual e
 `POST /api/v1/admin/meetings/{id}/{approve|reject|cancel}`, cookies e CSRF, sem
 corpo. Há bloqueio de duplicação, tratamento de 401/403/409 e atualização da lista.
@@ -143,30 +232,88 @@ indisponível, com explicação. O [handoff dos relatórios e da agenda](admin-d
 registra os contratos necessários e a definição de conversa única do proprietário.
 
 O chat permanece `POST /api/v1/chat`, com seu token próprio e `credentials: 'omit'`.
-Somente com Fase 3 habilitada ele envia `X-Orbe-Capabilities: meetings-v1`.
+Somente com chat HTTP e reuniões habilitados ele envia
+`X-Orbe-Capabilities: meetings-v1`; a flag de auth não anuncia essa capacidade.
 `actions` admite no máximo uma proposta validada. O botão **REVISAR PROPOSTA DE
 REUNIÃO** fecha o chat e abre o mesmo fluxo público; nenhum token volta ao texto
 da LLM. O histórico do chat e o Canvas permanecem preservados.
 O botão **NOVA CONVERSA** foi retirado: fechar/reabrir preserva a sessão em memória;
 recarregar a página descarta o histórico local e a próxima pergunta inicia outra.
 
-## Ambientes
+## Ambientes e migração das flags
 
-| Destino | Orbe real | Fase 3 real | API |
-| --- | --- | --- | --- |
-| CI para `dev` | sim | sim | `https://devapi.phasscode.com` |
-| CI para `main` | não | não | vazia |
-| Local sem opt-in | não | não | vazia |
-| Testes Fase 3 | mock | mock | `https://phase3-api.invalid` |
+`PlatformConfig` tem a forma `{ authEnabled, meetingsEnabled, apiBaseUrl }`.
+`VITE_AUTH_ENABLED` controla sessão/login e a UI administrativa;
+`VITE_MEETINGS_ENABLED` controla clientes/UI de reuniões e a capability do chat.
+`VITE_ORBE_API_ENABLED` continua independente, usando a URL validada compartilhada
+`VITE_API_BASE_URL`. Somente a string exata `true` ativa cada flag; ausência,
+`false`, `TRUE` ou URL inválida não habilitam o respectivo módulo.
 
-`.env.example` é apenas o modelo. Para configuração local use `.env.local` na raiz;
-não coloque segredos em `VITE_*`. As flags públicas são `VITE_ORBE_API_ENABLED`,
-`VITE_PHASE3_ENABLED` e `VITE_API_BASE_URL`. Reinicie Vite após alterações.
+**Migração obrigatória:** `VITE_PHASE3_ENABLED` é ignorada e não serve como fallback.
+Antes de atualizar configurações locais/pipeline, escolher explicitamente quais
+módulos serão ativados, retirar a flag antiga e definir as duas novas. Ter apenas
+`VITE_PHASE3_ENABLED=true` não ativa auth nem reuniões. Não copiar a flag antiga
+automaticamente para ambas: o primeiro perfil DEV preparado por F1 é somente login.
+
+| Destino preparado | Orbe HTTP | Auth | Reuniões | API |
+| --- | --- | --- | --- | --- |
+| CI para `dev`, inclusive PR destinado à `dev` | sim | sim | não | `https://devapi.phasscode.com` |
+| Build de `main`, inclusive PR destinado à `main` | não | não | não | vazia |
+| Local sem opt-in | não | não | não | vazia, salvo configuração explícita |
+| Testes isolados | conforme cenário | conforme cenário | conforme cenário | `.invalid` conhecida e interceptada |
+
+Essa tabela descreve configuração de build, não publicação realizada ou estado das
+flags privadas do servidor. O modo Vite `production` não significa ambiente PROD.
+
+Quatro exemplos locais, todos com API válida. Como base, usar
+`VITE_API_BASE_URL=http://localhost:3000` somente se backend, hostname/cookies e
+origem CORS locais estiverem configurados de modo compatível. Orbe pode ser `true`
+ou `false` em **cada** combinação; para testar sem LLM, mantê-lo `false` ou usar
+a suíte interceptada, sem apontar automação para um provedor real.
+
+1. Nenhuma UI de sessão/agenda; chat continua independente:
+
+   ```dotenv
+   VITE_AUTH_ENABLED=false
+   VITE_MEETINGS_ENABLED=false
+   ```
+
+2. Login/sessão/logout e shell admin, sem consultas/capability de reuniões:
+
+   ```dotenv
+   VITE_AUTH_ENABLED=true
+   VITE_MEETINGS_ENABLED=false
+   ```
+
+3. Login/admin e clientes de reuniões habilitados:
+
+   ```dotenv
+   VITE_AUTH_ENABLED=true
+   VITE_MEETINGS_ENABLED=true
+   ```
+
+4. Clientes públicos de reuniões habilitados, sem UI/fetch de sessão/admin:
+
+   ```dotenv
+   VITE_AUTH_ENABLED=false
+   VITE_MEETINGS_ENABLED=true
+   ```
+
+O quarto exemplo não desabilita a autenticação administrativa no backend. Reuniões
+no servidor continuam exigindo suas dependências privadas; a independência da UI
+não remove autorização, Calendar ou requisitos operacionais. O formulário direto
+sem depender de uma action do Orbe ainda não foi acrescentado em F1.
+
+`.env.example` é apenas o modelo. Para configuração local use `.env.local` na raiz
+e reinicie Vite após alterações. Esses exemplos não modificam arquivos privados;
+não coloque e-mail administrativo, chaves, cookies, CSRF ou tokens em `VITE_*`.
 
 A política do CI usa a branch de destino do PR. Define explícitos também
 protegem builds locais da `main` contra `.env.local` ou variáveis herdadas com
-DEV. Os testes isolados podem habilitar exclusivamente as duas URLs `.invalid`
-conhecidas com uma flag interna de mock; essa exceção nunca autoriza `devapi`.
+DEV: Orbe/auth/reuniões são forçados a `false` e a URL fica vazia. Os testes
+isolados podem habilitar exclusivamente `https://orbe-api.invalid` ou
+`https://phase3-api.invalid` com `PHASSCODE_MOCK_API_BUILD=true`; essa exceção
+nunca autoriza `devapi` ou a API produtiva.
 Os builds de teste ficam fora de `dist`, que continua sendo o artefato publicado.
 
 Em produção, o baú informa indisponibilidade sem solicitar senha; o Orbe continua
@@ -195,10 +342,24 @@ npm run build
 npm test
 npm run test:orbe
 npm run test:phase3
+npm run test:f1
 npm run test:visual
 ```
 
-## Resultados da validação
+`test:f1` utiliza oito perfis de flags em servidores Vite locais nas portas
+4180–4187 e a API `https://phase3-api.invalid` interceptada. É uma suíte de UI
+com mocks, não o E2E real de B2/F3. A etapa correspondente foi acrescentada ao
+workflow de CI como código; não foi acionada por editar o arquivo.
+Não existe script/configuração de lint de código neste frontend. TypeScript e
+Commitlint têm escopos próprios e não devem ser relatados como lint aprovado.
+
+## Histórico da validação anterior a F1
+
+Os resultados desta seção pertencem às revisões de **25/10/2026**, anteriores à
+separação das flags e ao tratamento de callback F1. São preservados como histórico;
+não devem ser apresentados como regressão executada novamente em F1. A validação
+local desta atualização é registrada separadamente em
+[f1-validacao-local.md](f1-validacao-local.md).
 
 Validação inicial concluída em 25/10/2026, no Windows com Edge/Playwright:
 
@@ -246,7 +407,9 @@ a suíte Fase 3 em 49 (23 administrativos, 21 públicos/sessão e 5 do Orbe). Os
 cenários conferem a entrada administrativa automática a partir de `/` e
 `/#sobre`, a volta ao portfólio sem ciclo e o menu sem agendamento ou controles
 manuais de sessão. As requisições continuam inteiramente simuladas; a política
-de login por e-mail no backend permanece pendente.
+de login por e-mail no backend foi registrada como pendente naquele snapshot.
+Essa observação histórica foi superada no código backend pelo PR #13, sem que
+este resultado de testes com mocks comprove sua publicação ou homologação real.
 Os quatro casos responsivos administrativos foram ampliados e reexecutados com
 sucesso: baú em 320/375/768/1440 px nos dois temas, texto do botão sem overflow,
 foco, Tab/Escape e axe em 320 px nos dois temas.

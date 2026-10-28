@@ -186,7 +186,8 @@ test('consulta HTTP simulada percorre cliente, HMR e terminal no Vite real sem r
     },
     define: {
       'import.meta.env.VITE_ORBE_API_ENABLED': JSON.stringify('true'),
-      'import.meta.env.VITE_PHASE3_ENABLED': JSON.stringify('false'),
+      'import.meta.env.VITE_AUTH_ENABLED': JSON.stringify('false'),
+      'import.meta.env.VITE_MEETINGS_ENABLED': JSON.stringify('false'),
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://orbe-api.invalid'),
     },
     server: { host: '127.0.0.1', port: 0, strictPort: true, watch: null },

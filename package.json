@@ -15,7 +15,10 @@
     "test:smoke": "playwright test --config playwright.smoke.config.ts",
     "test:visual": "playwright test --config playwright.visual.config.ts",
     "test:orbe": "playwright test --config playwright.orbe.config.ts",
-    "test:phase3": "playwright test --config playwright.phase3.config.ts"
+    "test:phase3": "playwright test --config playwright.phase3.config.ts",
+    "test:f1": "playwright test --config playwright.f1.config.ts",
+    "test:f2": "playwright test --config playwright.f2.config.ts",
+    "test:f3": "playwright test --config playwright.f3.config.ts"
   },
   "dependencies": {
     "gsap": "^3.13.0",

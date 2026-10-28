@@ -16,6 +16,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # R2: no frontend release can proceed without the same complete paired B2/F3 gate.
+  # Both repository variables pin the exact authorized pair of commits.
+  # This intentionally fails closed for main until a separately authorized main gate.
+  coordinated:
+    name: 'Coordinated B2/F3 (approved immutable DEV pair)'
+    # PRs only run regular checks; no release gate needs pinned candidate SHAs.
+    # main/production intentionally remains unqualified and blocked.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    needs: [tests]
+    timeout-minutes: 70
+    permissions:
+      contents: read
+    env:
+      PHASSCODE_RELEASE_BACKEND_SHA: ${{ vars.PHASSCODE_RELEASE_BACKEND_SHA }}
+      PHASSCODE_RELEASE_FRONTEND_SHA: ${{ vars.PHASSCODE_RELEASE_FRONTEND_SHA }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: SladeSouzaSantos/phasscode-platform
+          ref: ${{ vars.PHASSCODE_RELEASE_BACKEND_SHA }}
+          path: paired/backend
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          path: paired/frontend
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Verify both approved pinned DEV SHAs
+        run: |
+          set -euo pipefail
+          node paired/frontend/scripts/release-pair-gate.mjs frontend
+          test "$(git -C paired/backend rev-parse HEAD)" = "$PHASSCODE_RELEASE_BACKEND_SHA"
+          test "$(git -C paired/frontend rev-parse HEAD)" = "$PHASSCODE_RELEASE_FRONTEND_SHA"
+          git -C paired/backend switch -c dev
+          git -C paired/frontend switch -c dev
+      - name: Install backend harness only (no lifecycle scripts)
+        working-directory: paired/backend
+        run: npm ci --ignore-scripts
+      - name: Validate B2 harness guards
+        working-directory: paired/backend
+        run: node node_modules/vitest/vitest.mjs run tests/b2-harness.test.ts --pool threads --maxWorkers 1
+      - name: Run full unfiltered B2/F3 against approved frontend and backend
+        working-directory: paired/backend
+        run: npm run test:e2e -- --frontend ../frontend --regression
+
   tests:
     name: '1 - Tests / Typecheck / Build / Playwright'
     runs-on: ubuntu-latest
@@ -66,6 +115,13 @@ jobs:
       - name: Test authentication and meetings with mocked requests only
         run: npm run test:phase3
 
+      - name: Test independent feature flags and Google callback with mocked requests only
+        run: npm run test:f1
+
+      - name: Test session coordination between tabs with mocked requests only
+        run: npm run test:f2
+
+      # F3 requires B2 isolated Fastify/Vite and is executed by coordinated.
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v6
@@ -226,7 +282,7 @@ jobs:
 
   deploy:
     name: '5 - Deploy identical image contents to Mac Mini Nginx'
-    needs: [image, dast]
+    needs: [image, dast, coordinated]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -243,6 +299,12 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - name: Require explicit frontend remote release enablement
+        env:
+          ENABLE_REMOTE_DEPLOY: ${{ vars.ENABLE_REMOTE_DEPLOY }}
+        run: |
+          set -euo pipefail
+          test "$ENABLE_REMOTE_DEPLOY" = true
       - name: Connect to Tailscale
         uses: ./.github/actions/tailscale-connect
         with:

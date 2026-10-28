@@ -115,6 +115,7 @@ export async function mockPlatform(page: Page, replies: MockPlatformReply[], bas
   const requests: Request[] = [];
   const unexpected: Request[] = [];
   const consumed = new Set<number>();
+  let currentSession: AuthSessionResponse | undefined;
   await page.route(PLATFORM_ROUTE, async route => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
@@ -128,12 +129,22 @@ export async function mockPlatform(page: Page, replies: MockPlatformReply[], bas
       && (reply.method ?? 'GET') === request.method()
       && (typeof reply.path === 'string' ? reply.path === path : reply.path.test(path)));
     if (index < 0) {
+      // F2 explicitly rechecks the current server session under Web Locks before
+      // protected writes. Keep that GET visible in requests; never replay a POST.
+      if (request.method() === 'GET' && path === '/api/v1/auth/session' && currentSession) {
+        await route.fulfill({ headers, json: currentSession });
+        return;
+      }
       unexpected.push(request);
       await route.fulfill({ status: 503, headers, json: platformError('UNEXPECTED_TEST_REQUEST') });
       return;
     }
     consumed.add(index);
     const reply = replies[index];
+    if ((reply.status ?? 200) === 200 && ['/api/v1/auth/session', '/api/v1/auth/refresh'].includes(path)) {
+      currentSession = reply.body as AuthSessionResponse;
+    }
+    if (path === '/api/v1/auth/logout' && reply.status === 204) currentSession = anonymousSession();
     if (reply.waitFor) await reply.waitFor;
     try {
       if (reply.networkError) await route.abort('internetdisconnected');

@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { AdminDashboard } from './components/AdminDashboard';
+import { AuthCallbackNotice } from './components/AuthCallbackNotice';
+import { AuthSessionNotice } from './components/AuthSessionNotice';
+import { platformConfig } from './config/platform';
 import { Navbar } from './components/Navbar';
 import { OrbAssistant } from './components/OrbAssistant';
 import { MeetingScheduler } from './components/meetings/MeetingScheduler';
@@ -46,15 +49,16 @@ function PortfolioPage({ theme, toggleTheme, adminView = false, onMeetingProposa
         </>}
       </div>
     </main>
-    <OrbAssistant onMeetingProposal={onMeetingProposal} />
+    <OrbAssistant onMeetingProposal={platformConfig.meetingsEnabled ? onMeetingProposal : undefined} />
   </>;
 }
 
 function RequireAdmin({ children }: { children: ReactNode }) {
-  const { state } = useAuth();
+  const { state, callbackNotice } = useAuth();
+  const { search, hash } = useLocation();
   if (state.status === 'loading') return <main className="portfolio-main"><p role="status">[ CONSULTANDO PERMISSÕES... ]</p></main>;
   return state.status === 'authenticated' && state.user?.roles.includes('admin')
-    ? children : <Navigate to="/#sobre" replace />;
+    ? children : <Navigate to={callbackNotice ? `/${search}${hash || '#sobre'}` : '/#sobre'} replace />;
 }
 
 function LegacyRedirect({ to }: { to: string }) {
@@ -64,13 +68,17 @@ function LegacyRedirect({ to }: { to: string }) {
 
 export function App() {
   const { theme, toggleTheme } = useTheme();
-  const { state: auth } = useAuth();
-  const { pathname } = useLocation();
+  const { state: auth, callbackNotice } = useAuth();
+  const { pathname, search, hash } = useLocation();
   const navigate = useNavigate();
   const handledAdminSession = useRef<string | null>(null);
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [meetingProposal, setMeetingProposal] = useState<MeetingProposal | undefined>();
-  const reviewMeeting = (proposal: MeetingProposal) => { setMeetingProposal(proposal); setMeetingOpen(true); };
+  const reviewMeeting = (proposal: MeetingProposal) => {
+    if (!platformConfig.meetingsEnabled) return;
+    setMeetingProposal(proposal);
+    setMeetingOpen(true);
+  };
 
   useEffect(() => {
     if (auth.status === 'anonymous' || auth.status === 'unavailable') {
@@ -79,11 +87,11 @@ export function App() {
     }
     if (auth.status !== 'authenticated' || !auth.user?.roles.includes('admin')
       || handledAdminSession.current === auth.user.id) return;
-    // The OAuth callback returns to the portfolio. Open the room once per
-    // authenticated visit, while allowing the administrator to return home.
+    // Open the room once on the default return. Explicit paths, query and hash
+    // remain the visitor's navigation destination, including after OAuth.
     handledAdminSession.current = auth.user.id;
-    if (pathname === '/') void navigate('/administracao', { replace: true });
-  }, [auth.status, auth.user, pathname, navigate]);
+    if (pathname === '/' && !search && !hash && !callbackNotice) void navigate('/administracao', { replace: true });
+  }, [auth.status, auth.user, pathname, search, hash, callbackNotice, navigate]);
 
   useLayoutEffect(() => {
     const archive = /^\/projetos(?:\.html)?\/?$/.test(pathname);
@@ -95,7 +103,7 @@ export function App() {
   }, [pathname]);
 
   const pageProps = { theme, toggleTheme, onMeetingProposal: reviewMeeting };
-  return <><Routes>
+  return <><AuthCallbackNotice /><AuthSessionNotice /><Routes>
     <Route path="/" element={<PortfolioPage {...pageProps} />} />
     <Route path="/administracao" element={<RequireAdmin><PortfolioPage {...pageProps} adminView /></RequireAdmin>} />
     <Route path="/projetos" element={<ArquivoProjetos />} />
@@ -103,6 +111,6 @@ export function App() {
     <Route path="/index.html" element={<LegacyRedirect to="/" />} />
     <Route path="*" element={<LegacyRedirect to="/" />} />
   </Routes>
-    {meetingOpen && <MeetingScheduler onClose={() => setMeetingOpen(false)} initialProposal={meetingProposal} />}
+    {platformConfig.meetingsEnabled && meetingOpen && <MeetingScheduler onClose={() => setMeetingOpen(false)} initialProposal={meetingProposal} />}
   </>;
 }

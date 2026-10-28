@@ -23,7 +23,8 @@ export function productionIsolationDefines(command: string, branch: string, envi
   // Explicit defines override .env.local as well as inherited shell variables.
   return {
     'import.meta.env.VITE_ORBE_API_ENABLED': JSON.stringify('false'),
-    'import.meta.env.VITE_PHASE3_ENABLED': JSON.stringify('false'),
+    'import.meta.env.VITE_AUTH_ENABLED': JSON.stringify('false'),
+    'import.meta.env.VITE_MEETINGS_ENABLED': JSON.stringify('false'),
     'import.meta.env.VITE_API_BASE_URL': JSON.stringify(''),
   };
 }

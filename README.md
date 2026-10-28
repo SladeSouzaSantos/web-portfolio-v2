@@ -41,6 +41,21 @@ ações do Orbe com uma API `.invalid` inteiramente interceptada. Não cria even
 nem envia notificações. Consulte a [integração da Fase 3](docs/phase3-integracao.md)
 e o [roteiro de homologação controlada](docs/phase3-homologacao.md).
 
+`npm run test:f1` acrescenta a matriz independente de auth/reuniões/Orbe e o
+retorno Google com respostas interceptadas. Sua etapa de CI foi preparada no
+workflow; editar esse arquivo não executa a CI. Resultados locais atuais e
+limitações ficam em [f1-validacao-local.md](docs/f1-validacao-local.md).
+
+`npm run test:f2` valida a coordenação de sessão/CSRF entre abas e a preservação
+do aviso de logout não confirmado durante a navegação. O harness usa duas páginas
+no mesmo contexto, cookies HttpOnly sintéticos e uma API HTTP loopback interceptada.
+Escopo, limitações de navegador e resultados locais ficam em
+[f2-validacao-local.md](docs/f2-validacao-local.md). O incremento não altera o
+backend nem antecipa o E2E real de B2/F3.
+
+Não há script/configuração de lint de código no frontend; `typecheck` verifica
+tipos e Commitlint verifica mensagens de commit, sem equivaler a um linter de código.
+
 ## Organização
 
 ```text
@@ -67,20 +82,38 @@ A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descri
 
 Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
 
-O baú é exclusivo da administração: utiliza Google e cookies de sessão no build
-da `dev` e oferece ao administrador apenas acesso à sala e logout. O papel `admin`
-retornado pela API abre `/administracao` ao iniciar uma sessão na página principal.
-O agendamento público continua pelo Orbe, separado do baú. Restringir o login ao
-e-mail do proprietário depende da [política no backend](docs/admin-access-handoff.md).
-A produção mantém esses
-recursos explicitamente indisponíveis e o Orbe demonstrativo. A URL compartilhada
-é `VITE_API_BASE_URL`; `VITE_PHASE3_ENABLED` habilita sessão/reuniões e
-`VITE_ORBE_API_ENABLED` habilita o chat. Não coloque segredos em `VITE_*`.
-ID/token do chat, CSRF e tokens privados de reunião ficam apenas em memória.
-Veja a [arquitetura, os ambientes e as limitações](docs/phase3-integracao.md).
+O baú é exclusivo da administração: com `VITE_AUTH_ENABLED=true`, utiliza Google
+e cookies de sessão e oferece acesso à sala e logout. O papel `admin` retornado
+pela API abre `/administracao` na entrada pela raiz sem query/fragmento ou aviso
+de callback; destinos de navegação permitidos no retorno são preservados.
+A admissão e o papel são verificados pelo backend; o React não contém e-mail
+permitido nem concede acesso por comparação de e-mail. O retorno Google trata
+erros públicos com mensagens locais, limpa `auth_error` da URL e permite nova
+tentativa manual. A API continua sendo a autoridade sobre a sessão.
 
-A sala administrativa reúne a agenda com busca/ordenação dos pedidos carregados,
-resumo por situação e decisões confirmadas. Os relatórios do Orbe e o
+Na atualização local F1 de 26/10/2026, `VITE_AUTH_ENABLED` e
+`VITE_MEETINGS_ENABLED` controlam autenticação e reuniões separadamente;
+`VITE_ORBE_API_ENABLED` controla o chat HTTP. Somente o valor exato `true` habilita
+cada módulo, com `VITE_API_BASE_URL` válida. **`VITE_PHASE3_ENABLED` é ignorada,
+sem fallback**: configurações antigas precisam de migração explícita.
+O perfil preparado pelo CI para `dev` liga Orbe e auth, mantendo reuniões
+desligadas. Assim, o administrador pode usar a sala sem consultar agenda nem
+anunciar ferramentas de reunião. O build de `main` força as três flags falsas
+e a URL vazia, inclusive diante de configuração local herdada.
+Não coloque segredos em `VITE_*`.
+ID/token do chat, CSRF e tokens privados de reunião ficam apenas em memória.
+Veja a [matriz, os quatro exemplos e a migração](docs/phase3-integracao.md#ambientes-e-migração-das-flags)
+e o [registro de validação local F1](docs/f1-validacao-local.md). Essas alterações
+locais não comprovam publicação ou homologação Google/Calendar/canais reais.
+
+Quando reuniões estão habilitadas, o agendamento público continua pelo Orbe,
+separado do baú e sem exigir login do visitante. Uma entrada pública independente
+da LLM permanece pendência separada; F1 não acrescenta esse acesso.
+
+A sala administrativa apresenta a agenda somente quando reuniões estão habilitadas,
+com busca/ordenação dos pedidos carregados, resumo por situação e decisões confirmadas.
+Com reuniões desligadas, a sala permanece acessível sem montar consultas administrativas
+de agenda. Os relatórios do Orbe e o
 reagendamento ainda dependem de novos contratos publicados pelo backend; a
 interface identifica essas indisponibilidades. Veja o
 [handoff dos relatórios e da agenda](docs/admin-dashboard-handoff.md).

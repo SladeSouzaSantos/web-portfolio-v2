@@ -1,5 +1,6 @@
 import { useRef, type MouseEvent, type RefObject } from 'react';
 import { AdminMeetings } from './AdminMeetings';
+import { platformConfig } from '../config/platform';
 import '../styles/admin_dashboard.css';
 
 const reports = [
@@ -45,7 +46,7 @@ export function AdminDashboard({ onReturn }: { onReturn: () => void }) {
 
     <nav className="admin-dashboard-navigation" aria-label="Seções da administração">
       <a href="#admin-orbe-records" onClick={event => focusSection(event, recordsRef)}>REGISTROS DO ORBE</a>
-      <a href="#admin-meeting-agenda" onClick={event => focusSection(event, agendaRef)}>AGENDA E PEDIDOS</a>
+      {platformConfig.meetingsEnabled && <a href="#admin-meeting-agenda" onClick={event => focusSection(event, agendaRef)}>AGENDA E PEDIDOS</a>}
     </nav>
 
     <section ref={recordsRef} id="admin-orbe-records" className="admin-dashboard-records"
@@ -61,8 +62,8 @@ export function AdminDashboard({ onReturn }: { onReturn: () => void }) {
       </dl>
     </section>
 
-    <div ref={agendaRef} id="admin-meeting-agenda" className="admin-dashboard-agenda" tabIndex={-1}>
+    {platformConfig.meetingsEnabled ? <div ref={agendaRef} id="admin-meeting-agenda" className="admin-dashboard-agenda" tabIndex={-1}>
       <AdminMeetings />
-    </div>
+    </div> : <p role="status" className="admin-dashboard-unavailable">As reuniões estão desativadas neste ambiente.</p>}
   </section>;
 }
