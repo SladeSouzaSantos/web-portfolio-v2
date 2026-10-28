@@ -5,7 +5,13 @@ on:
     branches: [main, dev]
   pull_request:
     branches: [main, dev]
+  # Manual release qualification only; a push runs tests + security, not deployment.
   workflow_dispatch:
+    inputs:
+      apply_remote:
+        description: Deploy the approved DEV pair remotely after checks (default false)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,7 +29,7 @@ jobs:
     name: 'Coordinated B2/F3 (approved immutable DEV pair)'
     # PRs only run regular checks; no release gate needs pinned candidate SHAs.
     # main/production intentionally remains unqualified and blocked.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     needs: [tests]
     timeout-minutes: 70
@@ -193,8 +199,8 @@ jobs:
 
   image:
     name: '3 - Build and push immutable GHCR image'
-    needs: sast
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: [sast, coordinated]
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -299,7 +305,7 @@ jobs:
   deploy:
     name: '5 - Deploy identical image contents to Mac Mini Nginx'
     needs: [image, dast, coordinated]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.apply_remote
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -475,7 +481,7 @@ jobs:
   verify_deploy:
     name: '6 - Verify deployed site'
     needs: deploy
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.apply_remote
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
