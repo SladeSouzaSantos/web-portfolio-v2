@@ -5,13 +5,21 @@ on:
     branches: [main, dev]
   pull_request:
     branches: [main, dev]
-  # Manual release qualification only; a push runs tests + security, not deployment.
+  # DEV push qualifies captured candidates with no remote deployment.
   workflow_dispatch:
     inputs:
       apply_remote:
         description: Deploy the approved DEV pair remotely after checks (default false)
         type: boolean
         default: false
+      backend_sha:
+        description: Immutable backend commit for manual DEV release (optional fallback vars)
+        type: string
+        required: false
+      frontend_sha:
+        description: Immutable frontend commit for manual DEV release (optional fallback vars)
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -29,20 +37,20 @@ jobs:
     name: 'Coordinated B2/F3 (approved immutable DEV pair)'
     # PRs only run regular checks; no release gate needs pinned candidate SHAs.
     # main/production intentionally remains unqualified and blocked.
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     needs: [tests]
     timeout-minutes: 70
     permissions:
       contents: read
     env:
-      PHASSCODE_RELEASE_BACKEND_SHA: ${{ vars.PHASSCODE_RELEASE_BACKEND_SHA }}
-      PHASSCODE_RELEASE_FRONTEND_SHA: ${{ vars.PHASSCODE_RELEASE_FRONTEND_SHA }}
+      PHASSCODE_RELEASE_BACKEND_SHA: ${{ inputs.backend_sha || vars.PHASSCODE_RELEASE_BACKEND_SHA }}
+      PHASSCODE_RELEASE_FRONTEND_SHA: ${{ github.event_name == 'push' && github.sha || inputs.frontend_sha || vars.PHASSCODE_RELEASE_FRONTEND_SHA }}
     steps:
       - uses: actions/checkout@v7
         with:
           repository: SladeSouzaSantos/phasscode-platform
-          ref: ${{ vars.PHASSCODE_RELEASE_BACKEND_SHA }}
+          ref: ${{ github.event_name == 'push' && 'dev' || inputs.backend_sha || vars.PHASSCODE_RELEASE_BACKEND_SHA }}
           path: paired/backend
           persist-credentials: false
       - uses: actions/checkout@v7
@@ -53,14 +61,22 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - name: Verify both approved pinned DEV SHAs
+      - name: Verify immutable captured DEV pair before tests
         run: |
           set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            export PHASSCODE_RELEASE_BACKEND_SHA="$(git -C paired/backend rev-parse HEAD)"
+          fi
           node paired/frontend/scripts/release-pair-gate.mjs frontend
           test "$(git -C paired/backend rev-parse HEAD)" = "$PHASSCODE_RELEASE_BACKEND_SHA"
           test "$(git -C paired/frontend rev-parse HEAD)" = "$PHASSCODE_RELEASE_FRONTEND_SHA"
           git -C paired/backend switch -c dev
           git -C paired/frontend switch -c dev
+          {
+            echo "Candidate only; Mac Mini deployment requires a separate manual approval."
+            echo "backend_SHA=$(git -C paired/backend rev-parse HEAD)"
+            echo "frontend_SHA=$(git -C paired/frontend rev-parse HEAD)"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Install backend harness only (no lifecycle scripts)
         working-directory: paired/backend
         run: npm ci --ignore-scripts
@@ -86,6 +102,18 @@ jobs:
           DOCKER_HOST: unix:///var/run/docker.sock
           DOCKER_CONTEXT: default
         run: npm run test:e2e -- --frontend ../frontend --regression
+      - name: Save exact candidate pair for manual promotion
+        run: |
+          set -euo pipefail
+          BACKEND_SHA="$(git -C paired/backend rev-parse HEAD)"
+          FRONTEND_SHA="$(git -C paired/frontend rev-parse HEAD)"
+          printf '{"backend_sha":"%s","frontend_sha":"%s","ci_run_id":"%s","source":"automatic-dev-candidate","approved_for_deploy":false}\n' "$BACKEND_SHA" "$FRONTEND_SHA" "$GITHUB_RUN_ID" > candidate-pair.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: frontend-dev-candidate-pair
+          path: candidate-pair.json
+          if-no-files-found: error
+          retention-days: 14
 
   tests:
     name: '1 - Tests / Typecheck / Build / Playwright'
@@ -200,7 +228,7 @@ jobs:
   image:
     name: '3 - Build and push immutable GHCR image'
     needs: [sast, coordinated]
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:

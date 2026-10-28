@@ -43,7 +43,11 @@ test('push em DEV executa CI e par B2/F3 sem liberar release remota', () => {
   const workflow = readFileSync(resolve('.github/workflows/deploy.yml'), 'utf8');
   const pairedCi = readFileSync(resolve('.github/workflows/paired-dev-ci.yml'), 'utf8');
   expect(workflow).toContain('branches: [main, dev]');
-  expect(workflow).toContain("if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'");
+  expect(workflow).toContain("github.event_name == 'push' || github.event_name == 'workflow_dispatch'");
+  expect(workflow).toContain('frontend-dev-candidate-pair');
+  expect(workflow).toContain('automatic-dev-candidate');
+  expect(workflow).toContain('inputs.backend_sha || vars.PHASSCODE_RELEASE_BACKEND_SHA');
+  expect(workflow).toContain('inputs.frontend_sha || vars.PHASSCODE_RELEASE_FRONTEND_SHA');
   expect(workflow).toContain('needs: [sast, coordinated]');
   expect(workflow).toContain(
     "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.apply_remote",
