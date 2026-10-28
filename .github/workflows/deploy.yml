@@ -26,8 +26,9 @@ permissions:
 
 # Nunca publicar duas releases simultâneas da mesma branch.
 concurrency:
-  group: phasscode-${{ github.ref }}
-  cancel-in-progress: false
+  # Cancel only superseded automatic candidates, never a manual release.
+  group: phasscode-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
   # R2: no frontend release can proceed without the same complete paired B2/F3 gate.
