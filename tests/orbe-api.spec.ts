@@ -43,6 +43,46 @@ test('legado mantém chat público sem capacidade ou confirmação de reuniões'
   expect(meetingMutations).toEqual([]);
 });
 
+test('Shift+Enter adiciona quebra de linha sem enviar; Enter envia o texto completo', async ({ page }) => {
+  const mock = await mockChat(page, [{}]);
+  const { input, history, dialog } = await openChat(page);
+  await expect(dialog).toContainText('Shift + Enter pula linha');
+  await input.fill('Primeira pergunta');
+  await input.press('Shift+Enter');
+  await input.type('Segunda linha');
+  await expect(input).toHaveValue('Primeira pergunta\\nSegunda linha'.replace('\\n', '\n'));
+  expect(mock.requests).toHaveLength(0);
+  await input.press('Enter');
+  await expect(history.locator('.user-msg')).toContainText('Primeira pergunta');
+  await expect(history.locator('.user-msg')).toContainText('Segunda linha');
+  await expect(history).toContainText('Java, Spring Boot e TypeScript');
+  expect(mock.requests).toHaveLength(1);
+  expect(mock.requests[0].postDataJSON()).toEqual({ message: 'Primeira pergunta\\nSegunda linha'.replace('\\n', '\n') });
+});
+
+test('maximizar e restaurar mantém mensagens, sessão e requisição em andamento', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const pending = deferredReply();
+  const mock = await mockChat(page, [{ waitFor: pending.promise }]);
+  const { input, send, history, dialog } = await openChat(page);
+  await input.fill('Qual é a experiência de Pedro?');
+  await send.click();
+  await expect(history.locator('.user-msg')).toContainText('experiência de Pedro');
+  const original = await dialog.boundingBox();
+  await dialog.getByRole('button', { name: 'Maximizar chat' }).click();
+  await expect(dialog).toHaveClass(/orb-chat-panel-expanded/);
+  const maximized = await dialog.boundingBox();
+  expect(maximized!.width).toBeGreaterThan(original!.width);
+  await expect(send).toBeDisabled();
+  await dialog.getByRole('button', { name: 'Restaurar tamanho do chat' }).click();
+  await expect(dialog).not.toHaveClass(/orb-chat-panel-expanded/);
+  expect(mock.requests).toHaveLength(1);
+  pending.release();
+  await expect(history).toContainText('Java, Spring Boot e TypeScript');
+  await expect(input).toHaveValue('');
+  expect(mock.requests).toHaveLength(1);
+});
+
 test('cria e continua a conversa sem persistir ou expor o token', async ({ page, context }) => {
   const consoleMessages: string[] = [];
   page.on('console', message => consoleMessages.push(message.text()));
@@ -310,11 +350,12 @@ test('teclado, celular e movimento reduzido preservam acesso aos controles', asy
   await page.setViewportSize({ width: 320, height: 568 });
   await mockChat(page, [{}]);
   const { dialog, input, send, close, trigger, history } = await openChat(page);
-  await expect(close).toBeFocused();
+  const maximize = dialog.getByRole('button', { name: 'Maximizar chat' });
+  await expect(maximize).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(send).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(close).toBeFocused();
+  await expect(maximize).toBeFocused();
   await input.fill('Pergunta pelo teclado');
   await input.press('Enter');
   await expect(history).toContainText('Java, Spring Boot e TypeScript');

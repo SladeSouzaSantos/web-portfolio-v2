@@ -141,10 +141,13 @@ body.modo-claro .orb-chat-panel .chat-sender {
     gap: 8px;
 }
 
-.orb-chat-form input {
+.orb-chat-form textarea {
     flex: 1;
     min-width: 0;
-    min-height: 44px;
+    min-height: 64px;
+    max-height: min(160px, 30dvh);
+    resize: vertical;
+    line-height: 1.8;
     background-color: var(--bg-caixa-interna);
     border: 2px solid var(--borda-suave);
     color: var(--texto-principal);
@@ -154,7 +157,7 @@ body.modo-claro .orb-chat-panel .chat-sender {
     outline: none;
 }
 
-.orb-chat-form input:focus {
+.orb-chat-form textarea:focus {
     border-color: var(--acento-ouro);
 }
 
@@ -207,9 +210,76 @@ body.modo-claro .orb-chat-panel .chat-sender {
         flex-direction: column;
     }
 
-    .orb-chat-form input, .orb-chat-send-btn {
+    .orb-chat-form textarea, .orb-chat-send-btn {
         width: 100%;
     }
 }
 .orb-meeting-actions { margin-top: 12px; border-top: 1px solid var(--borda-ouro); padding-top: 10px; }
 .orb-meeting-actions .orb-chat-reset-btn { margin-top: 10px; width: 100%; white-space: normal; line-height: 1.8; }
+
+/* Public Orbe chat sizing and multiline composer. Modals remain inside the viewport. */
+.orb-chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.orb-chat-size-btn {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: var(--texto-destaque-ouro);
+    cursor: pointer;
+}
+
+.orb-chat-size-btn:hover { color: var(--texto-ciano); }
+.orb-chat-size-btn svg { display: block; }
+
+.orb-chat-keyboard-hint {
+    margin: 8px 0 0;
+    color: var(--texto-secundario);
+    font-size: 7px;
+    line-height: 1.8;
+}
+
+.login-modal-overlay .orb-chat-panel.orb-chat-panel-expanded {
+    max-width: none;
+    width: min(1120px, calc(100vw - 24px));
+    height: calc(100dvh - 24px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.orb-chat-panel-expanded .login-modal-header { flex-shrink: 0; }
+.orb-chat-panel-expanded .login-modal-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.orb-chat-panel-expanded .orb-chat-history {
+    flex: 1;
+    height: auto;
+    min-height: 96px;
+}
+
+.orb-chat-panel-expanded .orb-chat-form,
+.orb-chat-panel-expanded .orb-chat-keyboard-hint { flex-shrink: 0; }
+
+@media (max-width: 640px) {
+    .orb-chat-panel .orb-chat-title { font-size: 8px; }
+    .orb-chat-panel .orb-chat-header-actions { gap: 0; }
+    .orb-chat-panel .orb-chat-form textarea { max-height: 140px; }
+}
+
+@media (max-height: 520px) {
+    .orb-chat-panel-expanded .orb-chat-history { min-height: 80px; }
+}

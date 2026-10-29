@@ -78,6 +78,9 @@ jobs:
       - name: Run end-to-end browser tests
         run: npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts
 
+      - name: Validate Orbe chat lifecycle and keyboard controls against a mock API
+        run: npm run test:orbe
+
 
 
 

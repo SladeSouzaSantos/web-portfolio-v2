@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { startOrbRenderer, type OrbRenderer } from '../effects/orbRenderer';
 import { useReducedMotion } from '../hooks/useMediaQuery';
 import { useOrbeChat } from '../hooks/useOrbeChat';
@@ -6,7 +6,7 @@ import { getOrbeSources } from '../services/orbeSources';
 import { Modal } from './Modal';
 
 const GREETINGS = [
-  'Saudações, Herói! Sou o Orbe de Acesso. Clique em mim para abrir o guia do portfólio!',
+  'Saudações, Herói! Sou o Orbe do Portfólio. Clique em mim para abrir o guia do portfólio!',
   'Procura saber mais sobre Pedro Santos? Clique em mim para conversar!',
   'Dica: explore as abas acima para ver projetos, experiências e estudos!',
   'Quer conhecer as habilidades de Pedro? Clique no orbe para consultar o guia!',
@@ -28,6 +28,7 @@ export function OrbAssistant() {
   const [bubbleDismissed, setBubbleDismissed] = useState(false);
   const [greeting, setGreeting] = useState(GREETINGS[0]);
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(hover: none), (max-width: 768px)');
@@ -79,6 +80,14 @@ export function OrbAssistant() {
     void sendMessage();
   }
 
+  function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    // Enter submits on desktop; Shift+Enter inserts a native newline.
+    // An active IME composition (e.g. accented text or CJK) must not submit.
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    if (!isLoading && cooldownSeconds === 0) event.currentTarget.form?.requestSubmit();
+  }
+
   return (
     <>
       <div id="gbcWidget" className="orb-assistant-widget" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 50, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', pointerEvents: 'none' }}>
@@ -106,10 +115,27 @@ export function OrbAssistant() {
         </button>
       </div>
       {open && (
-        <Modal overlayClassName="login-modal-overlay ativo" panelClassName="login-modal-box orb-chat-panel" labelledBy="orbChatTitle" describedBy="orbChatDescription" onClose={closeChat}>
+        <Modal overlayClassName="login-modal-overlay ativo" panelClassName={`login-modal-box orb-chat-panel${expanded ? ' orb-chat-panel-expanded' : ''}`} labelledBy="orbChatTitle" describedBy="orbChatDescription" onClose={closeChat}>
           <div className="login-modal-header">
             <h2 id="orbChatTitle" className="orb-chat-title">[&nbsp;CONSULTAR ORBE MÁGICO&nbsp;]</h2>
-            <button type="button" className="login-close-btn" aria-label="Fechar guia do portfólio" onClick={closeChat}>×</button>
+            <div className="orb-chat-header-actions">
+              <button type="button" className="orb-chat-size-btn"
+                aria-label={expanded ? 'Restaurar tamanho do chat' : 'Maximizar chat'}
+                title={expanded ? 'Restaurar tamanho do chat' : 'Maximizar chat'}
+                aria-pressed={expanded}
+                onClick={() => setExpanded(current => !current)}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {expanded ? <>
+                    <rect x="6" y="6" width="14" height="14" rx="1" />
+                    <path d="M4 16V4h12" />
+                  </> : <>
+                    <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" />
+                  </>}
+                </svg>
+              </button>
+              <button type="button" className="login-close-btn" aria-label="Fechar guia do portfólio" onClick={closeChat}>×</button>
+            </div>
           </div>
           <div className="login-modal-body" style={{ padding: 16 }}>
             <p id="orbChatDescription" className="login-subtitle" style={{ marginBottom: 12 }}>{apiEnabled
@@ -141,9 +167,15 @@ export function OrbAssistant() {
             </div>}
             {cooldownSeconds > 0 && <p className="orb-chat-cooldown">Aguarde {cooldownSeconds}s antes de enviar outra pergunta.</p>}
             <form className="orb-chat-form" onSubmit={submitMessage}>
-              <input type="text" aria-label="Sua pergunta ao orbe" aria-describedby={apiEnabled ? 'orbChatPrivacy' : undefined} placeholder="Sua pergunta..." autoComplete="off" required readOnly={isLoading} maxLength={maxMessageLength} value={query} onChange={(event) => setQuery(event.target.value)} />
+              <textarea rows={2} aria-label="Sua pergunta ao orbe"
+                aria-describedby={apiEnabled ? 'orbChatPrivacy orbChatKeyboardHint' : 'orbChatKeyboardHint'}
+                placeholder="Sua pergunta..." required readOnly={isLoading}
+                maxLength={maxMessageLength} value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={handleComposerKeyDown} />
               <button type="submit" className="orb-chat-send-btn" disabled={isLoading || cooldownSeconds > 0}>ENVIAR</button>
             </form>
+            <p id="orbChatKeyboardHint" className="orb-chat-keyboard-hint">Enter envia · Shift + Enter pula linha</p>
           </div>
         </Modal>
       )}
