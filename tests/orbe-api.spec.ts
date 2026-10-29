@@ -23,6 +23,27 @@ async function openChat(page: Page) {
   };
 }
 
+test('janela possui um único histórico e apresenta recrutamento mesmo ao restaurar cache', async ({ page }) => {
+  await mockChat(page, [{}]);
+  const { dialog, input, send } = await openChat(page);
+  await expect(dialog).toHaveCount(1);
+  await expect(dialog.getByRole('log', { name: 'Conversa com o orbe' })).toHaveCount(1);
+  await expect(dialog.getByLabel('Limite de perguntas')).toHaveCount(1);
+  await expect(dialog).toContainText('requisitos de uma vaga');
+  await expect(dialog).toContainText('24 horas');
+  await input.fill('Qual é a experiência de Pedro?');
+  await send.click();
+  await expect(dialog.getByRole('log')).toContainText('Java, Spring Boot e TypeScript');
+  await page.reload();
+  await page.getByRole('button', { name: 'Abrir guia do portfólio' }).click();
+  const restored = page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ });
+  await expect(restored.getByRole('log')).toHaveCount(1);
+  await expect(restored.getByText(/Saudações! Sou Orbe/)).toHaveCount(1);
+  await expect(restored.getByText('Qual é a experiência de Pedro?')).toHaveCount(1);
+  await restored.getByRole('button', { name: 'Maximizar chat' }).click();
+  await expect(restored.getByRole('log')).toHaveCount(1);
+  await expect(restored.getByLabel('Limite de perguntas')).toHaveCount(1);
+});
 test('legado mantém chat público sem capacidade ou confirmação de reuniões', async ({ page }) => {
   const meetingMutations: string[] = [];
   page.on('request', request => {
@@ -91,7 +112,7 @@ test('cria e continua a conversa sem persistir ou expor o token', async ({ page,
   const mock = await mockChat(page, [{}, { body: continued }]);
   const { dialog, trigger, close, input, send, history } = await openChat(page);
   await expect(dialog).toContainText(/provedor de IA/i);
-  await expect(dialog).toContainText(/temporariamente/i);
+  await expect(dialog).toContainText('por até 24 horas');
   await expect(dialog).toContainText(/dados pessoais sensíveis/i);
   await input.fill('Quais tecnologias Pedro utiliza?');
   await send.click();

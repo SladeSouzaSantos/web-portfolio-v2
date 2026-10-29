@@ -16,7 +16,7 @@ test('Orbe se apresenta como representante profissional sem ações de agendamen
   await page.getByRole('button', { name: 'Abrir guia do portfólio' }).click();
   const dialog = page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ });
   await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText('representante virtual de Pedro Santos');
+  await expect(dialog).toContainText('Conheça Pedro Santos para sua próxima oportunidade');
   await expect(dialog).not.toContainText('REVISAR PROPOSTA DE REUNIÃO');
   await expect(dialog.getByRole('textbox', { name: 'Sua pergunta ao orbe' })).toBeVisible();
   await page.keyboard.press('Escape');

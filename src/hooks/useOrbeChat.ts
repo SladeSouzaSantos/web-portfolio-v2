@@ -21,7 +21,7 @@ interface PendingRequest { controller: AbortController; text: string }
 const greeting: ChatMessage = {
   id: 0,
   sender: 'orb',
-  text: 'Saudações! Eu sou o Orbe, representante virtual de Pedro Santos. Posso apresentar sua experiência profissional, formação, tecnologias e projetos.',
+  text: 'Saudações! Sou Orbe, assistente do portfólio de Pedro Santos. Está recrutando para uma vaga Java ou IA? Posso apresentar sua experiência, mostrar projetos e comparar requisitos de oportunidades.',
 };
 
 /** Owns the React conversation lifecycle; HTTP/session credentials belong to the client. */
@@ -32,8 +32,9 @@ export function useOrbeChat(reducedMotion: boolean) {
   const nextId = useRef(1);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const restored = restoreOrbeTranscript();
+    // Keep the conversation, but replace an outdated greeting from the local cache.
     return restored.length && restored[0]?.id === 0 && restored[0].sender === 'orb'
-      ? restored : [greeting];
+      ? [greeting, ...restored.slice(1)] : [greeting];
   });
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
