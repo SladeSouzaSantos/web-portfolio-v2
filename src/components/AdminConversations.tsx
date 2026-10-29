@@ -13,6 +13,25 @@ const labels: Record<ConversationIntent, string> = {
   meeting: 'Agendamento',
 };
 
+const reports = [
+  {
+    title: 'PERGUNTAS RESPONDIDAS',
+    description: 'Quantas perguntas receberam uma resposta do Orbe.',
+  },
+  {
+    title: 'CONVERSAS ÚNICAS',
+    description: 'Fechar e reabrir o Orbe mantém a mesma conversa. Recarregar a página permite iniciar outra.',
+  },
+  {
+    title: 'PERGUNTAS MAIS FREQUENTES',
+    description: 'Assuntos que despertam interesse sobre os projetos e a trajetória profissional.',
+  },
+  {
+    title: 'INTENÇÕES DAS CONVERSAS',
+    description: 'Curiosidade, interesse em vaga, sondagem profissional ou dúvidas técnicas; casos incertos devem ser identificados.',
+  },
+];
+
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 }
@@ -57,9 +76,8 @@ export function AdminConversations() {
 
   useEffect(() => {
     mounted.current = true;
-    if (isAdmin) void load();
     return () => { mounted.current = false; inflight.current?.abort(); };
-  }, [isAdmin, load]);
+  }, []);
 
   if (!isAdmin) return null;
   return <div className="admin-conversations">
@@ -68,6 +86,16 @@ export function AdminConversations() {
       Os indicadores consideram os últimos {report?.retentionDays ?? '—'} dias e começam a ser coletados após a atualização do backend.
       Uma conversa pode conter várias perguntas; reabrir o chat não cria uma conversa nova.
     </p>
+    {!report && !busy && !error && <>
+      <p>Os relatórios do Orbe ainda não estão disponíveis.</p>
+      <dl className="admin-dashboard-metrics">
+        {reports.map(item => <div className="admin-dashboard-metric" key={item.title}>
+          <dt>{item.title}</dt>
+          <dd className="admin-dashboard-unavailable">Aguardando dados</dd>
+          <dd className="admin-dashboard-metric-description">{item.description}</dd>
+        </div>)}
+      </dl>
+    </>}
     {report && <div className="admin-dashboard-metrics" aria-label="Indicadores do Orbe">
       <div className="admin-dashboard-metric"><strong>CONVERSAS ÚNICAS</strong><p>{report.totals.conversations}</p></div>
       <div className="admin-dashboard-metric"><strong>PERGUNTAS RESPONDIDAS</strong><p>{report.totals.questions}</p></div>
@@ -83,7 +111,7 @@ export function AdminConversations() {
     </div>}
     <div className="admin-conversations-controls">
       <button type="button" className="login-submit-btn" disabled={busy} onClick={() => void load()}>
-        ATUALIZAR INDICADORES
+        {report ? 'ATUALIZAR INDICADORES' : 'CONSULTAR INDICADORES'}
       </button>
     </div>
     {busy && <p role="status">[ CONSULTANDO AS CONVERSAS... ]</p>}
