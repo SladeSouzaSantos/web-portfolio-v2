@@ -174,13 +174,12 @@ export function OrbAssistant() {
           </div>
           <div className="login-modal-body" style={{ padding: 16 }}>
             <p id="orbChatDescription" className="login-subtitle" style={{ marginBottom: 12 }}>{apiEnabled
-              ? 'Sou o representante virtual de Pedro Santos. Pergunte sobre experiência, tecnologias, projetos, formação ou contato profissional.'
+              ? 'Conheça Pedro Santos para sua próxima oportunidade em tecnologia. Pergunte sobre experiência, projetos em Java e IA ou compartilhe os requisitos de uma vaga para uma análise de compatibilidade.'
               : 'Demonstração do representante virtual de Pedro Santos, com respostas predefinidas sobre experiência e projetos.'}</p>
             {apiEnabled && <p id="orbChatPrivacy" className="orb-chat-privacy">
-              Suas perguntas podem ser enviadas ao provedor de IA utilizado pelo backend.
-              O histórico pode ser armazenado temporariamente. Não informe dados pessoais sensíveis.
-              Uma cópia do texto fica neste navegador por até 24 horas; use Nova conversa para apagá-la.
-              Após recarregar a página, as mensagens voltam à tela, mas a sessão da IA recomeça.
+              Não informe dados pessoais sensíveis. As perguntas podem ser processadas pelo
+              provedor de IA. O texto fica neste navegador por até 24 horas e pode ser apagado
+              com Nova conversa. Recarregar mantém o texto, mas reinicia o contexto da IA.
             </p>}
             <p className="orb-chat-counter" aria-label="Limite de perguntas">
               {userTurnCount}/{maxUserTurns} perguntas nesta conversa
