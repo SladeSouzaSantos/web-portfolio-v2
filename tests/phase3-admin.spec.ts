@@ -200,6 +200,9 @@ test('registros do Orbe exibem conversas, assuntos e intenção de forma adminis
   ]);
   await visitAdmin(page);
   const records = page.getByRole('region', { name: '[ REGISTROS DO ORBE ]', exact: true });
+  // Insight collection is an explicit admin action, not an automatic dashboard request.
+  await expect(records.getByText('Aguardando dados', { exact: true })).toHaveCount(4);
+  await records.getByRole('button', { name: 'CONSULTAR INDICADORES', exact: true }).click();
   await expect(records.getByText('CONVERSAS ÚNICAS', { exact: true })).toBeVisible();
   await expect(records.getByText('PERGUNTAS RESPONDIDAS', { exact: true })).toBeVisible();
   await expect(records.getByText('Dúvida técnica: 1', { exact: true })).toBeVisible();
