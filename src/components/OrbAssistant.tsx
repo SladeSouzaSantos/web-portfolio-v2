@@ -4,7 +4,6 @@ import { useReducedMotion } from '../hooks/useMediaQuery';
 import { useOrbeChat } from '../hooks/useOrbeChat';
 import { getOrbeSources } from '../services/orbeSources';
 import { Modal } from './Modal';
-import type { MeetingProposal } from '../types/meetings';
 
 const GREETINGS = [
   'Saudações, Herói! Sou o Orbe de Acesso. Clique em mim para abrir o guia do portfólio!',
@@ -14,7 +13,7 @@ const GREETINGS = [
   'O sistema opera com estabilidade máxima nas runas de código. Em que posso ajudar?',
 ];
 
-export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (proposal: MeetingProposal) => void }) {
+export function OrbAssistant() {
   const reducedMotion = useReducedMotion();
   const {
     messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
@@ -114,8 +113,8 @@ export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (propo
           </div>
           <div className="login-modal-body" style={{ padding: 16 }}>
             <p id="orbChatDescription" className="login-subtitle" style={{ marginBottom: 12 }}>{apiEnabled
-              ? 'Converse com o Orbe sobre o portfólio e a trajetória profissional de Pedro Santos.'
-              : 'Guia interativo em demonstração, com respostas predefinidas sobre habilidades, projetos e contato.'}</p>
+              ? 'Sou o representante virtual de Pedro Santos. Pergunte sobre experiência, tecnologias, projetos, formação ou contato profissional.'
+              : 'Demonstração do representante virtual de Pedro Santos, com respostas predefinidas sobre experiência e projetos.'}</p>
             {apiEnabled && <p id="orbChatPrivacy" className="orb-chat-privacy">
               Suas perguntas podem ser enviadas ao provedor de IA utilizado pelo backend.
               O histórico pode ser armazenado temporariamente. Não informe dados pessoais sensíveis.
@@ -131,13 +130,7 @@ export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (propo
                       {source.href ? <a href={source.href} target="_blank" rel="noopener noreferrer">{source.title}</a> : source.title}
                     </li>)}</ul>
                   </div>}
-                  {!!message.actions?.length && onMeetingProposal && <div className="orb-meeting-actions">
-                    <p>Proposta preparada. Nenhuma solicitação foi confirmada.</p>
-                    {message.actions.map(action => <button type="button" className="orb-chat-reset-btn" key={action.proposal.proposalId}
-                      onClick={() => { closeChat(); onMeetingProposal(action.proposal); }}>
-                      REVISAR PROPOSTA DE REUNIÃO
-                    </button>)}
-                  </div>}
+
                 </div>
               ))}
             </div>

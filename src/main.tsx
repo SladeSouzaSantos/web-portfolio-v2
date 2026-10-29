@@ -2,9 +2,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { App } from './App';
-import { AuthProvider } from './contexts/AuthContext';
-import { MeetingsProvider } from './contexts/MeetingsContext';
-import { consumeAuthCallback } from './services/authNavigation';
 import './styles/paleta_cores.css';
 import './styles/gbc-reset.css';
 import './styles/navbar.css';
@@ -17,10 +14,7 @@ import './styles/orbe_assistant.css';
 import './styles/arquivo_projetos.css';
 import './styles/app.css';
 import './styles/tipografia.css';
-import './styles/admin_meetings.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Elemento raiz do portfólio não encontrado.');
-// Consume public callback feedback before the router or StrictMode can redirect.
-const callbackNotice = consumeAuthCallback(window.location, window.history);
-createRoot(root).render(<StrictMode><AuthProvider initialCallbackNotice={callbackNotice}><MeetingsProvider><BrowserRouter><App /></BrowserRouter></MeetingsProvider></AuthProvider></StrictMode>);
+createRoot(root).render(<StrictMode><BrowserRouter><App /></BrowserRouter></StrictMode>);

@@ -1,169 +1,65 @@
-# PHASSCODE — portfólio RPG
+# PHASSCODE — portfólio profissional em pixel art
 
-Portfólio de Pedro Santos em React, TypeScript e Vite. A interface preserva a identidade em pixel art da versão estática: Taverna, Guilda de Projetos, Crônicas da Jornada e Academia Arcana. As animações usam GSAP/ScrollTrigger e canvas, com limpeza ao trocar de seção e suporte à preferência de movimento reduzido.
+Portfólio público de Pedro Santos, construído em React, TypeScript e Vite.
+Apresenta projetos, experiência, formação e o **Orbe Mágico**, assistente
+virtual que representa sua trajetória profissional e cita fontes do portfólio.
 
-## Executar localmente
+## Funcionalidades atuais
 
-Requer Node.js **22.12 ou superior** e npm. A integração contínua usa Node.js 24.
+- Navegação pelas seções Sobre, Projetos, Experiência e Formação.
+- Arquivo de Missões e visualização de projetos.
+- Orbe conversacional sobre competências, experiência, estudos e contato.
+- Temas claro/escuro, acessibilidade e suporte a movimento reduzido.
 
-```sh
+**Não há login, baú, contas, painel administrativo, reuniões nem notificações.**
+O Orbe não agenda compromissos nem envia mensagens em nome do proprietário.
+Os módulos históricos da Fase 3 ainda poderão ser vistos no Git, mas não
+são importados pela interface pública nem fazem parte da release.
+
+## Execução local
+
+Requer Node.js 24 e npm:
+
+```bash
 npm ci
+cp .env.example .env.local
 npm run dev
-```
-
-Abra o endereço informado pelo Vite. A aplicação precisa do servidor de desenvolvimento ou de uma publicação do build; abrir `index.html` diretamente pelo sistema de arquivos não executa o TypeScript.
-
-```sh
-npm run typecheck  # Verifica os tipos sem gerar arquivos
-npm run build      # Verifica tipos e gera dist/
-npm run preview    # Serve o build localmente
-```
-
-## Testes de navegação e interface
-
-Os testes Playwright executam contra o build de produção e iniciam o servidor de preview automaticamente. Gere novamente o build depois de alterar o código.
-
-```sh
 npm run build
 npx playwright install chromium
-npm test
+npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts
 ```
 
-No Windows, a configuração utiliza o Microsoft Edge instalado. Nos demais sistemas, utiliza o Chromium do Playwright. No Linux da CI, a instalação inclui as dependências do navegador com `npx playwright install --with-deps chromium`.
+O chat real requer `VITE_ORBE_API_ENABLED=true` e uma URL válida no
+`VITE_API_BASE_URL`. Sem API habilitada, a interface mostra uma demonstração
+de respostas predefinidas. Nunca coloque chaves de LLM em variáveis `VITE_*`.
 
-Os testes também verificam erros JavaScript, recursos do site, responsividade em tablet/desktop e acessibilidade com axe. A suíte separada `npm run test:smoke` verifica a URL publicada após o deploy; `npm run test:visual` compara capturas com referências revisadas. Consulte [os comandos e as configurações dos testes](docs/testes.md).
+## Ambientes no Mac Mini
 
-`npm run test:orbe` gera um build isolado com a integração HTTP habilitada e executa o chat
-com respostas interceptadas pelo Playwright. Os testes não chamam a OpenRouter.
+| Branch | Site | API de chat |
+| --- | --- | --- |
+| `dev` | `https://devgbc.phasscode.com` | `https://devapi.phasscode.com` |
+| `main` | `https://gbc.phasscode.com` | `https://api.phasscode.com` |
 
-`npm run test:phase3` valida Google/sessão, agendamento público, administração e
-ações do Orbe com uma API `.invalid` inteiramente interceptada. Não cria eventos
-nem envia notificações. Consulte a [integração da Fase 3](docs/phase3-integracao.md)
-e o [roteiro de homologação controlada](docs/phase3-homologacao.md).
+O workflow `.github/workflows/deploy.yml` valida o frontend, executa SAST,
+publica uma imagem imutável e a verifica em ambiente descartável.
+Para publicar no Mac Mini use **Actions → PHASSCODE → Run workflow**,
+selecione a branch e execute `apply_remote=true`.
 
-`npm run test:f1` acrescenta a matriz independente de auth/reuniões/Orbe e o
-retorno Google com respostas interceptadas. Sua etapa de CI foi preparada no
-workflow; editar esse arquivo não executa a CI. Resultados locais atuais e
-limitações ficam em [f1-validacao-local.md](docs/f1-validacao-local.md).
+O deployment requer `ENABLE_REMOTE_DEPLOY=true` no environment
+correspondente (`development` ou `production`), acesso Tailscale/SSH,
+checkout limpo e o servidor previamente configurado. O deploy de produção
+deve exigir aprovação humana no GitHub Environment.
 
-`npm run test:f2` valida a coordenação de sessão/CSRF entre abas e a preservação
-do aviso de logout não confirmado durante a navegação. O harness usa duas páginas
-no mesmo contexto, cookies HttpOnly sintéticos e uma API HTTP loopback interceptada.
-Escopo, limitações de navegador e resultados locais ficam em
-[f2-validacao-local.md](docs/f2-validacao-local.md). O incremento não altera o
-backend nem antecipa o E2E real de B2/F3.
+**Nenhum PR ou push publica no Mac Mini por si só.**
+Faça o deploy do backend compatível primeiro, depois do frontend.
+O frontend nunca deve fazer chamadas de produção ao backend de desenvolvimento.
 
-Não há script/configuração de lint de código no frontend; `typecheck` verifica
-tipos e Commitlint verifica mensagens de commit, sem equivaler a um linter de código.
+## Base de conhecimento
 
-## Organização
+O conteúdo visível fica em `src/data/`.
+A base consultada pelo Orbe reside no repositório
+`SladeSouzaSantos/phasscode-platform`, em `knowledge/portfolio.json`.
+Atualize ambos quando houver uma mudança profissional relevante.
 
-```text
-src/
-├── App.tsx                 # Rotas e composição da aplicação
-├── components/             # Navbar, modal, tema, baú e orbe
-├── sections/               # Sobre, Projetos, Experiência, Formação e Arquivo
-├── data/                   # Catálogos editáveis e informações do perfil
-├── effects/                # Desenho e interação do orbe em canvas
-├── hooks/                  # Navegação, tema, media queries e fundos
-├── lib/                    # Resolução de URLs dos assets
-├── config/                 # Ativação e URL pública do Orbe por ambiente
-├── services/               # Cliente HTTP, demonstração e fontes do Orbe
-├── styles/                 # CSS original e ajustes da aplicação
-└── types/                  # Contratos dos dados do portfólio
-public/assets/img/          # Imagens e símbolos SVG
-public/assets/fonts/        # Press Start 2P e licença SIL Open Font License
-tests/                      # Testes Playwright
-```
-
-Para editar conteúdo, comece por `src/data/perfil.ts`, `projetos.ts`, `experiencias.ts` e `formacoes.ts`. A seção inicial de projetos e o Arquivo de Missões compartilham o mesmo catálogo. Os registros de experiência, formação e trilhas mantêm o conteúdo e as datas da versão anterior, incluindo situações provisórias que precisam de revisão editorial antes da publicação.
-
-A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descrições, fichas e controles usam Press Start 2P, com tamanhos, espaçamento entre letras e entrelinhas ajustados para cada contexto. A fonte é servida pelo próprio site, com sua licença em `public/assets/fonts/OFL.txt`. O catálogo `/projetos` reutiliza as artes do mural e dos pergaminhos da Guilda, mantendo os símbolos dos projetos. As referências visuais devem ser revisadas após mudanças nesses estilos.
-
-Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
-
-O baú é exclusivo da administração: com `VITE_AUTH_ENABLED=true`, utiliza Google
-e cookies de sessão e oferece acesso à sala e logout. O papel `admin` retornado
-pela API abre `/administracao` na entrada pela raiz sem query/fragmento ou aviso
-de callback; destinos de navegação permitidos no retorno são preservados.
-A admissão e o papel são verificados pelo backend; o React não contém e-mail
-permitido nem concede acesso por comparação de e-mail. O retorno Google trata
-erros públicos com mensagens locais, limpa `auth_error` da URL e permite nova
-tentativa manual. A API continua sendo a autoridade sobre a sessão.
-
-Na atualização local F1 de 26/10/2026, `VITE_AUTH_ENABLED` e
-`VITE_MEETINGS_ENABLED` controlam autenticação e reuniões separadamente;
-`VITE_ORBE_API_ENABLED` controla o chat HTTP. Somente o valor exato `true` habilita
-cada módulo, com `VITE_API_BASE_URL` válida. **`VITE_PHASE3_ENABLED` é ignorada,
-sem fallback**: configurações antigas precisam de migração explícita.
-O perfil preparado pelo CI para `dev` liga Orbe e auth, mantendo reuniões
-desligadas. Assim, o administrador pode usar a sala sem consultar agenda nem
-anunciar ferramentas de reunião. O build de `main` força as três flags falsas
-e a URL vazia, inclusive diante de configuração local herdada.
-Não coloque segredos em `VITE_*`.
-ID/token do chat, CSRF e tokens privados de reunião ficam apenas em memória.
-Veja a [matriz, os quatro exemplos e a migração](docs/phase3-integracao.md#ambientes-e-migração-das-flags)
-e o [registro de validação local F1](docs/f1-validacao-local.md). Essas alterações
-locais não comprovam publicação ou homologação Google/Calendar/canais reais.
-
-Quando reuniões estão habilitadas, o agendamento público continua pelo Orbe,
-separado do baú e sem exigir login do visitante. Uma entrada pública independente
-da LLM permanece pendência separada; F1 não acrescenta esse acesso.
-
-A sala administrativa apresenta a agenda somente quando reuniões estão habilitadas,
-com busca/ordenação dos pedidos carregados, resumo por situação e decisões confirmadas.
-Com reuniões desligadas, a sala permanece acessível sem montar consultas administrativas
-de agenda. Os relatórios do Orbe e o
-reagendamento ainda dependem de novos contratos publicados pelo backend; a
-interface identifica essas indisponibilidades. Veja o
-[handoff dos relatórios e da agenda](docs/admin-dashboard-handoff.md).
-Fechar e reabrir o Orbe preserva a conversa; o botão NOVA CONVERSA foi retirado.
-Recarregar a página descarta o histórico local e permite iniciar outra conversa.
-
-## Rotas e navegação
-
-- `/`: página principal.
-- `/#sobre`, `/#projetos`, `/#experiencia` e `/#academico`: seções da página principal, com suporte ao histórico do navegador.
-- `/#portfolio` e `/#formacao`: aliases para Projetos e Formação.
-- `/projetos`: Arquivo de Missões com filtros e detalhes dos projetos.
-- `/administracao`: sala protegida pelo papel `admin`, com registros do Orbe e agenda.
-- `/index.html` e `/projetos.html`: endereços antigos, redirecionados para `/` e `/projetos`, respectivamente, preservando os parâmetros de consulta e o fragmento.
-
-O React Router usa `BrowserRouter` para navegar entre a página principal e o catálogo sem recarregar o documento. O `index.html` é a única entrada do Vite, e o build gera apenas esse HTML em `dist/`. Para publicar, sirva **o conteúdo de `dist/`** e configure o servidor para retornar `index.html` nas rotas da aplicação. Esse fallback permite abrir `/projetos` diretamente ou atualizar a página nessa rota. A configuração atual assume publicação na raiz do domínio; publicar em um subdiretório exige revisar `base` do Vite, o roteador e as URLs absolutas das imagens no CSS.
-
-## Nginx e publicação
-
-O `nginx.conf` aponta a produção para `/opt/projects/web-portfolio-v2/dist`. Um exemplo equivalente é:
-
-```nginx
-server {
-    listen 80;
-    server_name portfolio.exemplo.com;
-    root /opt/projects/web-portfolio-v2/dist;
-    index index.html;
-
-    location = /projetos.html {
-        return 301 /projetos$is_args$args;
-    }
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /assets/ {
-        try_files $uri =404;
-    }
-}
-```
-
-Para homologação, configure um domínio próprio e use `/opt/projects/web-portfolio-v2-dev/dist`. Se o Nginx executar em Docker, monte o diretório do projeto inteiro no mesmo caminho absoluto do host, ou ajuste a estratégia de links: o contêiner precisa conseguir resolver tanto `dist` quanto os diretórios `.releases` para os quais ele aponta. Montar apenas o destino atual de `dist` impede que futuras trocas de symlink sejam acompanhadas pelo contêiner.
-
-O workflow `.github/workflows/deploy.yml` automatiza a **candidata DEV**, mas não seu deploy. Push em `dev` executa testes/build, SAST, B2/F3 com os SHAs capturados no checkout, publica imagem GHCR imutável e executa DAST em ambiente descartável. O artifact `frontend-dev-candidate-pair` guarda o par realmente testado, sem autorizar deploy. Push em `dev` também executa `paired-dev-ci.yml` com integração isolada adicional. PRs para `dev`/`main` executam somente testes e segurança, sem imagem ou deploy.
-
-O **deploy permanece manual**: iniciar `deploy.yml` na branch `dev` com `backend_sha` e `frontend_sha` obtidos de uma candidata verde. Esses parâmetros substituem as antigas variáveis `PHASSCODE_RELEASE_BACKEND_SHA`/`PHASSCODE_RELEASE_FRONTEND_SHA`; não é preciso editá-las a cada commit. A execução manual requalifica o par com B2/F3, CI/SAST, imagem por digest e DAST. `apply_remote` começa em `false`; o servidor só é alterado mediante `apply_remote=true`, `ENABLE_REMOTE_DEPLOY=true` no environment `development` e autorização operacional independente R3/R4/CORS. `main`/produção continuam bloqueados. Quando autorizado, o servidor extrai o `dist` da imagem testada para `.releases` e ativa o symlink com rollback e verificações.
-
-A homologação usa `DEV_SITE_URL=https://devgbc.phasscode.com`; a produção usa `https://gbc.phasscode.com`. A autenticação Tailscale está preparada para OAuth e preserva a authkey enquanto as novas credenciais não forem cadastradas. Veja [a configuração do OAuth e as versões das actions](docs/tailscale-oauth.md).
-
-O ambiente existente precisa manter os secrets de conexão Tailscale/SSH configurados no GitHub Actions e o checkout de cada ambiente na branch correspondente. O usuário SSH precisa escrever no diretório do projeto e executar o Docker Compose do proxy. A validação recusa misturar um artefato antigo com um checkout mais novo.
-
-Na primeira publicação, `dist` deve estar ausente ou já ser um symlink. Caso exista como diretório físico, mova o build existente para uma pasta de release e crie o link durante a preparação do servidor. O workflow recusa substituí-lo automaticamente. As releases anteriores são mantidas para permitir retorno manual; sua retenção deve ser administrada no servidor. Nenhuma configuração, execução ou publicação no servidor é realizada apenas por editar esses arquivos localmente.
+Os testes legados de login e reuniões permanecem no histórico do repositório;
+a pipeline de release usa apenas as suítes pertinentes ao portfólio público.
