@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { orbeConfig } from '../config/orbe';
-import { platformConfig } from '../config/platform';
 import { CHAT_MAX_MESSAGE_LENGTH, createOrbeClient, OrbeClientError } from '../services/orbeClient';
 import { sendDemoMessage } from '../services/orbeDemo';
-import type { ChatSource, MeetingChatAction } from '../types/orbe';
+import type { ChatSource } from '../types/orbe';
 
 interface ChatMessage {
   id: number;
@@ -11,7 +10,6 @@ interface ChatMessage {
   text: string;
   sources?: ChatSource[];
   simulated?: boolean;
-  actions?: MeetingChatAction[];
 }
 
 interface ChatNotice { message: string; correlationId?: string }
@@ -20,7 +18,7 @@ interface PendingRequest { controller: AbortController; text: string }
 const greeting: ChatMessage = {
   id: 0,
   sender: 'orb',
-  text: 'Saudações! Sou o Orbe Guardião. Como posso auxiliar sua jornada pelo portfólio de Pedro Santos?',
+  text: 'Saudações! Eu sou o Orbe, representante virtual de Pedro Santos. Posso apresentar sua experiência profissional, formação, tecnologias e projetos.',
 };
 
 /** Owns the React conversation lifecycle; HTTP/session credentials belong to the client. */
@@ -85,9 +83,7 @@ export function useOrbeChat(reducedMotion: boolean) {
     setError(null);
     setIsLoading(true);
     try {
-      if (orbeConfig.enabled && !clientRef.current) clientRef.current = createOrbeClient(orbeConfig.apiBaseUrl, {
-        meetingCapabilities: platformConfig.meetingsEnabled,
-      });
+      if (orbeConfig.enabled && !clientRef.current) clientRef.current = createOrbeClient(orbeConfig.apiBaseUrl);
       const reply = orbeConfig.enabled
         ? await clientRef.current!.send(text, { signal: request.controller.signal })
         : await sendDemoMessage(text, request.controller.signal, reducedMotion);
@@ -95,7 +91,6 @@ export function useOrbeChat(reducedMotion: boolean) {
       setMessages(current => [...current, {
         id: nextId.current++, sender: 'orb', text: reply.answer,
         sources: reply.sources, simulated: reply.meta.simulated,
-        actions: platformConfig.meetingsEnabled ? reply.actions : undefined,
       }]);
     } catch (failure) {
       if (!mountedRef.current || pendingRef.current !== request || request.controller.signal.aborted) return;

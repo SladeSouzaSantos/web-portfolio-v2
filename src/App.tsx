@@ -1,13 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
-import { AdminDashboard } from './components/AdminDashboard';
-import { AuthCallbackNotice } from './components/AuthCallbackNotice';
-import { AuthSessionNotice } from './components/AuthSessionNotice';
-import { platformConfig } from './config/platform';
+import { useLayoutEffect, useRef } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router';
 import { Navbar } from './components/Navbar';
 import { OrbAssistant } from './components/OrbAssistant';
-import { MeetingScheduler } from './components/meetings/MeetingScheduler';
-import { useAuth } from './contexts/AuthContext';
 import { useSectionNavigation } from './hooks/useSectionNavigation';
 import { useTheme } from './hooks/useTheme';
 import type { Theme } from './hooks/useTheme';
@@ -17,48 +11,30 @@ import { Formacao } from './sections/Formacao';
 import { Projetos } from './sections/Projetos';
 import { Sobre } from './sections/Sobre';
 import type { SecaoId } from './types/portfolio';
-import type { MeetingProposal } from './types/meetings';
 
 const frames: Record<SecaoId, string> = {
   sobre: 'moldura-taverna', projetos: 'moldura-guilda', experiencia: 'moldura-cronicas', academico: 'moldura-academia',
 };
-interface PortfolioPageProps {
-  theme: Theme;
-  toggleTheme: () => void;
-  adminView?: boolean;
-  onMeetingProposal: (proposal: MeetingProposal) => void;
-}
-function PortfolioPage({ theme, toggleTheme, adminView = false, onMeetingProposal }: PortfolioPageProps) {
+
+function PortfolioPage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
   const section = useSectionNavigation();
-  const navigate = useNavigate();
   const mainRef = useRef<HTMLElement>(null);
   return <>
     <a className="skip-link" href="#conteudo" onClick={event => {
       event.preventDefault();
       mainRef.current?.focus();
     }}>Pular para o conteúdo</a>
-    <Navbar activeSection={section} theme={theme} onToggleTheme={toggleTheme}
-      onNavigate={() => {}} onOpenPanel={() => navigate('/administracao')} onLogout={() => navigate('/#sobre')} />
+    <Navbar activeSection={section} theme={theme} onToggleTheme={toggleTheme} onNavigate={() => {}} />
     <main ref={mainRef} id="conteudo" className="portfolio-main" tabIndex={-1}>
-      <div id="contentDisplay" className={`content-panel ${adminView ? '' : frames[section]}`}>
-        {adminView ? <AdminDashboard onReturn={() => navigate('/#sobre')} /> : <>
-          {section === 'sobre' && <Sobre />}
-          {section === 'projetos' && <Projetos />}
-          {section === 'experiencia' && <Experiencia />}
-          {section === 'academico' && <Formacao />}
-        </>}
+      <div id="contentDisplay" className={`content-panel ${frames[section]}`}>
+        {section === 'sobre' && <Sobre />}
+        {section === 'projetos' && <Projetos />}
+        {section === 'experiencia' && <Experiencia />}
+        {section === 'academico' && <Formacao />}
       </div>
     </main>
-    <OrbAssistant onMeetingProposal={platformConfig.meetingsEnabled ? onMeetingProposal : undefined} />
+    <OrbAssistant />
   </>;
-}
-
-function RequireAdmin({ children }: { children: ReactNode }) {
-  const { state, callbackNotice } = useAuth();
-  const { search, hash } = useLocation();
-  if (state.status === 'loading') return <main className="portfolio-main"><p role="status">[ CONSULTANDO PERMISSÕES... ]</p></main>;
-  return state.status === 'authenticated' && state.user?.roles.includes('admin')
-    ? children : <Navigate to={callbackNotice ? `/${search}${hash || '#sobre'}` : '/#sobre'} replace />;
 }
 
 function LegacyRedirect({ to }: { to: string }) {
@@ -68,31 +44,7 @@ function LegacyRedirect({ to }: { to: string }) {
 
 export function App() {
   const { theme, toggleTheme } = useTheme();
-  const { state: auth, callbackNotice } = useAuth();
-  const { pathname, search, hash } = useLocation();
-  const navigate = useNavigate();
-  const handledAdminSession = useRef<string | null>(null);
-  const [meetingOpen, setMeetingOpen] = useState(false);
-  const [meetingProposal, setMeetingProposal] = useState<MeetingProposal | undefined>();
-  const reviewMeeting = (proposal: MeetingProposal) => {
-    if (!platformConfig.meetingsEnabled) return;
-    setMeetingProposal(proposal);
-    setMeetingOpen(true);
-  };
-
-  useEffect(() => {
-    if (auth.status === 'anonymous' || auth.status === 'unavailable') {
-      handledAdminSession.current = null;
-      return;
-    }
-    if (auth.status !== 'authenticated' || !auth.user?.roles.includes('admin')
-      || handledAdminSession.current === auth.user.id) return;
-    // Open the room once on the default return. Explicit paths, query and hash
-    // remain the visitor's navigation destination, including after OAuth.
-    handledAdminSession.current = auth.user.id;
-    if (pathname === '/' && !search && !hash && !callbackNotice) void navigate('/administracao', { replace: true });
-  }, [auth.status, auth.user, pathname, search, hash, callbackNotice, navigate]);
-
+  const { pathname } = useLocation();
   useLayoutEffect(() => {
     const archive = /^\/projetos(?:\.html)?\/?$/.test(pathname);
     document.title = archive ? 'Arquivo de Missões | PHASSCODE' : 'Pedro Santos | PHASSCODE';
@@ -101,16 +53,12 @@ export function App() {
       : 'Portfólio de Pedro Santos: desenvolvimento de software, projetos, experiência profissional e formação em uma jornada RPG em pixel art.');
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
-
-  const pageProps = { theme, toggleTheme, onMeetingProposal: reviewMeeting };
-  return <><AuthCallbackNotice /><AuthSessionNotice /><Routes>
-    <Route path="/" element={<PortfolioPage {...pageProps} />} />
-    <Route path="/administracao" element={<RequireAdmin><PortfolioPage {...pageProps} adminView /></RequireAdmin>} />
+  return <Routes>
+    <Route path="/" element={<PortfolioPage theme={theme} toggleTheme={toggleTheme} />} />
+    <Route path="/administracao" element={<Navigate to="/#sobre" replace />} />
     <Route path="/projetos" element={<ArquivoProjetos />} />
     <Route path="/projetos.html" element={<LegacyRedirect to="/projetos" />} />
     <Route path="/index.html" element={<LegacyRedirect to="/" />} />
     <Route path="*" element={<LegacyRedirect to="/" />} />
-  </Routes>
-    {platformConfig.meetingsEnabled && meetingOpen && <MeetingScheduler onClose={() => setMeetingOpen(false)} initialProposal={meetingProposal} />}
-  </>;
+  </Routes>;
 }

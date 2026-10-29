@@ -16,16 +16,15 @@ export function frontendBuildBranch(environment = process.env): string {
 
 export function productionIsolationDefines(command: string, branch: string, environment = process.env): Record<string, string> {
   if (command !== 'build' || branch !== 'main') return {};
-  const isolatedMockBuild = environment.PHASSCODE_MOCK_API_BUILD === 'true'
-    && ['https://orbe-api.invalid', 'https://phase3-api.invalid'].includes(environment.VITE_API_BASE_URL ?? '');
-  // Dedicated test artifacts may exercise the main branch only with inert .invalid APIs.
-  if (isolatedMockBuild) return {};
-  // Explicit defines override .env.local as well as inherited shell variables.
+  // Production always uses the production Orbe API, never a developer's local .env.
+  // Authentication and meetings are disabled on both public sites.
+  if (environment.PHASSCODE_MOCK_API_BUILD === 'true'
+    && ['https://orbe-api.invalid', 'https://phase3-api.invalid'].includes(environment.VITE_API_BASE_URL ?? '')) return {};
   return {
-    'import.meta.env.VITE_ORBE_API_ENABLED': JSON.stringify('false'),
+    'import.meta.env.VITE_ORBE_API_ENABLED': JSON.stringify('true'),
     'import.meta.env.VITE_AUTH_ENABLED': JSON.stringify('false'),
     'import.meta.env.VITE_MEETINGS_ENABLED': JSON.stringify('false'),
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(''),
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://api.phasscode.com'),
   };
 }
 
