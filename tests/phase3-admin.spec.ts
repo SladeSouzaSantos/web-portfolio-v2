@@ -173,30 +173,47 @@ test('listagem vazia é informativa e conteúdo HTML de visitante permanece text
   expect(api.unexpected).toEqual([]);
 });
 
-test('registros do Orbe indicam dados indisponíveis sem inventar métricas ou consultar novas APIs', async ({ page }) => {
+test('registros do Orbe exibem conversas, assuntos e intenção de forma administrativa', async ({ page }) => {
   const requests: string[] = [];
   page.on('request', request => {
     const path = new URL(request.url()).pathname;
     if (path.startsWith('/api/v1/') && request.method() !== 'OPTIONS') requests.push(`${request.method()} ${path}`);
   });
+  const summary = 'Assuntos identificados: Tecnologias. Intenção provável: dúvida técnica.';
   const api = await mockPlatform(page, [
     { path: '/api/v1/auth/session', body: authenticatedSession('admin') },
     { path: ADMIN_PATH, body: list([]) },
+    { path: '/api/v1/admin/conversations', body: {
+      retentionDays: 7,
+      generatedAt: '2026-10-28T15:00:00.000Z',
+      totals: { conversations: 1, questions: 2 },
+      intents: [{ name: 'technical', total: 1 }],
+      topics: [{ name: 'Tecnologias', total: 1 }],
+      items: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        intent: 'technical', summary, topics: ['Tecnologias'], turns: 2,
+        createdAt: '2026-10-28T14:00:00.000Z',
+        updatedAt: '2026-10-28T15:00:00.000Z',
+      }],
+      nextOffset: null,
+    } },
   ]);
   await visitAdmin(page);
   const records = page.getByRole('region', { name: '[ REGISTROS DO ORBE ]', exact: true });
-  await expect(records.getByText('Aguardando dados', { exact: true })).toHaveCount(4);
-  for (const label of ['PERGUNTAS RESPONDIDAS', 'CONVERSAS ÚNICAS', 'PERGUNTAS MAIS FREQUENTES', 'INTENÇÕES DAS CONVERSAS']) {
-    await expect(records.getByText(label, { exact: true })).toBeVisible();
-  }
-  await expect(records.locator('dd').filter({ hasText: /^0$/ })).toHaveCount(0);
-  await expect(records).toContainText('Fechar e reabrir o Orbe mantém a mesma conversa.');
+  await expect(records.getByText('CONVERSAS ÚNICAS', { exact: true })).toBeVisible();
+  await expect(records.getByText('PERGUNTAS RESPONDIDAS', { exact: true })).toBeVisible();
+  await expect(records.getByText('Dúvida técnica: 1', { exact: true })).toBeVisible();
+  await expect(records.getByText('Tecnologias: 1', { exact: true })).toBeVisible();
+  await expect(records.getByText(summary, { exact: true })).toBeVisible();
+  await expect(records).toContainText('últimos 7 dias');
   await page.getByRole('link', { name: 'REGISTROS DO ORBE', exact: true }).click();
   await expect(records).toBeFocused();
   await page.getByRole('link', { name: 'AGENDA E PEDIDOS', exact: true }).click();
   await expect(page.locator('#admin-meeting-agenda')).toBeFocused();
   await expect(page).toHaveURL(/\/administracao$/);
-  expect(requests).toEqual(['GET /api/v1/auth/session', `GET ${ADMIN_PATH}`]);
+  expect(requests).toEqual(expect.arrayContaining([
+    'GET /api/v1/auth/session', `GET ${ADMIN_PATH}`, 'GET /api/v1/admin/conversations',
+  ]));
   expect(api.unexpected).toEqual([]);
 });
 
