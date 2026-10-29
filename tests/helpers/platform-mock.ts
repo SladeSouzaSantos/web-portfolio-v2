@@ -54,6 +54,16 @@ export function adminMeeting(status: MeetingStatus = 'PENDING', overrides: Parti
     version: 1, failureCode: null, ...overrides };
 }
 
+/** Empty, valid administrative report used when a meeting test does not specify Orbe data. */
+export function emptyConversationInsights() {
+  return {
+    retentionDays: 7,
+    generatedAt: '2026-10-28T15:00:00.000Z',
+    totals: { conversations: 0, questions: 0 },
+    intents: [], topics: [], items: [], nextOffset: null,
+  };
+}
+
 export function platformError(code = 'SERVICE_UNAVAILABLE') {
   return { error: { code, message: 'O serviço não está disponível neste teste.', correlationId: MOCK_PLATFORM_CORRELATION_ID } };
 }
@@ -133,6 +143,13 @@ export async function mockPlatform(page: Page, replies: MockPlatformReply[], bas
       // protected writes. Keep that GET visible in requests; never replay a POST.
       if (request.method() === 'GET' && path === '/api/v1/auth/session' && currentSession) {
         await route.fulfill({ headers, json: currentSession });
+        return;
+      }
+      // The Orbe metrics widget also reads on admin navigation. Keep existing meeting
+      // scenarios isolated and allow them to override this fallback with explicit replies.
+      if (request.method() === 'GET' && path === '/api/v1/admin/conversations' &&
+          currentSession?.user?.roles.includes('admin')) {
+        await route.fulfill({ headers, json: emptyConversationInsights() });
         return;
       }
       unexpected.push(request);
