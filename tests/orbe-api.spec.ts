@@ -112,7 +112,7 @@ test('cria e continua a conversa sem persistir ou expor o token', async ({ page,
   const mock = await mockChat(page, [{}, { body: continued }]);
   const { dialog, trigger, close, input, send, history } = await openChat(page);
   await expect(dialog).toContainText(/provedor de IA/i);
-  await expect(dialog).toContainText(/temporariamente/i);
+  await expect(dialog).toContainText('por até 24 horas');
   await expect(dialog).toContainText(/dados pessoais sensíveis/i);
   await input.fill('Quais tecnologias Pedro utiliza?');
   await send.click();
