@@ -117,8 +117,9 @@ export function OrbAssistant({ onMeetingProposal }: { onMeetingProposal?: (propo
               ? 'Converse com o Orbe sobre o portfólio e a trajetória profissional de Pedro Santos.'
               : 'Guia interativo em demonstração, com respostas predefinidas sobre habilidades, projetos e contato.'}</p>
             {apiEnabled && <p id="orbChatPrivacy" className="orb-chat-privacy">
-              Suas perguntas podem ser enviadas ao provedor de IA utilizado pelo backend.
-              O histórico pode ser armazenado temporariamente. Não informe dados pessoais sensíveis.
+              Suas perguntas podem ser enviadas ao provedor de IA e o histórico é armazenado temporariamente.
+              O sistema também registra assuntos e intenções prováveis em resumos temáticos acessíveis ao administrador,
+              sem copiar o texto das mensagens para esses resumos. Não informe dados pessoais sensíveis.
             </p>}
             <div ref={historyRef} className="orb-chat-history" role="log" aria-label="Conversa com o orbe" aria-live="polite" aria-relevant="additions text" aria-busy={isLoading} tabIndex={0}>
               {messages.map((message) => (

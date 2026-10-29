@@ -1,26 +1,8 @@
 import { useRef, type MouseEvent, type RefObject } from 'react';
 import { AdminMeetings } from './AdminMeetings';
+import { AdminConversations } from './AdminConversations';
 import { platformConfig } from '../config/platform';
 import '../styles/admin_dashboard.css';
-
-const reports = [
-  {
-    title: 'PERGUNTAS RESPONDIDAS',
-    description: 'Quantas perguntas receberam uma resposta do Orbe.',
-  },
-  {
-    title: 'CONVERSAS ÚNICAS',
-    description: 'Fechar e reabrir o Orbe mantém a mesma conversa. Recarregar a página permite iniciar outra.',
-  },
-  {
-    title: 'PERGUNTAS MAIS FREQUENTES',
-    description: 'Assuntos que despertam interesse sobre os projetos e a trajetória profissional.',
-  },
-  {
-    title: 'INTENÇÕES DAS CONVERSAS',
-    description: 'Curiosidade, interesse em vaga, sondagem profissional ou dúvidas técnicas; casos incertos devem ser identificados.',
-  },
-];
 
 function focusSection(event: MouseEvent<HTMLAnchorElement>, target: RefObject<HTMLElement | null>) {
   if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -52,14 +34,7 @@ export function AdminDashboard({ onReturn }: { onReturn: () => void }) {
     <section ref={recordsRef} id="admin-orbe-records" className="admin-dashboard-records"
       aria-labelledby="admin-orbe-title" tabIndex={-1}>
       <h2 id="admin-orbe-title">[ REGISTROS DO ORBE ]</h2>
-      <p>Os relatórios do Orbe ainda não estão disponíveis.</p>
-      <dl className="admin-dashboard-metrics">
-        {reports.map(report => <div key={report.title} className="admin-dashboard-metric">
-          <dt>{report.title}</dt>
-          <dd className="admin-dashboard-unavailable">Aguardando dados</dd>
-          <dd className="admin-dashboard-metric-description">{report.description}</dd>
-        </div>)}
-      </dl>
+      <AdminConversations />
     </section>
 
     {platformConfig.meetingsEnabled ? <div ref={agendaRef} id="admin-meeting-agenda" className="admin-dashboard-agenda" tabIndex={-1}>
