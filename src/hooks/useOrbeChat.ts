@@ -3,6 +3,9 @@ import { orbeConfig } from '../config/orbe';
 import { CHAT_MAX_MESSAGE_LENGTH, createOrbeClient, OrbeClientError } from '../services/orbeClient';
 import { sendDemoMessage } from '../services/orbeDemo';
 import type { ChatSource } from '../types/orbe';
+import {
+  clearOrbeTranscript, MAX_ORBE_USER_TURNS, restoreOrbeTranscript, saveOrbeTranscript,
+} from '../services/orbeTranscript';
 
 interface ChatMessage {
   id: number;
@@ -27,7 +30,11 @@ export function useOrbeChat(reducedMotion: boolean) {
   const pendingRef = useRef<PendingRequest | null>(null);
   const mountedRef = useRef(false);
   const nextId = useRef(1);
-  const [messages, setMessages] = useState<ChatMessage[]>([greeting]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const restored = restoreOrbeTranscript();
+    return restored.length && restored[0]?.id === 0 && restored[0].sender === 'orb'
+      ? restored : [greeting];
+  });
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ChatNotice | null>(null);
@@ -42,6 +49,27 @@ export function useOrbeChat(reducedMotion: boolean) {
       pendingRef.current = null;
       clientRef.current?.reset();
     };
+  }, []);
+
+  useEffect(() => {
+    saveOrbeTranscript(messages);
+    nextId.current = Math.max(nextId.current, ...messages.map(m => m.id + 1));
+  }, [messages]);
+
+  const userTurnCount = messages.filter(message => message.sender === 'user').length;
+  const limitReached = userTurnCount >= MAX_ORBE_USER_TURNS;
+
+  const newConversation = useCallback(() => {
+    pendingRef.current?.controller.abort();
+    pendingRef.current = null;
+    clientRef.current?.reset();
+    clearOrbeTranscript();
+    nextId.current = 1;
+    setMessages([greeting]);
+    setQuery('');
+    setIsLoading(false);
+    setError(null);
+    setRetryAt(0);
   }, []);
 
   useEffect(() => {
@@ -71,6 +99,10 @@ export function useOrbeChat(reducedMotion: boolean) {
 
   async function sendMessage() {
     if (pendingRef.current || Date.now() < retryAt) return;
+    if (limitReached) {
+      setError({ message: 'Esta conversa atingiu o limite de 20 perguntas. Copie-a e inicie uma nova conversa.' });
+      return;
+    }
     const text = query.trim();
     if (!text || text.length > CHAT_MAX_MESSAGE_LENGTH) {
       setError({ message: `Escreva uma pergunta com até ${CHAT_MAX_MESSAGE_LENGTH} caracteres.` });
@@ -117,6 +149,7 @@ export function useOrbeChat(reducedMotion: boolean) {
 
   return {
     messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
+    newConversation, userTurnCount, limitReached, maxUserTurns: MAX_ORBE_USER_TURNS,
     cooldownSeconds: Math.max(0, Math.ceil((retryAt - now) / 1000)),
     maxMessageLength: CHAT_MAX_MESSAGE_LENGTH,
     apiEnabled: orbeConfig.enabled,

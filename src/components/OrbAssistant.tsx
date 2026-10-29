@@ -3,6 +3,7 @@ import { startOrbRenderer, type OrbRenderer } from '../effects/orbRenderer';
 import { useReducedMotion } from '../hooks/useMediaQuery';
 import { useOrbeChat } from '../hooks/useOrbeChat';
 import { getOrbeSources } from '../services/orbeSources';
+import { copyOrbeTranscript } from '../services/orbeTranscript';
 import { Modal } from './Modal';
 
 const GREETINGS = [
@@ -18,6 +19,7 @@ export function OrbAssistant() {
   const {
     messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
     cooldownSeconds, maxMessageLength, apiEnabled,
+    newConversation, userTurnCount, limitReached, maxUserTurns,
   } = useOrbeChat(reducedMotion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -29,6 +31,7 @@ export function OrbAssistant() {
   const [greeting, setGreeting] = useState(GREETINGS[0]);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [copyStatus, setCopyStatus] = useState('');
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(hover: none), (max-width: 768px)');
@@ -73,6 +76,20 @@ export function OrbAssistant() {
   function openChat() {
     rendererRef.current?.activate();
     setOpen(true);
+  }
+
+  async function copyConversation() {
+    try {
+      await navigator.clipboard.writeText(copyOrbeTranscript(messages));
+      setCopyStatus('Conversa copiada.');
+    } catch {
+      setCopyStatus('Não foi possível copiar. Verifique a permissão da área de transferência.');
+    }
+  }
+
+  function startNewConversation() {
+    newConversation();
+    setCopyStatus('');
   }
 
   function submitMessage(event: FormEvent<HTMLFormElement>) {
@@ -120,6 +137,24 @@ export function OrbAssistant() {
             <h2 id="orbChatTitle" className="orb-chat-title">[&nbsp;CONSULTAR ORBE MÁGICO&nbsp;]</h2>
             <div className="orb-chat-header-actions">
               <button type="button" className="orb-chat-size-btn"
+                aria-label="Copiar conversa" title="Copiar conversa"
+                onClick={() => void copyConversation()}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="8" y="8" width="12" height="12" rx="2" />
+                  <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                </svg>
+              </button>
+              <button type="button" className="orb-chat-size-btn"
+                aria-label="Nova conversa" title="Nova conversa"
+                onClick={startNewConversation} disabled={userTurnCount === 0 && !query}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
+                  <path d="M16 5h6M19 2v6M9 12h5" />
+                </svg>
+              </button>
+              <button type="button" className="orb-chat-size-btn"
                 aria-label={expanded ? 'Restaurar tamanho do chat' : 'Maximizar chat'}
                 title={expanded ? 'Restaurar tamanho do chat' : 'Maximizar chat'}
                 aria-pressed={expanded}
@@ -144,14 +179,20 @@ export function OrbAssistant() {
             {apiEnabled && <p id="orbChatPrivacy" className="orb-chat-privacy">
               Suas perguntas podem ser enviadas ao provedor de IA utilizado pelo backend.
               O histórico pode ser armazenado temporariamente. Não informe dados pessoais sensíveis.
+              Uma cópia do texto fica neste navegador por até 24 horas; use Nova conversa para apagá-la.
+              Após recarregar a página, as mensagens voltam à tela, mas a sessão da IA recomeça.
             </p>}
+            <p className="orb-chat-counter" aria-label="Limite de perguntas">
+              {userTurnCount}/{maxUserTurns} perguntas nesta conversa
+            </p>
+            {copyStatus && <p role="status" className="orb-chat-copy-status">{copyStatus}</p>}
             <div ref={historyRef} className="orb-chat-history" role="log" aria-label="Conversa com o orbe" aria-live="polite" aria-relevant="additions text" aria-busy={isLoading} tabIndex={0}>
               {messages.map((message) => (
                 <div key={message.id} className={`chat-msg ${message.sender === 'orb' ? 'orb-msg' : 'user-msg'}`}>
                   <span className="chat-sender">{message.sender === 'orb' ? '[ORBE]:' : '[VOCÊ]:'}</span> <span className="chat-text">{message.text}</span>
                   {message.simulated && <p className="orb-chat-simulated">[ Resposta simulada ]</p>}
-                  {!!message.sources?.length && <div className="orb-chat-sources">
-                    <p>[ FONTES CONSULTADAS ]</p>
+                  {!!message.sources?.length && getOrbeSources(message.sources).length > 0 && <div className="orb-chat-sources">
+                    <p>[ PROJETOS RELACIONADOS ]</p>
                     <ul>{getOrbeSources(message.sources).map((source, index) => <li key={`${source.type}-${source.id}-${index}`}>
                       {source.href ? <a href={source.href} target="_blank" rel="noopener noreferrer">{source.title}</a> : source.title}
                     </li>)}</ul>
@@ -173,9 +214,10 @@ export function OrbAssistant() {
                 maxLength={maxMessageLength} value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={handleComposerKeyDown} />
-              <button type="submit" className="orb-chat-send-btn" disabled={isLoading || cooldownSeconds > 0}>ENVIAR</button>
+              <button type="submit" className="orb-chat-send-btn" disabled={isLoading || cooldownSeconds > 0 || limitReached}>ENVIAR</button>
             </form>
             <p id="orbChatKeyboardHint" className="orb-chat-keyboard-hint">Enter envia · Shift + Enter pula linha</p>
+            {limitReached && <p className="orb-chat-limit">Limite atingido. Use Copiar conversa e Nova conversa para continuar.</p>}
           </div>
         </Modal>
       )}

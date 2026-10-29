@@ -283,3 +283,12 @@ body.modo-claro .orb-chat-panel .chat-sender {
 @media (max-height: 520px) {
     .orb-chat-panel-expanded .orb-chat-history { min-height: 80px; }
 }
+
+/* Public chat utilities: high-contrast icons and inline status. */
+.orb-chat-header-actions .orb-chat-size-btn:disabled { opacity: .4; cursor: not-allowed; }
+.orb-chat-header-actions .orb-chat-size-btn:focus-visible { outline: 2px solid var(--texto-ciano); outline-offset: 2px; }
+.orb-chat-counter, .orb-chat-copy-status, .orb-chat-limit {
+  font-size: 7px; line-height: 1.8; margin: 0 0 8px;
+  color: var(--texto-secundario);
+}
+.orb-chat-copy-status, .orb-chat-limit { color: var(--texto-destaque-ouro); }
