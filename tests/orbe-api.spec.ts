@@ -394,10 +394,13 @@ test('teclado, celular e movimento reduzido preservam acesso aos controles', asy
   await page.setViewportSize({ width: 320, height: 568 });
   await mockChat(page, [{}]);
   const { dialog, input, send, close, trigger, history } = await openChat(page);
+  const copy = dialog.getByRole('button', { name: 'Copiar conversa' });
   const maximize = dialog.getByRole('button', { name: 'Maximizar chat' });
-  await expect(maximize).toBeFocused();
+  await expect(copy).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(send).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(copy).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(maximize).toBeFocused();
   await input.fill('Pergunta pelo teclado');
