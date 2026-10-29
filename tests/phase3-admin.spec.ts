@@ -288,7 +288,7 @@ test('busca e ordenação atuam nos registros carregados sem novas requisições
   await expect(edit).toBeDisabled();
   await expect(edit).toHaveAttribute('aria-describedby', 'admin-edit-unavailable');
   await expect(page.locator('#admin-edit-unavailable')).toContainText('ainda não está disponível');
-  expect(api.requests).toHaveLength(2);
+  expect(api.requests.filter(request => new URL(request.url()).pathname !== '/api/v1/admin/conversations')).toHaveLength(2);
   expect(api.requests.every(request => request.method() === 'GET')).toBe(true);
   expect(api.unexpected).toEqual([]);
 });
@@ -517,7 +517,7 @@ for (const theme of ['escuro', 'claro'] as const) {
     await expect(meetingSummary(page)).toBeVisible();
     const audit = await new AxeBuilder({ page }).include('.admin-dashboard').analyze();
     expect(audit.violations).toEqual([]);
-    expect(api.requests).toHaveLength(2);
+    expect(api.requests.filter(request => new URL(request.url()).pathname !== '/api/v1/admin/conversations')).toHaveLength(2);
     expect(api.requests.every(request => request.method() === 'GET')).toBe(true);
     expect(api.unexpected).toEqual([]);
   });
@@ -543,7 +543,8 @@ for (const width of [320, 375, 768, 1440]) {
       const records = page.getByRole('region', { name: '[ REGISTROS DO ORBE ]', exact: true });
       await expect(records).toBeFocused();
       await expect(records.getByRole('heading', { name: '[ REGISTROS DO ORBE ]', exact: true, level: 2 })).toBeVisible();
-      await expect(records.getByText('Aguardando dados', { exact: true })).toHaveCount(4);
+      await expect(records.getByText('CONVERSAS ÚNICAS', { exact: true })).toBeVisible();
+      await expect(records.getByText('PERGUNTAS RESPONDIDAS', { exact: true })).toBeVisible();
       await page.getByRole('link', { name: 'AGENDA E PEDIDOS', exact: true }).focus();
       await page.keyboard.press('Enter');
       await expect(page.locator('#admin-meeting-agenda')).toBeFocused();
