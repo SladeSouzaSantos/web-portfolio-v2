@@ -9,6 +9,9 @@ virtual que representa sua trajetória profissional e cita fontes do portfólio.
 - Navegação pelas seções Sobre, Projetos, Experiência e Formação.
 - Arquivo de Missões e visualização de projetos.
 - Orbe conversacional sobre competências, experiência, estudos e contato.
+  No chat, **Enter envia** a pergunta e **Shift + Enter insere uma nova linha**.
+  Use o botão **Maximizar chat** para expandir a janela e **Restaurar tamanho do chat**
+  para voltar ao modo compacto; a conversa permanece aberta.
 - Temas claro/escuro, acessibilidade e suporte a movimento reduzido.
 
 **Não há login, baú, contas, painel administrativo, reuniões nem notificações.**
@@ -27,6 +30,7 @@ npm run dev
 npm run build
 npx playwright install chromium
 npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts
+npm run test:orbe
 ```
 
 O chat real requer `VITE_ORBE_API_ENABLED=true` e uma URL válida no
