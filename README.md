@@ -174,3 +174,19 @@ histórico profissional, sem mudar o padrão visual da taverna.
 Respeita `prefers-reduced-motion` e evita alegações de domínio em tecnologias
 citadas apenas em ementas. Critérios cobertos em
 `tests/sobre-competencias.spec.ts`.
+
+### Academia Arcana — cursos do currículo
+
+As seis trilhas de Estudos Contínuos apresentam 38 cursos
+das formações Alura, Udemy e DIO, classificados por áreas de desenvolvimento.
+Cada ficha mostra instituição, situação conhecida ou "A confirmar" e a
+especialização em aprofundamento, sem afirmar certificações não verificadas.
+A lista acadêmica mantém a composição de nove medalhões, incluindo um
+medalhão agrupado para as cinco especializações da FacPrisma (Arquitetura de
+Software, Big Data, Aplicações Móveis, Inteligência Artificial e Segurança
+da Informação); a previsão 07/2026 permanece marcada como não verificada.
+
+Dados: `src/data/formacoes.ts`; interface: `src/sections/Formacao.tsx`.
+Teste E2E: `tests/formacao-cursos.spec.ts`.
+Mudança exclusiva da branch `dev`, sem deploy remoto nem alterações na
+`main`. Uma revisão ampla de UI/UX responsiva será feita separadamente.

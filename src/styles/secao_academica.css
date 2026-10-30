@@ -643,3 +643,83 @@ body.academia-modal-aberto {overflow:hidden !important;}
   }
   .academia-cartao {transition:none;}
 }
+
+/* Fichas de cursos: enriquecimento do conteúdo sem alterar armário ou medalhões. */
+.academia-modal__aviso {
+  margin: 14px 0 !important;
+  padding: 10px 12px;
+  border-left: 3px solid #a66e29;
+  background: rgba(122, 65, 12, .09);
+  font-size: 9px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.academia-modal__cursos,
+.academia-modal__especializacoes ul {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 20px;
+}
+.academia-modal__cursos { display: grid; gap: 9px; }
+.academia-modal__curso {
+  min-width: 0;
+  border: 1px solid #bd8a4f;
+  background: rgba(255, 251, 227, .37);
+  border-radius: 3px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+  align-items: start;
+  line-height: 1.6;
+}
+.academia-modal__curso-titulo {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.academia-modal__curso-instituicao { font-size: 9px; color: #6e411d; }
+.academia-modal__curso-status {
+  justify-self: end;
+  padding: 2px 6px;
+  border: 1px solid #b68a5b;
+  background: rgba(80, 45, 17, .06);
+  font-size: 8px;
+  line-height: 1.6;
+  white-space: nowrap;
+  color: #75421c;
+}
+.academia-modal__curso-status--concluido {
+  color: #195437; border-color: #6f9678; background: rgba(31,111,65,.09);
+}
+.academia-modal__curso-status--andamento {
+  color: #815011; border-color: #b1844b; background: rgba(194,129,26,.09);
+}
+.academia-modal__aprofundamento {
+  margin-top: 16px !important;
+  border-top: 1px dashed #a97741;
+  padding-top: 14px;
+  overflow-wrap: anywhere;
+}
+.academia-modal__aprofundamento strong { color: #754019; }
+.academia-modal__especializacoes h3 {
+  font: 10px/1.8 var(--fonte-titulo);
+  color: #754019;
+  margin: 16px 0 12px;
+}
+.academia-modal__especializacoes li {
+  border-left: 3px solid #9b6d39;
+  background: rgba(255,251,227,.3);
+  padding: 7px 10px;
+  margin: 6px 0;
+  font-size: 10px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 639px) {
+  .academia-modal__painel { padding: 50px 16px 22px; }
+  .academia-modal__curso { grid-template-columns: minmax(0, 1fr); }
+  .academia-modal__curso-status { justify-self: start; }
+}

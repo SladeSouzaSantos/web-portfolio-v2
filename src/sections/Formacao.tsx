@@ -117,7 +117,7 @@ export function Formacao() {
             <aside className="academia-estudos" aria-labelledby="academia-estudos-titulo">
               <div className="academia-estudos__cabecalho">
                 <h2 id="academia-estudos-titulo">ESTUDOS CONTÍNUOS</h2>
-                <p className="academia-estudos__subtitulo">CURSOS & CERTIFICAÇÕES</p>
+                <p className="academia-estudos__subtitulo">CURSOS & TRILHAS DE APRENDIZAGEM</p>
               </div>
               <div className="academia-estudos__lista">
                 {trilhas.map(trilha => (
@@ -131,7 +131,7 @@ export function Formacao() {
             </aside>
           </div>
         </div>
-        <p className="academia-secao__nota">Explore cada diploma para conhecer a formação.</p>
+        <p className="academia-secao__nota">Explore os medalhões e as trilhas para conhecer a formação e os cursos registrados.</p>
       </section>
       {ficha && (
         <Modal overlayClassName="academia-modal" panelClassName="academia-modal__painel" bodyClassName="academia-modal-aberto" labelledBy="academia-modal-titulo" onClose={() => setFicha(null)}>
@@ -148,13 +148,32 @@ export function Formacao() {
               <p><strong>Período:</strong> {ficha.item.periodo}</p>
               <p><strong>Situação:</strong> {ficha.item.situacao}</p>
               <p>{ficha.item.descricao}</p>
+              {ficha.item.especializacoes && (
+                <div className="academia-modal__especializacoes">
+                  <h3>ESPECIALIZAÇÕES INCLUÍDAS</h3>
+                  <ul>{ficha.item.especializacoes.map(nome => <li key={nome}>{nome}</li>)}</ul>
+                </div>
+              )}
+              {ficha.item.observacao && <p className="academia-modal__aviso">{ficha.item.observacao}</p>}
               {ficha.item.comprovante && <a className="academia-modal__link" href={ficha.item.comprovante} target="_blank" rel="noopener noreferrer">VER COMPROVANTE ↗</a>}
             </>
           ) : (
             <>
-              <p className="academia-modal__categoria">TRILHA DE APRENDIZAGEM</p>
+              <p className="academia-modal__categoria">TRILHA DE APRENDIZAGEM · {ficha.item.cursos.length} CURSOS</p>
               <p>{ficha.item.descricao}</p>
-              <p>Os cursos e certificados individuais desta área poderão ser adicionados ao catálogo posteriormente.</p>
+              <p className="academia-modal__aviso">Cursos mencionados nos currículos. Conclusão e certificados individuais não foram verificados, salvo quando a situação está explicitamente indicada.</p>
+              <ul className="academia-modal__cursos" aria-label={`Cursos da trilha ${ficha.item.titulo}`}>
+                {ficha.item.cursos.map(curso => (
+                  <li className="academia-modal__curso" key={`${curso.instituicao}-${curso.titulo}`}>
+                    <strong className="academia-modal__curso-titulo">{curso.titulo}</strong>
+                    <span className="academia-modal__curso-instituicao">{curso.instituicao}</span>
+                    <span className={`academia-modal__curso-status academia-modal__curso-status--${curso.situacao === 'Concluído' ? 'concluido' : curso.situacao === 'Em andamento' ? 'andamento' : 'pendente'}`}>
+                      {curso.situacao}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="academia-modal__aprofundamento"><strong>EM APROFUNDAMENTO:</strong> {ficha.item.aprofundamento}</p>
             </>
           )}
         </Modal>

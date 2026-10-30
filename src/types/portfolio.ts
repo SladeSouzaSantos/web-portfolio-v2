@@ -42,6 +42,16 @@ export interface Formacao {
   icone: string;
   descricao: string;
   comprovante: string;
+  especializacoes?: string[];
+  observacao?: string;
+}
+
+export type SituacaoCurso = 'Concluído' | 'Em andamento' | 'A confirmar';
+
+export interface CursoFormacao {
+  titulo: string;
+  instituicao: string;
+  situacao: SituacaoCurso;
 }
 
 export interface Trilha {
@@ -49,4 +59,6 @@ export interface Trilha {
   titulo: string;
   descricao: string;
   icone: string;
+  aprofundamento: string;
+  cursos: CursoFormacao[];
 }

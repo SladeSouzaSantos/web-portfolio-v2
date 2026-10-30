@@ -50,14 +50,268 @@ export const formacoes: FormacaoItem[] = [
     cor: '#265fa4', icone: 'cerebro',
     descricao: 'Especialização em engenharia de software aplicada a sistemas inteligentes, integração de IA e soluções baseadas em modelos de linguagem.', comprovante: '',
   },
+  {
+    id: 'pos-computacao-tic', titulo: 'Computação e TIC — 5 Especializações', tipo: 'Pós-graduações', instituicao: 'FacPrisma',
+    periodo: 'Previsão informada: 07/2026', situacao: 'Conclusão a confirmar',
+    cor: '#395a9b', icone: 'blocos',
+    descricao: 'Cinco especializações lato sensu em áreas da computação, registradas no currículo. O conjunto fica em um único medalhão para preservar a composição da Academia.',
+    especializacoes: [
+      'Arquitetura de Software',
+      'Big Data',
+      'Desenvolvimento de Aplicações para Dispositivos Móveis',
+      'Inteligência Artificial',
+      'Segurança da Informação',
+    ],
+    observacao: 'Previsão de conclusão extraída do currículo; situação final e certificados ainda não verificados.',
+    comprovante: '',
+  },
 ];
 
-// Áreas de estudo, não declarações de certificações concluídas.
+// As listas são transcritas e agrupadas a partir de currículos fornecidos pelo autor.
+// A presença no currículo não comprova individualmente certificação ou conclusão.
 export const trilhas: Trilha[] = [
-  { id: 'java', titulo: 'Java & Ecossistema', descricao: 'Java · Spring · APIs · Boas práticas', icone: 'codigo' },
-  { id: 'frontend', titulo: 'React & Frontend', descricao: 'React · JavaScript · Interfaces', icone: 'janela' },
-  { id: 'ia', titulo: 'Inteligência Artificial', descricao: 'LLMs · Agentes · LangChain · RAG', icone: 'cerebro' },
-  { id: 'arquitetura', titulo: 'Arquitetura de Software', descricao: 'SOLID · Design Patterns · Clean Architecture', icone: 'blocos' },
-  { id: 'dados', titulo: 'Dados & Bancos', descricao: 'SQL · NoSQL · Pipelines · Big Data', icone: 'dados' },
-  { id: 'qualidade', titulo: 'Segurança & Qualidade', descricao: 'Testes · TDD · Segurança da Informação', icone: 'escudo' },
+  {
+    "id": "java",
+    "titulo": "Java & Arquitetura",
+    "descricao": "Java · POO · Clean Code · TDD",
+    "icone": "codigo",
+    "aprofundamento": "Spring Boot, Quarkus, integração com IA e arquitetura moderna de aplicações Java.",
+    "cursos": [
+      {
+        "titulo": "Formação Java e Clean Architecture",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Java e Domain Driven Design",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação SOLID com Java",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Design Patterns em Java",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação TDD e Java — JUnit",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação em Java: POO, DDD e APIs REST",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Java Completo — Programação Orientada a Objetos",
+        "instituicao": "Udemy",
+        "situacao": "Em andamento"
+      },
+      {
+        "titulo": "Clean Code na Prática",
+        "instituicao": "Udemy",
+        "situacao": "Concluído"
+      },
+      {
+        "titulo": "Padrões de Projeto em Java",
+        "instituicao": "Udemy",
+        "situacao": "Concluído"
+      }
+    ]
+  },
+  {
+    "id": "ia",
+    "titulo": "IA & Dados",
+    "descricao": "Python · Algoritmos · Redes Neurais",
+    "icone": "cerebro",
+    "aprofundamento": "Engenharia de IA aplicada: RAG, embeddings, agentes, LangChain, LangGraph e MCP (pós-graduação).",
+    "cursos": [
+      {
+        "titulo": "Estruturas de Dados e Algoritmos em Python",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Redes Neurais Artificiais em Python",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Python Fundamentals",
+        "instituicao": "DIO",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Linguagem R para Análise de Dados",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Power BI Analyst",
+        "instituicao": "DIO",
+        "situacao": "A confirmar"
+      }
+    ]
+  },
+  {
+    "id": "frontend",
+    "titulo": "Frontend & Mobile",
+    "descricao": "JavaScript · TypeScript · Flutter",
+    "icone": "janela",
+    "aprofundamento": "Arquitetura de interfaces, React e integração de aplicativos com APIs.",
+    "cursos": [
+      {
+        "titulo": "Formação HTML e CSS — responsividade e mobile-first",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação JavaScript — DOM, formulários e APIs",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação TypeScript",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Dart",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Flutter — estados, APIs e testes",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Firebase Authentication",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Desenvolvimento Frontend com Angular",
+        "instituicao": "DIO",
+        "situacao": "A confirmar"
+      }
+    ]
+  },
+  {
+    "id": "arquitetura",
+    "titulo": "Engenharia de Software",
+    "descricao": "Requisitos · UML · Modelagem · UX",
+    "icone": "blocos",
+    "aprofundamento": "Projetos de software orientados a domínio, arquitetura, manutenção e qualidade.",
+    "cursos": [
+      {
+        "titulo": "Formação Engenharia de Requisitos",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação UML — modelagem e BPMN",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Design Thinking",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação UI Design",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Figma — layouts de aplicativos mobile",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Aprendendo Domain Driven Design (DDD) do Zero",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      }
+    ]
+  },
+  {
+    "id": "dados",
+    "titulo": "Bancos de Dados",
+    "descricao": "SQL · NoSQL · MongoDB · SQL Server",
+    "icone": "dados",
+    "aprofundamento": "Modelagem, persistência, consultas e integração entre bases relacionais e NoSQL.",
+    "cursos": [
+      {
+        "titulo": "Formação SQL Database Specialist",
+        "instituicao": "DIO",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "SQL Server Completo — Formação DBA",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Curso NoSQL — MongoDB e Neo4j",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Power BI + SQL Server",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      }
+    ]
+  },
+  {
+    "id": "qualidade",
+    "titulo": "DevOps & Qualidade",
+    "descricao": "Docker · Git · Cypress · Web",
+    "icone": "escudo",
+    "aprofundamento": "CI/CD, testes automatizados, segurança de aplicações e observabilidade.",
+    "cursos": [
+      {
+        "titulo": "Formação Docker — containers",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Git e GitHub — controle de versão",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Git e GitHub do Básico ao Avançado",
+        "instituicao": "Udemy",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Automação de Testes com Cypress",
+        "instituicao": "DIO",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "HTTP — entendendo a Web",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Webpack — módulos em aplicações Web",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      },
+      {
+        "titulo": "Formação Performance Web",
+        "instituicao": "Alura",
+        "situacao": "A confirmar"
+      }
+    ]
+  }
 ];
