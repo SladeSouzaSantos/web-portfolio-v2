@@ -9,7 +9,7 @@ type Filtro = Projeto['categoria'] | 'todos';
 
 const filtros: { id: Filtro; rotulo: string }[] = [
   { id: 'todos', rotulo: '✦ TODOS' },
-  { id: 'ia', rotulo: '✧ IA & BACKEND' },
+  { id: 'ia', rotulo: '✧ IA & SEGURANÇA' },
   { id: 'mobile', rotulo: '▣ MOBILE' },
   { id: 'ferramentas', rotulo: '⚒ FERRAMENTAS' },
 ];
