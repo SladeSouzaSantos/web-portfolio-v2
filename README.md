@@ -158,3 +158,19 @@ nesta entrega. Teste específico: `npx playwright test tests/stacks-digitadas.sp
 A animação Typed.js usa `contentType: 'null'` (texto puro) para preservar
 ampersands literais em `RAG & EMBEDDINGS` e `AGENTES & MCP`; a regressão é
 coberta por `tests/stacks-digitadas.spec.ts`.
+
+### Sobre Mim — foco em desenvolvimento e evidências profissionais
+
+O resumo apresenta o trabalho com Java/Hibernate/PostgreSQL em software acadêmico
+e as aplicações web e mobile desenvolvidas com Flutter, Python e PHP.
+Energia solar e petróleo e gás são descritos como contextos de negócios, não
+como especialidades principais. O foco profissional é backend Java,
+arquitetura e Engenharia de IA em aprofundamento.
+
+Os quatro cards agora distinguem tecnologias praticadas (experiência e
+projetos reais) de assuntos em estudo. Cada um possui `<details>` nativo,
+acessível por teclado/touch, com evidências e links para trabalhos públicos ou
+histórico profissional, sem mudar o padrão visual da taverna.
+Respeita `prefers-reduced-motion` e evita alegações de domínio em tecnologias
+citadas apenas em ementas. Critérios cobertos em
+`tests/sobre-competencias.spec.ts`.

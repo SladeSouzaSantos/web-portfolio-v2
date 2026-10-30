@@ -69,20 +69,43 @@ export function Sobre() {
       <div className="painel-rpg painel-descricao">
         <h2 className="descricao-titulo">[ SUMÁRIO DO HERÓI ]</h2>
         <p className="descricao-texto">
-          Engenheiro de Software e Desenvolvedor com sólida base em sistemas e energias renováveis, atualmente focado no ecossistema <strong>Java</strong> e <strong>Inteligência Artificial</strong>.
-          {' '}Combino rigor arquitetural e algoritmos inteligentes para criar soluções escaláveis, de alta performance e impacto real.
+          Sou <strong>desenvolvedor de software</strong>, com experiência na criação e manutenção de sistemas web, APIs e aplicativos móveis.
+          {' '}Atuei com <strong>Java, Hibernate e PostgreSQL</strong> no SIGAA e desenvolvi soluções com <strong>Flutter, Python e PHP</strong> para automatizar processos.
+          {' '}Hoje direciono meus projetos e estudos a <strong>backend Java, arquitetura de software e Engenharia de IA</strong>, explorando integrações com LLMs, RAG e agentes.
+          {' '}Minha vivência em energia e petróleo e gás trouxe desafios reais que transformei em aplicações digitais.
         </p>
         <div className="descricao-stats">
-          <div className="stat-box"><span className="stat-label">FOCO PRINCIPAL:</span><span className="stat-value">JAVA & IA</span></div>
-          <div className="stat-box"><span className="stat-label">MISSÃO:</span><span className="stat-value">CÓDIGO LIMPO & ESCALÁVEL</span></div>
+          <div className="stat-box"><span className="stat-label">FOCO PRINCIPAL:</span><span className="stat-value">JAVA BACKEND & IA</span></div>
+          <div className="stat-box"><span className="stat-label">MISSÃO:</span><span className="stat-value">SOFTWARE ÚTIL & TESTÁVEL</span></div>
         </div>
       </div>
       <div className="painel-rpg painel-skills">
         <div className="skills-grid-categorias">
-          {perfil.competencias.map(categoria => <div className="skill-categoria-box" key={categoria.titulo}>
-            <h2 className="skill-cat-titulo">{categoria.titulo}</h2>
-            <div className="skill-tags">{categoria.habilidades.map(item => <span className="skill-tag" key={item}>{item}</span>)}</div>
-          </div>)}
+          {perfil.competencias.map(categoria => (
+            <article className="skill-categoria-box" key={categoria.titulo}>
+              <h2 className="skill-cat-titulo">{categoria.titulo}</h2>
+              <p className="skill-cat-resumo">{categoria.resumo}</p>
+              <div className="skill-tags" aria-label="Tecnologias aplicadas na prática">
+                {categoria.habilidades.map(item => <span className="skill-tag" key={item}>{item}</span>)}
+              </div>
+              <p className="skill-cat-aprofundamento"><strong>EM APROFUNDAMENTO:</strong> {categoria.aprofundamento}</p>
+              <details className="skill-cat-evidencias">
+                <summary>VER EVIDÊNCIAS <span aria-hidden="true" className="skill-cat-seta">+</span></summary>
+                <ul>
+                  {categoria.evidencias.map(item => (
+                    <li key={item.url}>
+                      <a
+                        href={item.url}
+                        target={item.url.startsWith('https://') ? '_blank' : undefined}
+                        rel={item.url.startsWith('https://') ? 'noopener noreferrer' : undefined}
+                      >{item.nome}<span aria-hidden="true"> ↗</span></a>
+                      <span className="skill-cat-evidencia-desc">{item.descricao}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </article>
+          ))}
         </div>
       </div>
     </div>
