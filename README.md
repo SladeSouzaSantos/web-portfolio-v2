@@ -79,3 +79,12 @@ focar ou tocar no item do menu; as animações de fundo continuam independentes.
 
 Validação: `npx playwright test tests/site-loading.spec.ts`, incluindo desktop,
 320 px, acesso direto por hash, histórico e `prefers-reduced-motion`.
+
+### Transição circular entre seções
+
+A troca dos itens do menu usa a mesma técnica de `clip-path: circle(...)` do
+seletor de tema. Um portal visual sai do botão selecionado, cobre o viewport,
+troca a cena por baixo e se retrai, sem trocar o documento, descartar histórico
+ou carregar GIFs como bloqueio. Links com Ctrl/Cmd e movimento reduzido seguem
+navegação padrão. Cliques repetidos durante a transição não criam filas. As
+navegações pelo histórico continuam instantâneas.

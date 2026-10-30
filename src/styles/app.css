@@ -61,3 +61,54 @@ body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/as
 @media (prefers-reduced-motion: reduce) {
   .section-enter { animation: none !important; }
 }
+
+/* RPG portal: circular cover-and-reveal from the clicked navigation icon.
+   The destination is committed only after the circle covers the viewport. */
+#sectionTransitionMask {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at var(--scene-origin-x, 50%) var(--scene-origin-y, 50%),
+      #134458 0, #0b1d29 48%, #080d12 100%);
+  color: #fef08a;
+  clip-path: circle(0px at 50% 50%);
+  pointer-events: none;
+  overflow: hidden;
+}
+#sectionTransitionMask.is-active { pointer-events: auto; }
+.scene-transition-glyph {
+  font-family: var(--fonte-titulo, monospace);
+  color: #67e8f9;
+  font-size: clamp(45px, 10vw, 95px);
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(103, 232, 249, .45);
+}
+.scene-transition-caption {
+  font-family: var(--fonte-interface, monospace);
+  font-size: clamp(9px, 2vw, 13px);
+  letter-spacing: .15em;
+  line-height: 1.8;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  #sectionTransitionMask { display: none; }
+}
+
+/* A clipped circle does not cover all hit-test regions while expanding or
+   retracting. This invisible shield prevents lost clicks until the wipe ends. */
+#sectionTransitionShield {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+}
+#sectionTransitionShield.is-active { pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  #sectionTransitionShield { display: none; }
+}
