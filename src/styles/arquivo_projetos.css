@@ -69,14 +69,28 @@ body.arquivo-ativa .arquivo-container {
   padding: 0;
 }
 .arquivo-mural { width: 100%; min-width: 0; }
-.arquivo-mural__interior { min-width: 0; padding: 16px 4px 0; text-align: center; }
+/* O brasão da moldura invade parte do interior: área de leitura abaixo dele. */
+.arquivo-mural__interior {
+  min-width: 0;
+  padding: clamp(38px, 4.5vw, 56px) 4px 0;
+  text-align: center;
+}
 .arquivo-intro {
-  margin: 0 auto 22px;
-  color: #ffe2a5;
-  font: 8px/2 'Press Start 2P', monospace;
-  letter-spacing: .02em;
+  max-width: 100%;
+  margin: 0 auto 24px;
+  color: #ffe8b1;
+  font: clamp(7px, .85vw, 10px)/2 'Press Start 2P', monospace;
+  letter-spacing: .015em;
   text-shadow: 2px 2px 0 #3c1b0b, 0 1px 4px #2d1204;
   overflow-wrap: anywhere;
+}
+.arquivo-intro::after {
+  content: '';
+  display: block;
+  width: min(200px, 65%);
+  height: 2px;
+  margin: 13px auto 0;
+  background: linear-gradient(90deg, transparent, #f1bc66 22%, #fce6a1 50%, #f1bc66 78%, transparent);
 }
 .arquivo-filtros {
   display: flex;
@@ -88,27 +102,54 @@ body.arquivo-ativa .arquivo-container {
 body.arquivo-ativa .arquivo-filtro {
   min-height: 44px;
   padding: 10px 12px;
-  border: 2px solid #9e672c;
-  background: #3b2115;
-  box-shadow: 0 3px 0 #1a0a03, inset 0 2px 0 #87512c;
-  color: #ffe0a5;
+  border: 2px solid #a56e34;
+  background: #352116;
+  box-shadow: 0 3px 0 #1a0a03, inset 0 2px 0 #80522d;
+  color: #f5d9a5;
   font: 8px/1.8 'Press Start 2P', monospace;
-  transition: filter 120ms ease;
+  text-shadow: 1px 1px #160d0b;
+  transition: filter 120ms ease, border-color 120ms ease;
 }
 body.arquivo-ativa .arquivo-filtro[aria-pressed="true"] {
-  border-color: #ffc933;
-  background: #251b12;
-  box-shadow: 0 3px 0 #1a0a03, inset 0 0 0 1px #805522;
-  color: #ffdd54;
+  border-color: #ffd467;
+  background: #172e33;
+  box-shadow: 0 3px 0 #1a0a03, inset 0 0 0 1px #49828b;
+  color: #ffe08a;
 }
-body.arquivo-ativa .arquivo-filtro:hover { filter: brightness(1.2); }
+body.arquivo-ativa .arquivo-filtro:hover { filter: brightness(1.15); border-color: #eec074; }
 .arquivo-grid { gap: 18px 8px; }
-.arquivo-grid .guilda-cartaz:nth-child(n) { grid-column: span 2; width: 100%; }
-.arquivo-grid[data-total="8"] .guilda-cartaz:nth-child(7),
-.arquivo-grid[data-total="2"] .guilda-cartaz:nth-child(1) { grid-column: 2 / span 2; }
-.arquivo-grid[data-total="8"] .guilda-cartaz:nth-child(8),
-.arquivo-grid[data-total="2"] .guilda-cartaz:nth-child(2) { grid-column: 4 / span 2; }
-.arquivo-grid[data-total="1"] .guilda-cartaz { grid-column: 3 / span 2; }
+/* Mesma grade de seis tracks/3 cartazes da Guilda: o seletor local neutraliza
+   as posições especiais 4 e 5 da seção principal. */
+.arquivo-grid > .guilda-cartaz:nth-child(n) {
+  grid-column: span 2;
+  width: 100%;
+  min-height: 275px;
+}
+/* Duas missões no último andar do mural, centralizadas SOMENTE em desktop. */
+.arquivo-grid[data-total="8"] > .guilda-cartaz:nth-child(7),
+.arquivo-grid[data-total="2"] > .guilda-cartaz:nth-child(1) { grid-column: 2 / span 2; }
+.arquivo-grid[data-total="8"] > .guilda-cartaz:nth-child(8),
+.arquivo-grid[data-total="2"] > .guilda-cartaz:nth-child(2) { grid-column: 4 / span 2; }
+.arquivo-grid[data-total="1"] > .guilda-cartaz { grid-column: 3 / span 2; }
+/* Hierarquia cromática de RPG 16-bit, com tinta escura legível no pergaminho. */
+.arquivo-grid .guilda-cartaz__numero { color: #894622; }
+.arquivo-grid .guilda-cartaz__titulo {
+  color: #502612;
+  font-size: clamp(8px, .82vw, 10px);
+  line-height: 1.6;
+}
+.arquivo-grid .guilda-cartaz__tipo {
+  color: #863420;
+  font-size: 7px;
+}
+.arquivo-grid .guilda-cartaz__subtitulo { color: #4c3525; font-size: 7px; line-height: 1.8; }
+.arquivo-grid .guilda-cartaz__chamada { color: #8a3c1d; font-size: 7px; }
+body.arquivo-ativa .guilda-detalhes__janela h3 { color: #783a18; }
+body.arquivo-ativa .guilda-detalhes__tecnologias li {
+  border-color: #aa7443;
+  background: rgba(245, 205, 136, .16);
+  color: #63331b;
+}
 .arquivo-vazio {
   grid-column: 1 / -1;
   color: #ffe2a5;
@@ -118,39 +159,51 @@ body.arquivo-ativa .arquivo-filtro:hover { filter: brightness(1.2); }
 body.arquivo-ativa .arquivo-placa-rodape { margin: 24px auto 80px; }
 
 @media (max-width: 1000px) {
+  /* Regra deliberadamente mais específica que o posicionamento desktop:
+     impede colunas implícitas quando o filtro retorna 1, 2 ou 8 missões. */
   .arquivo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .arquivo-grid .guilda-cartaz:nth-child(n) { grid-column: auto; width: 100%; }
-  .arquivo-grid[data-total="1"] .guilda-cartaz,
-  .arquivo-grid[data-total="3"] .guilda-cartaz:last-child,
-  .arquivo-grid[data-total="5"] .guilda-cartaz:last-child,
-  .arquivo-grid[data-total="7"] .guilda-cartaz:last-child {
+  .arquivo-grid > .guilda-cartaz:nth-child(n) {
+    grid-column: auto;
+    width: 100%;
+    min-height: 245px;
+  }
+  .arquivo-grid[data-total="1"] > .guilda-cartaz:last-child,
+  .arquivo-grid[data-total="3"] > .guilda-cartaz:last-child,
+  .arquivo-grid[data-total="5"] > .guilda-cartaz:last-child,
+  .arquivo-grid[data-total="7"] > .guilda-cartaz:last-child {
     grid-column: 1 / -1;
-    width: calc(50% - 4px);
+    width: min(100%, 350px);
     justify-self: center;
   }
+  .arquivo-mural__interior { padding-top: 32px; }
 }
 @media (max-width: 640px) {
   body.arquivo-ativa .topbar__inner { min-height: 72px; padding: 10px 12px; gap: 8px; }
   body.arquivo-ativa .brand { font-size: 9px; }
   body.arquivo-ativa .back-top { padding: 8px; font-size: 7px; }
-  body.arquivo-ativa .arquivo-container { width: calc(100% - 52px); margin-top: 18px !important; }
-  .arquivo-mural__interior { padding: 12px 0 0; }
-  .arquivo-intro { font-size: 6px; margin-bottom: 18px; }
-  .arquivo-filtros { gap: 6px; margin-bottom: 18px; }
+  /* Folga para a sombra da moldura sem sacrificar a área útil do pergaminho. */
+  body.arquivo-ativa .arquivo-container { width: calc(100% - 40px); margin-top: 18px !important; }
+  .arquivo-mural__interior { padding: 30px 0 0; }
+  .arquivo-intro { font-size: 7px; line-height: 2; margin-bottom: 20px; }
+  .arquivo-filtros { gap: 7px; margin-bottom: 20px; }
   body.arquivo-ativa .arquivo-filtro { font-size: 7px; padding: 9px 7px; }
-  .arquivo-grid { grid-template-columns: minmax(0,1fr); gap: 18px; }
-  .arquivo-grid .guilda-cartaz:nth-child(n) {
-    grid-column: 1;
+  .arquivo-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .arquivo-grid > .guilda-cartaz:nth-child(n) {
+    grid-column: 1 / -1;
     width: 100%;
     max-width: 350px;
+    min-height: 245px;
     justify-self: center;
   }
+  .arquivo-grid .guilda-cartaz__titulo { font-size: 9px; }
+  .arquivo-grid .guilda-cartaz__subtitulo { font-size: 8px; }
   body.arquivo-ativa .arquivo-placa-rodape { margin: 20px auto 80px; }
 }
 @media (max-width: 350px) {
   body.arquivo-ativa .brand { font-size: 8px; }
   body.arquivo-ativa .back-top { font-size: 6px; max-width: 175px; }
-  .arquivo-intro { font-size: 5.5px; }
+  .arquivo-intro { font-size: 6.5px; }
+  .arquivo-grid > .guilda-cartaz:nth-child(n) { min-height: 265px; }
 }
 @media (prefers-reduced-motion: reduce) {
   body.arquivo-ativa *, body.arquivo-ativa *::before, body.arquivo-ativa *::after {

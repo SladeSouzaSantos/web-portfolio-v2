@@ -77,7 +77,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run end-to-end browser tests
-        run: npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts tests/site-loading.spec.ts tests/section-circle-transition.spec.ts tests/stacks-digitadas.spec.ts tests/sobre-competencias.spec.ts tests/responsive.spec.ts tests/accessibility.spec.ts tests/project-gallery.spec.ts tests/formacao-cursos.spec.ts
+        run: npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts tests/site-loading.spec.ts tests/section-circle-transition.spec.ts tests/stacks-digitadas.spec.ts tests/sobre-competencias.spec.ts tests/responsive.spec.ts tests/accessibility.spec.ts tests/project-gallery.spec.ts tests/formacao-cursos.spec.ts tests/archive-layout.spec.ts
 
       - name: Validate Orbe chat lifecycle and keyboard controls against a mock API
         run: npm run test:orbe

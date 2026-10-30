@@ -198,3 +198,16 @@ Dados: `src/data/formacoes.ts`; interface: `src/sections/Formacao.tsx`.
 Teste E2E: `tests/formacao-cursos.spec.ts`.
 Mudança exclusiva da branch `dev`, sem deploy remoto nem alterações na
 `main`. Uma revisão ampla de UI/UX responsiva será feita separadamente.
+
+### Arquivo de Missões — responsividade e hierarquia RPG
+
+A página `/projetos` reaproveita o comportamento da Guilda: três pergaminhos
+por linha no desktop, dois em tablet e um em mobile. A correção neutraliza as
+posições especiais da última fileira ao mudar de breakpoint ou filtro; não
+podem surgir colunas implícitas. O subtítulo fica abaixo do brasão da moldura,
+com espaço dedicado, separador pixel art e cores contrastantes nos títulos,
+subtítulos, filtros e informações técnicas. A tipografia continua
+`Press Start 2P` e não depende de bibliotecas adicionais.
+
+Teste: `tests/archive-layout.spec.ts` (270–1440 px, filtros, modal e grid).
+Nenhuma alteração ao backend ou à `main`; publicação exige homologação DEV.
