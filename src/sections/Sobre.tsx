@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { perfil } from '../data/perfil';
+import { StacksDigitadas } from '../components/StacksDigitadas';
 import { useMediaQuery, useReducedMotion } from '../hooks/useMediaQuery';
 import { useSceneBackground } from '../hooks/useSceneBackground';
 import { assetUrl } from '../lib/assets';
@@ -57,7 +58,7 @@ export function Sobre() {
         </div>
         <h1 id="perfil-nome" className="perfil-nome">{perfil.nome}</h1>
         <span className="perfil-cargo">{perfil.cargo}</span>
-        <div className="perfil-especialidades-container"><span className="especialidade-tag">{perfil.especialidade}</span></div>
+        <StacksDigitadas />
         <div className="perfil-social-links">
           {perfil.redes.map(rede => <a key={rede.nome} href={rede.url} target={rede.url.startsWith('https:') ? '_blank' : undefined}
             rel={rede.url.startsWith('https:') ? 'noopener noreferrer' : undefined} className="social-btn" aria-label={rede.nome}>

@@ -140,3 +140,17 @@ sem repetir os cinco projetos principais.
 
 Teste com `npm run build` e `npx playwright test tests/portfolio.spec.ts tests/project-gallery.spec.ts tests/responsive.spec.ts tests/routing.spec.ts tests/accessibility.spec.ts`.
 Trabalho restrito à `dev`; nenhuma mudança em `main` ou publicação no Mac Mini.
+
+### Stack animada na seção Sobre Mim
+
+No painel do avatar, `JAVA & FLUTTER` foi substituído por uma sequência de
+stacks em foco com **Typed.js 2.1.0**: Java, Spring Boot, Quarkus,
+JPA/Hibernate, LangChain4j, RAG/embeddings, LangChain/LangGraph, agentes,
+MCP, bancos vetoriais e guardrails, a partir das ementas Java Elite e
+Engenharia de Software em IA Aplicada.
+
+A animação só existe enquanto a seção está montada; faz cleanup ao navegar
+e usa rótulo fixo para `prefers-reduced-motion: reduce`. Acessibilidade:
+o texto digitado é decorativo e leitores de tela recebem descrição estática.
+Nenhum texto narrativo, competência, projeto ou conteúdo do Orbe foi revisado
+nesta entrega. Teste específico: `npx playwright test tests/stacks-digitadas.spec.ts`.

@@ -1,7 +1,19 @@
 export const perfil = {
   nome: 'PEDRO SANTOS',
   cargo: 'DESENVOLVEDOR JAVA & IA',
-  especialidade: 'JAVA & FLUTTER',
+  especialidade: 'JAVA • IA APLICADA',
+  // Tecnologias em foco, alinhadas às ementas Java Elite e Engenharia de Software em IA Aplicada.
+  stacksDestaque: [
+    'JAVA • SPRING BOOT',
+    'JAVA • QUARKUS',
+    'JAVA • JPA / HIBERNATE',
+    'JAVA • LANGCHAIN4J',
+    'IA • RAG & EMBEDDINGS',
+    'IA • LANGCHAIN / LANGGRAPH',
+    'IA • AGENTES & MCP',
+    'IA • BASES VETORIAIS',
+    'IA • GUARDRAILS',
+  ],
   redes: [
     { nome: 'LinkedIn', url: 'https://linkedin.com/in/phasscode', icone: 'icon-orb-linkedin' },
     { nome: 'GitHub', url: 'https://github.com/SladeSouzaSantos', icone: 'icon-orb-github' },

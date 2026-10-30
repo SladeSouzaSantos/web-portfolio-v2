@@ -520,3 +520,34 @@ body.taverna-ativa::after {
         width: 100% !important;
     }
 }
+
+/* Stack animada no painel do avatar: espaço fixo, sem saltos entre palavras. */
+.perfil-especialidades-container {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-height: 38px;
+    overflow: hidden;
+}
+.especialidade-tag {
+    max-width: 100%;
+    line-height: 1.7;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.especialidade-tag--digitando::after {
+    content: '▌';
+    display: inline-block;
+    margin-left: 3px;
+    color: var(--texto-verde-suave);
+    animation: stack-caret 1s steps(1, end) infinite;
+}
+@keyframes stack-caret {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .especialidade-tag--digitando::after {
+        animation: none;
+        content: none;
+    }
+}
