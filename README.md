@@ -88,3 +88,26 @@ troca a cena por baixo e se retrai, sem trocar o documento, descartar histórico
 ou carregar GIFs como bloqueio. Links com Ctrl/Cmd e movimento reduzido seguem
 navegação padrão. Cliques repetidos durante a transição não criam filas. As
 navegações pelo histórico continuam instantâneas.
+
+## Guilda de Projetos — cinco casos de estudo
+
+A Guilda e o Arquivo de Missões compartilham `src/data/projetos.ts`. A curadoria
+apresenta **GreenCity OS, HSP Simulator, GreenCity API, ReserGas e Guardrails/Prompt
+Injection**. O PHASSCODE e o Orbe não são listados como projeto externo: o próprio
+site demonstra sua implementação.
+
+- Ao passar o mouse sobre um pergaminho, a folha gira em 3D e exibe a imagem no verso;
+  ao clicar, abre a ficha de desafios, tecnologias e links.
+- Com teclado, foco visível e Enter abrem a ficha; com tela touch, o toque abre
+  diretamente a ficha, sem exigir hover. `prefers-reduced-motion` desativa o giro.
+- Capturas de tela: GreenCity OS (imagem fornecida pelo autor), API de Orçamento
+  (recorte da página 2 do PDF fornecido), ReserGas (imagem publicada no README).
+- As artes HSP Simulator e Guardrails são ilustrações, não capturas de software.
+- O endereço `https://hsp.greencity.net.br/` é apresentado como demonstração do
+  simulador web HSP; ele não executa o aplicativo Flutter GreenCity OS no navegador.
+- As capturas anexadas foram reduzidas para o mural; mantenha arquivos originais
+  fora dos assets públicos quando houver dados comerciais ou pessoais.
+
+Verifique o catálogo via `npx playwright test tests/portfolio.spec.ts tests/project-gallery.spec.ts`.
+A publicação em DEV/PROD segue o fluxo operacional acima: este trabalho é
+proposto em um PR para `dev`, sem merge em `main` ou deploy remoto automático.
