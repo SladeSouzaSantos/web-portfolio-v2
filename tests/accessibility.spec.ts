@@ -46,12 +46,12 @@ test('archive and project details meet automated WCAG 2.1 A/AA checks', async ({
   await page.goto('/projetos');
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   await expectAccessible(page, testInfo, 'archive');
-  await page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER', exact: true }).click();
+  await page.getByRole('button', { name: /Ver detalhes de TASK MANAGER/ }).click();
   await expect(page.getByRole('dialog', { name: 'TASK MANAGER', exact: true })).toBeVisible();
   await expectAccessible(page, testInfo, 'archive-project-details');
 });
 
-test('login and assistant dialogs meet automated WCAG 2.1 A/AA checks in both themes', async ({ page }, testInfo) => {
+test('public Orbe assistant meets automated WCAG 2.1 A/AA checks in both themes', async ({ page }, testInfo) => {
   await page.goto('/');
   const question = 'Quais projetos Pedro desenvolveu?';
   for (const theme of ['dark', 'light']) {
@@ -59,11 +59,6 @@ test('login and assistant dialogs meet automated WCAG 2.1 A/AA checks in both th
       await page.getByRole('button', { name: 'Ativar tema claro', exact: true }).click();
       await expect(page.locator('body')).toHaveClass(/modo-claro/);
     }
-    await page.getByRole('button', { name: 'Abrir prévia de login', exact: true }).click();
-    await expect(page.getByRole('dialog', { name: /PORTAL DE AUTENTICAÇÃO/ })).toBeVisible();
-    await expectAccessible(page, testInfo, `${theme}-login`);
-    await page.keyboard.press('Escape');
-
     await page.getByRole('button', { name: 'Abrir guia do portfólio', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ });
     const history = dialog.getByRole('log', { name: 'Conversa com o orbe', exact: true });

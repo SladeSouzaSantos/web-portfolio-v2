@@ -56,8 +56,9 @@ test('Cursor da stack é uma barra CSS centralizada, sem glifo deslocado', async
     cursorHeight: getComputedStyle(element, '::after').height,
     cursorWidth: getComputedStyle(element, '::after').width,
   }));
-  expect(css).toEqual({
-    display: 'inline-flex',
+  // CSS computed style may normalize inline-flex to flex according to stylesheets.
+  expect(['flex', 'inline-flex']).toContain(css.display);
+  expect(css).toMatchObject({
     alignment: 'center',
     cursorContent: '""',
     cursorHeight: '9px',

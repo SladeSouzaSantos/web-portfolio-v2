@@ -106,7 +106,7 @@ test('the archive shows eight complementary projects with independent category f
 test('archive details preserve the filter and return to the Guild', async ({ page }) => {
   await page.goto('/projetos');
   await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
-  const trigger = page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER', exact: true });
+  const trigger = page.getByRole('button', { name: /Ver detalhes de TASK MANAGER/ });
   await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'TASK MANAGER', exact: true });
   await expect(dialog).toContainText('observabilidade');
@@ -188,7 +188,7 @@ for (const width of [320, 375]) {
     await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
     await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
-    await page.getByRole('button', { name: 'Ver detalhes de TECLADO SOUND', exact: true }).click();
+    await page.getByRole('button', { name: /Ver detalhes de TECLADO SOUND/ }).click();
     const dialog = page.getByRole('dialog', { name: 'TECLADO SOUND', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();

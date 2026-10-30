@@ -24,7 +24,8 @@ test('hover com mouse revela o verso sem perder a ação de abrir detalhes', asy
   await expect.poll(() => cartaz.locator('.guilda-cartaz__folha')
     .evaluate(element => getComputedStyle(element).transform))
     .not.toBe('none');
-  await expect(cartaz.locator('.guilda-cartaz__face--verso img')).toHaveAttribute('src', /greencity-os.webp$/);
+  await expect(cartaz.locator('.guilda-cartaz__face--verso img')).toHaveCount(3);
+  await expect(cartaz.locator('.guilda-cartaz__face--verso img').first()).toHaveAttribute('src', /greencity-os.webp$/);
   await cartaz.click();
   await expect(page.getByRole('dialog', { name: 'GREENCITY OS' })).toBeVisible();
 });
