@@ -20,8 +20,9 @@ export const projetos: Projeto[] = [
     imagem: '/assets/img/projetos/greencity-os.webp',
     imagemAlt: 'Tela real do aplicativo GreenCity OS com projeto fotovoltaico, estimativa de geração, inversor e arranjos de módulos.',
     repositorio: 'https://github.com/SladeSouzaSantos/greencity-os',
-    demonstracao: '',
-    observacao: 'A página web HSP é um simulador complementar, não uma execução do aplicativo Flutter.',
+    demonstracao: 'https://hsp.greencity.net.br/',
+    demonstracaoRotulo: 'SIMULADOR HSP ↗',
+    observacao: 'Simulador HSP relacionado à solução GreenCity; o site não executa o aplicativo Flutter.',
   },
   {
     id: 'hsp-simulator',
