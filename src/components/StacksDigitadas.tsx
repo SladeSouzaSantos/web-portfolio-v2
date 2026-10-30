@@ -20,6 +20,9 @@ export function StacksDigitadas() {
     destino.textContent = '';
     const typed = new Typed(destino, {
       strings: perfil.stacksDestaque,
+      // Strings técnicas com '&' são texto, não entidades HTML.
+      // O modo HTML do Typed.js tenta consumir '&' até ';' e pode travar a digitação.
+      contentType: 'null',
       startDelay: 300,
       typeSpeed: 48,
       backSpeed: 27,

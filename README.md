@@ -154,3 +154,7 @@ e usa rótulo fixo para `prefers-reduced-motion: reduce`. Acessibilidade:
 o texto digitado é decorativo e leitores de tela recebem descrição estática.
 Nenhum texto narrativo, competência, projeto ou conteúdo do Orbe foi revisado
 nesta entrega. Teste específico: `npx playwright test tests/stacks-digitadas.spec.ts`.
+
+A animação Typed.js usa `contentType: 'null'` (texto puro) para preservar
+ampersands literais em `RAG & EMBEDDINGS` e `AGENTES & MCP`; a regressão é
+coberta por `tests/stacks-digitadas.spec.ts`.

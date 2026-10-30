@@ -27,3 +27,19 @@ test('Retorno à seção não duplica animações nem ultrapassa tela pequena', 
   await expect.poll(() => page.locator('[data-typed-stack]').textContent()).toContain('JAVA');
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 });
+
+test('Digitação não trava ao encontrar & literal nas stacks de IA', async ({ page }) => {
+  // A sequência passa por quatro rótulos Java antes de chegar ao RAG.
+  test.setTimeout(90_000);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/#sobre');
+
+  const stack = page.locator('[data-typed-stack]');
+  await expect.poll(() => stack.textContent(), { timeout: 45_000 })
+    .toBe('IA • RAG & EMBEDDINGS');
+  await expect.poll(() => stack.textContent(), { timeout: 45_000 })
+    .toBe('IA • AGENTES & MCP');
+  // Comprove que o ciclo prossegue mesmo depois da segunda ocorrência.
+  await expect.poll(() => stack.textContent(), { timeout: 15_000 })
+    .toBe('IA • BASES VETORIAIS');
+});
