@@ -48,7 +48,8 @@ test('Ficha permanece navegável em celular sem criar rolagem horizontal', async
   await page.getByRole('button', { name: /Frontend & Mobile/ }).click();
   const modal = page.getByRole('dialog', { name: 'Frontend & Mobile' });
   await expect(modal.locator('.academia-modal__curso')).toHaveCount(7);
-  await expect(modal.locator('.academia-modal__painel')).toBeVisible();
+  // O próprio elemento do diálogo é o painel; não há painel aninhado.
+  await expect(modal).toHaveClass(/academia-modal__painel/);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
   await page.keyboard.press('Escape');
   await expect(modal).toHaveCount(0);
