@@ -105,9 +105,9 @@ for (const viewport of [
     const filter = page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true });
     await filter.click();
     await expect(filter).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(1);
-    await page.getByRole('button', { name: 'Ver detalhes de LITHOLOGY', exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: 'LITHOLOGY', exact: true });
+    await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(2);
+    await page.getByRole('button', { name: 'Ver detalhes de GREENCITY API', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'GREENCITY API', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();
     expect(bounds).not.toBeNull();
