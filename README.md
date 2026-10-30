@@ -211,3 +211,7 @@ subtítulos, filtros e informações técnicas. A tipografia continua
 
 Teste: `tests/archive-layout.spec.ts` (270–1440 px, filtros, modal e grid).
 Nenhuma alteração ao backend ou à `main`; publicação exige homologação DEV.
+
+Correção de especificidade: a centralização das missões 7–8 só é aplicada em
+`min-width: 1001px`. No mobile não existem colunas implícitas. A grade usa
+seis tracks CSS no desktop, ocupadas por três cartões de duas tracks cada.

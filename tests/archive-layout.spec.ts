@@ -10,9 +10,11 @@ for (const width of sizes) {
     const grid = page.locator('.arquivo-grid');
     const cards = grid.locator('button.guilda-cartaz');
     await expect(cards).toHaveCount(8);
-    const expectedCols = width <= 640 ? 1 : width <= 1000 ? 2 : 3;
+    const expectedCardsPerRow = width <= 640 ? 1 : width <= 1000 ? 2 : 3;
+    // A Guilda usa seis trilhas CSS para três pergaminhos (span 2).
+    const expectedGridTracks = width <= 640 ? 1 : width <= 1000 ? 2 : 6;
     await expect.poll(async () => grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length))
-      .toBe(expectedCols);
+      .toBe(expectedGridTracks);
     const dimensions = await grid.evaluate(el => {
       const gridRect = el.getBoundingClientRect();
       const rects = Array.from(el.querySelectorAll<HTMLElement>('.guilda-cartaz'))
@@ -20,11 +22,13 @@ for (const width of sizes) {
       return {
         overflow: el.scrollWidth - el.clientWidth,
         outside: rects.filter(r => r.left < gridRect.left - 1 || r.right > gridRect.right + 1).length,
+        cardsFirstRow: rects.filter(r => Math.abs(r.top - rects[0].top) < 2).length,
         cardOverlap: rects.some((r, i) => rects.some((b, j) => j > i &&
           Math.min(r.right, b.right) - Math.max(r.left, b.left) > 2 &&
           Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top) > 2)),
       };
     });
+    expect(dimensions.cardsFirstRow, 'Número de pergaminhos por fileira').toBe(expectedCardsPerRow);
     expect(dimensions.overflow, 'Mural não pode criar colunas extras').toBeLessThanOrEqual(1);
     expect(dimensions.outside, 'Pergaminhos não podem sair da moldura').toBe(0);
     expect(dimensions.cardOverlap, 'Pergaminhos não podem se sobrepor').toBe(false);
