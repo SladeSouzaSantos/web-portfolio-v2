@@ -8,10 +8,33 @@
     <meta name="description" content="Portfólio de Pedro Santos: desenvolvimento de software, projetos, experiência profissional e formação em uma jornada RPG em pixel art." />
     <link rel="icon" href="/assets/img/logo-phasscode.svg" type="image/svg+xml" />
     <link rel="preload" href="/assets/fonts/press-start-2p.ttf" as="font" type="font/ttf" crossorigin />
+    <style>
+      #site-preloader { position:fixed; inset:0; z-index:20000; display:grid; place-items:center; padding:24px; background:#080d12; color:#fef08a; font-family:monospace; text-align:center; opacity:1; transition:opacity 280ms ease, visibility 280ms ease; animation:preloader-failsafe 1ms 5s forwards; }
+      #site-preloader .loader-panel { width:min(380px,100%); border:3px solid #b45309; background:#090d12; padding:30px 22px; box-shadow:0 0 0 5px #16120b, 0 20px 60px rgba(0,0,0,.65); }
+      #site-preloader .loader-symbol { color:#67e8f9; letter-spacing:.24em; font-size:13px; }
+      #site-preloader .loader-heading { margin:16px 0 12px; font-size:clamp(12px,3vw,17px); line-height:1.65; letter-spacing:.08em; }
+      #site-preloader .loader-subtitle { margin:0 0 22px; color:#94a3b8; font-size:10px; line-height:2; }
+      #site-preloader .loader-track { height:12px; border:2px solid #b45309; overflow:hidden; background:#0f171e; }
+      #site-preloader .loader-progress { display:block; width:35%; height:100%; background:repeating-linear-gradient(90deg,#f59e0b 0 13px,#78350f 13px 17px); animation:preloader-progress 1.15s ease-in-out infinite alternate; }
+      #site-preloader.is-leaving { opacity:0; visibility:hidden; pointer-events:none; animation:none; }
+      @keyframes preloader-progress { from{transform:translateX(-100%)} to{transform:translateX(285%)} }
+      @keyframes preloader-failsafe { to { opacity:0; visibility:hidden; pointer-events:none } }
+      @media (prefers-reduced-motion:reduce) {
+        #site-preloader, #site-preloader .loader-progress { transition:none; animation:none; }
+      }
+    </style>
   </head>
   <body class="modo-escuro">
+    <div id="site-preloader" role="status" aria-label="Preparando o portfólio">
+      <div class="loader-panel">
+        <div class="loader-symbol" aria-hidden="true">✦ ◆ ✦</div>
+        <p class="loader-heading">PHASSCODE</p>
+        <p class="loader-subtitle">[ PREPARANDO SUA JORNADA ]</p>
+        <div class="loader-track" aria-hidden="true"><span class="loader-progress"></span></div>
+      </div>
+    </div>
     <div id="root"></div>
-    <noscript>Ative o JavaScript para explorar o portfólio de Pedro Santos. Contato: phassantos.dev@gmail.com.</noscript>
+    <noscript><style>#site-preloader{display:none}</style>Ative o JavaScript para explorar o portfólio de Pedro Santos. Contato: phassantos.dev@gmail.com.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

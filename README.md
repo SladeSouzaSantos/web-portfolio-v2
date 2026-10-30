@@ -67,3 +67,15 @@ Atualize ambos quando houver uma mudança profissional relevante.
 
 Os testes legados de login e reuniões permanecem no histórico do repositório;
 a pipeline de release usa apenas as suítes pertinentes ao portfólio público.
+
+### Carregamento e transições do portfólio
+
+A primeira renderização usa um preloader pixel art para a cena e fonte visíveis;
+a espera é limitada a 2,2 segundos (sem bloquear imagens GIF animadas), com
+remoção após o primeiro paint, fallback visual e suporte a movimento reduzido.
+As quatro seções trocam conteúdo por hash sem reload, com entrada curta de
+300 ms. Imagens WebP das cenas seguintes são antecipadas ao passar o mouse,
+focar ou tocar no item do menu; as animações de fundo continuam independentes.
+
+Validação: `npx playwright test tests/site-loading.spec.ts`, incluindo desktop,
+320 px, acesso direto por hash, histórico e `prefers-reduced-motion`.
