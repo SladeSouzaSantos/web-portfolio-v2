@@ -47,7 +47,7 @@ test('archive links and browser history navigate within the same document', asyn
   await expect(page.getByRole('heading', { name: archiveHeading, exact: true })).toBeVisible();
   await expectSameDocument();
 
-  await page.getByRole('link', { name: '← RETORNAR AO PORTFÓLIO', exact: true }).click();
+  await page.getByRole('link', { name: '← VOLTAR À GUILDA', exact: true }).click();
   await expect(page).toHaveURL(/\/#projetos$/);
   await expect(page.getByRole('heading', { name: guildHeading, exact: true })).toBeVisible();
   await expectSameDocument();
@@ -94,7 +94,7 @@ test('title and description follow the active page and browser history', async (
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: archiveHeading, exact: true })).toBeVisible();
   await expectMetadata(page, true);
-  await page.getByRole('link', { name: '← VOLTAR AO PORTFÓLIO', exact: true }).click();
+  await page.getByRole('link', { name: '← VOLTAR À GUILDA', exact: true }).click();
   await expect(page.getByRole('heading', { name: guildHeading, exact: true })).toBeVisible();
   await expectMetadata(page, false);
   await page.goBack();
