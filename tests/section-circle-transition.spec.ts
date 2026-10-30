@@ -46,6 +46,7 @@ test.describe('circular page transitions', () => {
     await expect(page).toHaveURL(/\/#projetos$/);
     await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES' })).toBeVisible();
     await expect(page.locator('#sectionTransitionMask')).not.toHaveClass(/is-active/, { timeout: 5_000 });
+    await expect(page.locator('#sectionTransitionShield')).not.toHaveClass(/is-active/);
     const samples = await page.evaluate(() =>
       (Reflect.get(window, '__circleCoverProbe') as { samples: Array<CoverSample & { section: string }> }).samples,
     );

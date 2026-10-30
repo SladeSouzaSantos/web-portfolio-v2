@@ -99,3 +99,16 @@ body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/as
 @media (prefers-reduced-motion: reduce) {
   #sectionTransitionMask { display: none; }
 }
+
+/* A clipped circle does not cover all hit-test regions while expanding or
+   retracting. This invisible shield prevents lost clicks until the wipe ends. */
+#sectionTransitionShield {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+}
+#sectionTransitionShield.is-active { pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  #sectionTransitionShield { display: none; }
+}

@@ -19,6 +19,7 @@ const SCENE_WAIT_MS = 180;
 export function useSectionTransition(activeSection: SecaoId) {
   const navigate = useNavigate();
   const maskRef = useRef<HTMLDivElement>(null);
+  const shieldRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<Animation | null>(null);
   const runId = useRef(0);
   const locked = useRef(false);
@@ -61,6 +62,9 @@ export function useSectionTransition(activeSection: SecaoId) {
     mask.style.setProperty('--scene-origin-y', `${y}px`);
     mask.style.clipPath = closed;
     mask.classList.add('is-active');
+    // The clipped circle cannot intercept clicks outside its radius.
+    // Shield the entire viewport until the reveal finishes.
+    shieldRef.current?.classList.add('is-active');
 
     const id = ++runId.current;
     locked.current = true;
@@ -104,6 +108,7 @@ export function useSectionTransition(activeSection: SecaoId) {
           animationRef.current = null;
           mask.style.clipPath = closed;
           mask.classList.remove('is-active');
+          shieldRef.current?.classList.remove('is-active');
           locked.current = false;
         }
       }
@@ -114,10 +119,13 @@ export function useSectionTransition(activeSection: SecaoId) {
   return {
     onNavigate,
     overlay: createPortal(
-      <div id="sectionTransitionMask" ref={maskRef} aria-hidden="true">
-        <span className="scene-transition-glyph">✦</span>
-        <span className="scene-transition-caption">[ NOVA CENA ]</span>
-      </div>,
+      <>
+        <div id="sectionTransitionShield" ref={shieldRef} aria-hidden="true" />
+        <div id="sectionTransitionMask" ref={maskRef} aria-hidden="true">
+          <span className="scene-transition-glyph">✦</span>
+          <span className="scene-transition-caption">[ NOVA CENA ]</span>
+        </div>
+      </>,
       document.body,
     ),
   };
