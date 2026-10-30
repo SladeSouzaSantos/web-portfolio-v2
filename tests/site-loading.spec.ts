@@ -23,6 +23,7 @@ test('preloader waits for the first critical WebP, then removes the overlay with
 });
 
 test('hash-based sections transition smoothly, keep history and avoid document reload', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/#sobre');
   await expect(page.locator('#site-preloader')).toHaveCount(0);
   const marker = await page.evaluate(() => {
