@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router';
 import { Navbar } from './components/Navbar';
 import { OrbAssistant } from './components/OrbAssistant';
 import { useSectionNavigation } from './hooks/useSectionNavigation';
+import { useSectionTransition } from './hooks/useSectionTransition';
 import { useTheme } from './hooks/useTheme';
 import type { Theme } from './hooks/useTheme';
 import { ArquivoProjetos } from './sections/ArquivoProjetos';
@@ -18,13 +19,14 @@ const frames: Record<SecaoId, string> = {
 
 function PortfolioPage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
   const section = useSectionNavigation();
+  const { onNavigate, overlay } = useSectionTransition(section);
   const mainRef = useRef<HTMLElement>(null);
   return <>
     <a className="skip-link" href="#conteudo" onClick={event => {
       event.preventDefault();
       mainRef.current?.focus();
     }}>Pular para o conteúdo</a>
-    <Navbar activeSection={section} theme={theme} onToggleTheme={toggleTheme} onNavigate={() => {}} />
+    <Navbar activeSection={section} theme={theme} onToggleTheme={toggleTheme} onNavigate={onNavigate} />
     <main ref={mainRef} id="conteudo" className="portfolio-main" tabIndex={-1}>
       <div key={section} id="contentDisplay" data-section={section} className={`content-panel section-enter ${frames[section]}`}>
         {section === 'sobre' && <Sobre />}
@@ -34,6 +36,7 @@ function PortfolioPage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () =
       </div>
     </main>
     <OrbAssistant />
+    {overlay}
   </>;
 }
 

@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { Link } from 'react-router';
 import type { SecaoId } from '../types/portfolio';
 import type { Theme } from '../hooks/useTheme';
@@ -13,19 +14,19 @@ const links: { id: SecaoId; label: string; title: string; icon: string }[] = [
 ];
 interface NavbarProps {
   activeSection: SecaoId; theme: Theme; onToggleTheme: () => void;
-  onNavigate: () => void;
+  onNavigate: (event: MouseEvent<HTMLAnchorElement>, section: SecaoId) => void;
 }
 export function Navbar({ activeSection, theme, onToggleTheme, onNavigate }: NavbarProps) {
   return <nav id="gbcNavbar" className="barra-navegacao" aria-label="Navegação principal">
     <div className="barra-navegacao-container">
-      <Link to="/#sobre" className="bloco-heroi" onClick={onNavigate} aria-label="PHASSCODE — início">
+      <Link to="/#sobre" className="bloco-heroi" onClick={event => onNavigate(event, 'sobre')} aria-label="PHASSCODE — início">
         <span className="indicador-status" aria-hidden="true" /><span className="texto-logo">PHASSCODE</span>
       </Link>
       <div className="bloco-utilitarios">
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </div>
       <div className="bloco-navegacao-centro sem-barra-rolagem">
-        {links.map(link => <Link key={link.id} id={`nav-${link.id}`} to={`/#${link.id}`} onClick={onNavigate}
+        {links.map(link => <Link key={link.id} id={`nav-${link.id}`} to={`/#${link.id}`} onClick={event => onNavigate(event, link.id)}
           onMouseEnter={() => warmSectionScene(link.id)}
           onFocus={() => warmSectionScene(link.id)}
           onTouchStart={() => warmSectionScene(link.id)}
