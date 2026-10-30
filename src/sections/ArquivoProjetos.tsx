@@ -34,7 +34,7 @@ export function ArquivoProjetos() {
           <Link className="back-top" to="/#projetos">← VOLTAR AO PORTFÓLIO</Link>
         </nav>
       </header>
-      <main className="arquivo-container">
+      <main className="arquivo-container section-enter">
         <section className="arquivo-mural" aria-labelledby="arquivo-titulo">
           <div className="arquivo-mural__interior">
             <h1 id="arquivo-titulo">ARQUIVO DE MISSÕES</h1>

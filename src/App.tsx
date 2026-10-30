@@ -26,7 +26,7 @@ function PortfolioPage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () =
     }}>Pular para o conteúdo</a>
     <Navbar activeSection={section} theme={theme} onToggleTheme={toggleTheme} onNavigate={() => {}} />
     <main ref={mainRef} id="conteudo" className="portfolio-main" tabIndex={-1}>
-      <div id="contentDisplay" className={`content-panel ${frames[section]}`}>
+      <div key={section} id="contentDisplay" data-section={section} className={`content-panel section-enter ${frames[section]}`}>
         {section === 'sobre' && <Sobre />}
         {section === 'projetos' && <Projetos />}
         {section === 'experiencia' && <Experiencia />}

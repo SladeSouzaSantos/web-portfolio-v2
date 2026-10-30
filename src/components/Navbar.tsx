@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import type { SecaoId } from '../types/portfolio';
 import type { Theme } from '../hooks/useTheme';
 import { assetUrl } from '../lib/assets';
+import { warmSectionScene } from '../lib/sceneAssets';
 import { ThemeToggle } from './ThemeToggle';
 
 const links: { id: SecaoId; label: string; title: string; icon: string }[] = [
@@ -25,6 +26,9 @@ export function Navbar({ activeSection, theme, onToggleTheme, onNavigate }: Navb
       </div>
       <div className="bloco-navegacao-centro sem-barra-rolagem">
         {links.map(link => <Link key={link.id} id={`nav-${link.id}`} to={`/#${link.id}`} onClick={onNavigate}
+          onMouseEnter={() => warmSectionScene(link.id)}
+          onFocus={() => warmSectionScene(link.id)}
+          onTouchStart={() => warmSectionScene(link.id)}
           className={`botao-rpg${activeSection === link.id ? ' gbc-selected' : ''}`}
           aria-label={link.title} aria-current={activeSection === link.id ? 'page' : undefined}>
           <span className="indicador-selecao" aria-hidden="true">▼</span>
