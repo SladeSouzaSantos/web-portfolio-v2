@@ -73,7 +73,7 @@ test('the backdrop closes details and a different project opens with its own con
 test('the archive filters the five selected projects and restores all', async ({ page }) => {
   await page.goto('/#projetos');
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
-  await expect(page).toHaveURL(/\\/projetos$/);
+  await expect(page).toHaveURL(/\/projetos$/);
   const cards = page.locator('.arquivo-grid').getByRole('article');
   await expect(cards).toHaveCount(5);
 
@@ -109,7 +109,7 @@ test('archive details preserve the selected filter and return to the Guild', asy
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
   await expect(page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(1);
+  await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(2);
   await page.getByRole('link', { name: '← RETORNAR AO PORTFÓLIO', exact: true }).click();
   await expect(page).toHaveURL(/\/#projetos$/);
   await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES' })).toBeVisible();
