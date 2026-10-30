@@ -534,11 +534,22 @@ body.taverna-ativa::after {
     text-align: center;
     overflow-wrap: anywhere;
 }
+/* Alinha o cursor à caixa da linha, evitando o deslocamento do glifo ▌ na fonte pixel. */
+.especialidade-tag--digitando {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
 .especialidade-tag--digitando::after {
-    content: '▌';
-    display: inline-block;
-    margin-left: 3px;
-    color: var(--texto-verde-suave);
+    content: '';
+    display: block;
+    flex: 0 0 2px;
+    width: 2px;
+    height: 9px;
+    background-color: var(--texto-verde-suave);
+    align-self: center;
+    transform: translateY(-1px);
     animation: stack-caret 1s steps(1, end) infinite;
 }
 @keyframes stack-caret {
