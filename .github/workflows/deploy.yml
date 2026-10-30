@@ -61,7 +61,8 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -n "${COMMIT_BASE:-}" ]] && git cat-file -e "${COMMIT_BASE}^{commit}" 2>/dev/null; then
-            npx commitlint --from "$COMMIT_BASE" --to "$COMMIT_HEAD"
+            # Validate developer commits; GitHub merge commits carry integration metadata.
+            npx commitlint --from "$COMMIT_BASE" --to "$COMMIT_HEAD" --git-log-args "--no-merges"
           else
             git log -1 --format=%B "$COMMIT_HEAD" | npx commitlint
           fi
