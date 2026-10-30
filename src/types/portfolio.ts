@@ -52,6 +52,7 @@ export interface CursoFormacao {
   titulo: string;
   instituicao: string;
   situacao: SituacaoCurso;
+  cargaHoraria?: number;
 }
 
 export interface Trilha {

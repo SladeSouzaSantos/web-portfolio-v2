@@ -161,12 +161,12 @@ export function Formacao() {
             <>
               <p className="academia-modal__categoria">TRILHA DE APRENDIZAGEM · {ficha.item.cursos.length} CURSOS</p>
               <p>{ficha.item.descricao}</p>
-              <p className="academia-modal__aviso">Cursos mencionados nos currículos. Conclusão e certificados individuais não foram verificados, salvo quando a situação está explicitamente indicada.</p>
+              <p className="academia-modal__aviso">Cursos concluídos conforme informado pelo autor. Os comprovantes poderão ser vinculados à página posteriormente.</p>
               <ul className="academia-modal__cursos" aria-label={`Cursos da trilha ${ficha.item.titulo}`}>
                 {ficha.item.cursos.map(curso => (
                   <li className="academia-modal__curso" key={`${curso.instituicao}-${curso.titulo}`}>
                     <strong className="academia-modal__curso-titulo">{curso.titulo}</strong>
-                    <span className="academia-modal__curso-instituicao">{curso.instituicao}</span>
+                    <span className="academia-modal__curso-instituicao">{curso.instituicao}{curso.cargaHoraria ? ` · ${curso.cargaHoraria}h` : ''}</span>
                     <span className={`academia-modal__curso-status academia-modal__curso-status--${curso.situacao === 'Concluído' ? 'concluido' : curso.situacao === 'Em andamento' ? 'andamento' : 'pendente'}`}>
                       {curso.situacao}
                     </span>

@@ -67,8 +67,9 @@ export const formacoes: FormacaoItem[] = [
   },
 ];
 
-// As listas são transcritas e agrupadas a partir de currículos fornecidos pelo autor.
-// A presença no currículo não comprova individualmente certificação ou conclusão.
+// Cursos dos currículos: conclusão confirmada pelo próprio autor em 30/10/2026.
+// Cursos do Hackers do Bem: títulos e cargas horárias conferidos nos quatro certificados enviados.
+// Os PDFs não integram o repositório público e os links de comprovantes ficam para depois.
 export const trilhas: Trilha[] = [
   {
     "id": "java",
@@ -80,37 +81,37 @@ export const trilhas: Trilha[] = [
       {
         "titulo": "Formação Java e Clean Architecture",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Java e Domain Driven Design",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação SOLID com Java",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Design Patterns em Java",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação TDD e Java — JUnit",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação em Java: POO, DDD e APIs REST",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Java Completo — Programação Orientada a Objetos",
         "instituicao": "Udemy",
-        "situacao": "Em andamento"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Clean Code na Prática",
@@ -134,27 +135,27 @@ export const trilhas: Trilha[] = [
       {
         "titulo": "Estruturas de Dados e Algoritmos em Python",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Redes Neurais Artificiais em Python",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Python Fundamentals",
         "instituicao": "DIO",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Linguagem R para Análise de Dados",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Power BI Analyst",
         "instituicao": "DIO",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       }
     ]
   },
@@ -168,37 +169,37 @@ export const trilhas: Trilha[] = [
       {
         "titulo": "Formação HTML e CSS — responsividade e mobile-first",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação JavaScript — DOM, formulários e APIs",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação TypeScript",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Dart",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Flutter — estados, APIs e testes",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Firebase Authentication",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Desenvolvimento Frontend com Angular",
         "instituicao": "DIO",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       }
     ]
   },
@@ -212,32 +213,32 @@ export const trilhas: Trilha[] = [
       {
         "titulo": "Formação Engenharia de Requisitos",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação UML — modelagem e BPMN",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Design Thinking",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação UI Design",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Figma — layouts de aplicativos mobile",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Aprendendo Domain Driven Design (DDD) do Zero",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       }
     ]
   },
@@ -251,66 +252,90 @@ export const trilhas: Trilha[] = [
       {
         "titulo": "Formação SQL Database Specialist",
         "instituicao": "DIO",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "SQL Server Completo — Formação DBA",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Curso NoSQL — MongoDB e Neo4j",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Power BI + SQL Server",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       }
     ]
   },
   {
     "id": "qualidade",
     "titulo": "DevOps & Qualidade",
-    "descricao": "Docker · Git · Cypress · Web",
+    "descricao": "Docker · Git · DevSecOps · Segurança",
     "icone": "escudo",
     "aprofundamento": "CI/CD, testes automatizados, segurança de aplicações e observabilidade.",
     "cursos": [
       {
         "titulo": "Formação Docker — containers",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Git e GitHub — controle de versão",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Git e GitHub do Básico ao Avançado",
         "instituicao": "Udemy",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Automação de Testes com Cypress",
         "instituicao": "DIO",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "HTTP — entendendo a Web",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Webpack — módulos em aplicações Web",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
       },
       {
         "titulo": "Formação Performance Web",
         "instituicao": "Alura",
-        "situacao": "A confirmar"
+        "situacao": "Concluído"
+      },
+      {
+        "titulo": "Hackers do Bem — Nivelamento",
+        "instituicao": "Programa Hackers do Bem",
+        "situacao": "Concluído",
+        "cargaHoraria": 80
+      },
+      {
+        "titulo": "Hackers do Bem — Básico",
+        "instituicao": "Programa Hackers do Bem",
+        "situacao": "Concluído",
+        "cargaHoraria": 64
+      },
+      {
+        "titulo": "Hackers do Bem — Fundamental",
+        "instituicao": "Programa Hackers do Bem",
+        "situacao": "Concluído",
+        "cargaHoraria": 96
+      },
+      {
+        "titulo": "Hackers do Bem — Especialização em DevOps e DevSecOps",
+        "instituicao": "Programa Hackers do Bem",
+        "situacao": "Concluído",
+        "cargaHoraria": 80
       }
     ]
   }

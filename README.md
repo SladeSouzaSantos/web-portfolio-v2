@@ -177,10 +177,18 @@ citadas apenas em ementas. Critérios cobertos em
 
 ### Academia Arcana — cursos do currículo
 
-As seis trilhas de Estudos Contínuos apresentam 38 cursos
-das formações Alura, Udemy e DIO, classificados por áreas de desenvolvimento.
-Cada ficha mostra instituição, situação conhecida ou "A confirmar" e a
-especialização em aprofundamento, sem afirmar certificações não verificadas.
+As seis trilhas de Estudos Contínuos apresentam 42 cursos
+das formações Alura, Udemy, DIO e Programa Hackers do Bem, classificados por
+áreas de desenvolvimento. Todos aparecem como **Concluído**, por confirmação
+expressa do autor em 30/10/2026. Isso não implica que todos os certificados
+individuais tenham sido disponibilizados no site.
+
+O Programa Hackers do Bem contém quatro etapas concluídas e documentadas nos
+certificados enviados pelo autor: Nivelamento (80h), Básico (64h), Fundamental
+(96h) e Especialização em DevOps e DevSecOps (80h), totalizando 320h.
+Os PDFs não foram inseridos no repositório público nem associados a botões
+de comprovante. A situação das graduações e pós-graduações é gerenciada
+separadamente e não foi modificada nesta atualização.
 A lista acadêmica mantém a composição de nove medalhões, incluindo um
 medalhão agrupado para as cinco especializações da FacPrisma (Arquitetura de
 Software, Big Data, Aplicações Móveis, Inteligência Artificial e Segurança
