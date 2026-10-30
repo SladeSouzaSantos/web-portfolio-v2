@@ -9,7 +9,7 @@ export interface Projeto {
   tecnologias: string[];
   repositorio: string;
   demonstracao: string;
-  categoria: 'ia' | 'mobile' | 'ferramentas';
+  categoria: 'ia' | 'mobile' | 'ferramentas' | 'frontend' | 'backend' | 'engenharia' | 'minijogos';
   icone: string;
   imagem: string;
   imagemAlt: string;

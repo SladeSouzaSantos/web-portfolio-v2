@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Modal } from '../components/Modal';
+import { CartazMissao } from '../components/CartazMissao';
 import { ProjetoMidia } from '../components/ProjetoMidia';
 import { projetos } from '../data/projetos';
 import { useSceneBackground } from '../hooks/useSceneBackground';
@@ -26,34 +27,12 @@ export function Projetos() {
           <div className="guilda-mural__interior">
             <div className="guilda-projetos-grid">
               {projetos.map((projeto, index) => (
-                <button
+                <CartazMissao
                   key={projeto.id}
-                  className="guilda-cartaz"
-                  aria-label={`${projeto.nome} — abrir detalhes`}
-                  type="button"
-                  data-guilda-projeto={projeto.id}
-                  onClick={() => setProjetoAberto(projeto)}
-                >
-                  <span className="guilda-cartaz__folha">
-                    <span className="guilda-cartaz__face guilda-cartaz__face--frente">
-                      <span className="guilda-cartaz__conteudo">
-                    <span className="guilda-cartaz__numero">MISSÃO {String(index + 1).padStart(2, '0')}</span>
-                    <span className="guilda-cartaz__titulo">{projeto.nome}</span>
-                    <span className="guilda-cartaz__linha" aria-hidden="true" />
-                    <span className="guilda-cartaz__tipo">{projeto.tipo}</span>
-                    <span className="guilda-cartaz__subtitulo">{projeto.subtitulo}</span>
-                    <span className="guilda-cartaz__chamada">[ INSPECIONAR ]</span>
-                      </span>
-                    </span>
-                    <span className="guilda-cartaz__face guilda-cartaz__face--verso" aria-hidden="true">
-                      <span className="guilda-cartaz__miniatura">
-                        <ProjetoMidia projeto={projeto} compact />
-                      </span>
-                      <span className="guilda-cartaz__verso-rotulo">{projeto.nome}</span>
-                      <span className="guilda-cartaz__verso-acao">[ ABRIR MISSÃO ]</span>
-                    </span>
-                  </span>
-                </button>
+                  projeto={projeto}
+                  indice={index}
+                  onOpen={() => setProjetoAberto(projeto)}
+                />
               ))}
             </div>
             <div className="guilda-arquivo" aria-label="Outros projetos">
