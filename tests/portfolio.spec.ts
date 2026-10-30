@@ -70,47 +70,53 @@ test('the backdrop closes details and a different project opens with its own con
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
-test('the archive filters the five selected projects and restores all', async ({ page }) => {
+test('the archive shows eight complementary projects with independent category filters', async ({ page }) => {
   await page.goto('/#projetos');
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page).toHaveURL(/\/projetos$/);
-  const cards = page.locator('.arquivo-grid').getByRole('article');
-  await expect(cards).toHaveCount(5);
+  const cards = page.locator('.arquivo-grid .guilda-cartaz');
+  await expect(cards).toHaveCount(8);
+  await expect(page.getByRole('button', { name: 'Ver detalhes de GREENCITY OS' })).toHaveCount(0);
 
-  const ai = page.getByRole('button', { name: '✧ IA & SEGURANÇA', exact: true });
-  await ai.click();
-  await expect(ai).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
+  await expect(cards).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ver detalhes de ERP API' })).toBeVisible();
+
+  await page.getByRole('button', { name: '♫ MINIJOGOS' }).click();
+  await expect(cards).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Ver detalhes de TECLADO SOUND' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ver detalhes de NÚMERO SECRETO' })).toBeVisible();
+
+  await page.getByRole('button', { name: '✧ FRONT-END' }).click();
   await expect(cards).toHaveCount(1);
-  await expect(page.getByRole('heading', { name: 'GUARDRAILS & IA' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ver detalhes de STRANGER THINGS' })).toBeVisible();
 
-  await page.getByRole('button', { name: '▣ MOBILE', exact: true }).click();
+  await page.getByRole('button', { name: '⬡ IA & DADOS' }).click();
   await expect(cards).toHaveCount(2);
-  await expect(page.getByRole('heading', { name: 'GREENCITY OS' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'RESERGAS' })).toBeVisible();
+  await page.getByRole('button', { name: '☀ ENGENHARIA' }).click();
+  await expect(cards).toHaveCount(1);
 
-  await page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true }).click();
-  await expect(cards).toHaveCount(2);
-  await expect(page.getByRole('heading', { name: 'HSP SIMULATOR' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'GREENCITY API' })).toBeVisible();
-
-  await page.getByRole('button', { name: '✦ TODOS', exact: true }).click();
-  await expect(cards).toHaveCount(5);
+  await page.getByRole('button', { name: '✦ TODOS' }).click();
+  await expect(cards).toHaveCount(8);
+  await expect(page.getByRole('link', { name: /Explorar todos os repositórios no GitHub/ }))
+    .toHaveAttribute('href', 'https://github.com/SladeSouzaSantos?tab=repositories');
 });
 
-test('archive details preserve the selected filter and return to the Guild', async ({ page }) => {
+test('archive details preserve the filter and return to the Guild', async ({ page }) => {
   await page.goto('/projetos');
-  await page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true }).click();
-  const trigger = page.getByRole('button', { name: 'Ver detalhes de GREENCITY API', exact: true });
+  await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
+  const trigger = page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER', exact: true });
   await trigger.click();
-  const dialog = page.getByRole('dialog', { name: 'GREENCITY API', exact: true });
-  await expect(dialog).toContainText('propostas comerciais');
-  await expect(dialog).toContainText('Laravel');
+  const dialog = page.getByRole('dialog', { name: 'TASK MANAGER', exact: true });
+  await expect(dialog).toContainText('observabilidade');
+  await expect(dialog).toContainText('Flask');
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
-  await expect(page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(2);
-  await page.getByRole('link', { name: '← RETORNAR AO PORTFÓLIO', exact: true }).click();
+  await expect(page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(2);
+  await page.getByRole('link', { name: '← VOLTAR À GUILDA', exact: true }).click();
   await expect(page).toHaveURL(/\/#projetos$/);
   await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES' })).toBeVisible();
 });
@@ -124,7 +130,7 @@ test('the selected theme survives reloads and a visit to the archive', async ({ 
   await expect(page.getByRole('button', { name: 'Ativar tema escuro', exact: true })).toBeVisible();
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: '← VOLTAR AO PORTFÓLIO', exact: true }).click();
+  await page.getByRole('link', { name: '← VOLTAR À GUILDA', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Ativar tema escuro', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ativar tema escuro', exact: true }).click();
   await expect(page.locator('body')).toHaveClass(/modo-escuro/);
@@ -182,8 +188,8 @@ for (const width of [320, 375]) {
     await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
     await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
-    await page.getByRole('button', { name: 'Ver detalhes de GREENCITY OS', exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: 'GREENCITY OS', exact: true });
+    await page.getByRole('button', { name: 'Ver detalhes de TECLADO SOUND', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'TECLADO SOUND', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();
     expect(bounds).not.toBeNull();

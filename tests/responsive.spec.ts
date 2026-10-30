@@ -102,12 +102,12 @@ for (const viewport of [
     await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
     await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
     await expectControlsWithinViewport(page);
-    const filter = page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true });
+    const filter = page.getByRole('button', { name: '⚒ BACKEND & DEVOPS', exact: true });
     await filter.click();
     await expect(filter).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(2);
-    await page.getByRole('button', { name: 'Ver detalhes de GREENCITY API', exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: 'GREENCITY API', exact: true });
+    await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(2);
+    await page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'TASK MANAGER', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();
     expect(bounds).not.toBeNull();

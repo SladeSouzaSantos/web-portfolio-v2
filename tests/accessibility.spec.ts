@@ -46,8 +46,8 @@ test('archive and project details meet automated WCAG 2.1 A/AA checks', async ({
   await page.goto('/projetos');
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   await expectAccessible(page, testInfo, 'archive');
-  await page.getByRole('button', { name: 'Ver detalhes de GREENCITY OS', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'GREENCITY OS', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'TASK MANAGER', exact: true })).toBeVisible();
   await expectAccessible(page, testInfo, 'archive-project-details');
 });
 

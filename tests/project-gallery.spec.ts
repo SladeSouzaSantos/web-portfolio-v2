@@ -39,23 +39,35 @@ test('movimento reduzido desabilita giro, mas mantém o detalhe acessível', asy
   await expect(page.getByRole('dialog', { name: 'GREENCITY OS' })).toBeVisible();
 });
 
-test('arquivo preserva demonstração web, APK e conteúdo de segurança', async ({ page }) => {
+test('Arquivo oferece minijogos, repositórios e a placa inferior da Guilda', async ({ page }) => {
   await page.goto('/projetos');
-  const cardHsp = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'HSP SIMULATOR' }) });
-  await cardHsp.getByRole('button', { name: /Ver detalhes/ }).click();
-  await expect(page.getByRole('dialog').getByRole('link', { name: /ABRIR SIMULADOR/ }))
-    .toHaveAttribute('href', 'https://hsp.greencity.net.br/');
-  await page.keyboard.press('Escape');
+  await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(8);
+  await expect(page.locator('.arquivo-mural .guilda-mural__interior')).toBeVisible();
+  const plate = page.locator('.arquivo-placa-rodape .guilda-arquivo__placa');
+  await expect(plate).toHaveAttribute('href', 'https://github.com/SladeSouzaSantos?tab=repositories');
 
-  const cardGas = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'RESERGAS' }) });
-  await cardGas.getByRole('button', { name: /Ver detalhes/ }).click();
-  await expect(page.getByRole('dialog').getByRole('link', { name: /BAIXAR APK/ }))
-    .toHaveAttribute('href', /resergas\.apk$/);
+  await page.getByRole('button', { name: '♫ MINIJOGOS' }).click();
+  await page.getByRole('button', { name: 'Ver detalhes de TECLADO SOUND' }).click();
+  const sound = page.getByRole('dialog', { name: 'TECLADO SOUND' });
+  await expect(sound.getByRole('link', { name: /EXPERIMENTAR/ }))
+    .toHaveAttribute('href', 'https://projetos.phasscode.com/projetos/teclado_som/');
   await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Ver detalhes de NÚMERO SECRETO' }).click();
+  await expect(page.getByRole('dialog', { name: 'NÚMERO SECRETO' }).getByRole('link', { name: /JOGAR/ }))
+    .toHaveAttribute('href', 'https://projetos.phasscode.com/projetos/n_secreto/');
+});
 
-  await page.getByRole('button', { name: '✧ IA & SEGURANÇA' }).click();
-  await page.getByRole('button', { name: 'Ver detalhes de GUARDRAILS & IA' }).click();
-  await expect(page.getByRole('dialog')).toContainText('prompt injection');
+test('Arquivo usa as mesmas faces e animações dos cartazes da Guilda', async ({ page }) => {
+  await page.goto('/projetos');
+  const card = page.locator('.arquivo-grid .guilda-cartaz').first();
+  await expect(card.locator('.guilda-cartaz__face')).toHaveCount(2);
+  await expect(card.locator('.guilda-cartaz__face--verso img')).toHaveCount(1);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await card.hover();
+  await expect.poll(() => card.locator('.guilda-cartaz__folha')
+    .evaluate(el => getComputedStyle(el).transform)).not.toBe('none');
+  await card.click();
+  await expect(page.getByRole('dialog', { name: 'TASK MANAGER' })).toBeVisible();
 });
 
 test('Galerias mobile usam exatamente três telas e a proposta local é uma imagem WebP válida', async ({ page }) => {

@@ -120,3 +120,23 @@ proposto em um PR para `dev`, sem merge em `main` ou deploy remoto automático.
 - Fundos artificiais e bordas dos containers de imagens removidos; o fundo interno das interfaces reais é preservado.
 - A área útil dos cartazes foi limitada para evitar que títulos, categorias e descrições atinjam os ornamentos.
 - Sem alterações em `main`, Orbe, backend, workflows ou deploy remoto.
+
+## Arquivo de Missões — oito projetos complementares
+
+A Guilda permanece com cinco projetos principais em `src/data/projetos.ts`.
+A rota `/projetos` agora apresenta **oito projetos diferentes**, mantidos
+em `src/data/arquivoProjetos.ts`: Task Manager Flask, Stranger Things Experience,
+ERP API, Shadow Sim Pro, Gemini Nano Browser, Smart Model Router, Teclado Sound
+e Número Secreto. Os dois últimos são exercícios de curso da Alura e possuem
+demonstração interativa; Número Secreto depende de navegador com reconhecimento
+de voz e permissão para microfone.
+
+A página reaproveita `CartazMissao`, o mesmo pergaminho reversível, imagens no
+verso, fundo e moldura da Guilda. O rodapé usa a mesma placa de madeira
+(`moldura-projeto-simples.webp`), agora com link para todos os repositórios no
+GitHub. As imagens do Arquivo são ilustrações SVG originais e conceituais,
+não screenshots dos sistemas. A categoria pode ser filtrada por área,
+sem repetir os cinco projetos principais.
+
+Teste com `npm run build` e `npx playwright test tests/portfolio.spec.ts tests/project-gallery.spec.ts tests/responsive.spec.ts tests/routing.spec.ts tests/accessibility.spec.ts`.
+Trabalho restrito à `dev`; nenhuma mudança em `main` ou publicação no Mac Mini.

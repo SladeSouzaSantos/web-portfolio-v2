@@ -14,13 +14,13 @@ test('the project archive supports direct access and a browser refresh', async (
   await page.goto('/projetos');
   await expect(page).toHaveURL(/\/projetos$/);
   await expect(page.getByRole('heading', { name: archiveHeading, exact: true })).toBeVisible();
-  await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(5);
+  await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(8);
   await expectMetadata(page, true);
 
   await page.reload();
   await expect(page).toHaveURL(/\/projetos$/);
   await expect(page.getByRole('heading', { name: archiveHeading, exact: true })).toBeVisible();
-  await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(5);
+  await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(8);
   await expectMetadata(page, true);
 });
 
