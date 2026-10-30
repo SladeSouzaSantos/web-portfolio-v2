@@ -19,6 +19,11 @@ export const projetos: Projeto[] = [
     tecnologias: ['Flutter', 'Dart', 'BLoC', 'Isar', 'Dio', 'LLMs'],
     imagem: '/assets/img/projetos/greencity-os.webp',
     imagemAlt: 'Tela real do aplicativo GreenCity OS com projeto fotovoltaico, estimativa de geração, inversor e arranjos de módulos.',
+    galeria: [
+      { src: '/assets/img/projetos/greencity-os.webp', alt: 'Tela real do aplicativo GreenCity OS: dimensionamento, arranjos e geração fotovoltaica.' },
+      { src: '/assets/img/projetos/greencity-os-2.webp', alt: 'GreenCity OS: tela Finalizar Orçamento com parâmetros financeiros e geração de PDF.' },
+      { src: '/assets/img/projetos/greencity-os-3.webp', alt: 'GreenCity OS: configuração de módulos, inclinação, azimute e sombreamento.' },
+    ],
     repositorio: 'https://github.com/SladeSouzaSantos/greencity-os',
     demonstracao: 'https://hsp.greencity.net.br/',
     demonstracaoRotulo: 'SIMULADOR HSP ↗',
@@ -80,6 +85,11 @@ export const projetos: Projeto[] = [
     tecnologias: ['Flutter', 'Dart', 'Clean Architecture', 'Testes unitários'],
     imagem: 'https://github.com/user-attachments/assets/39267291-65f8-4ab1-9c54-066f3ee1c1c1',
     imagemAlt: 'Captura de tela real do aplicativo ReserGas publicada no README do projeto.',
+    galeria: [
+      { src: 'https://github.com/user-attachments/assets/39267291-65f8-4ab1-9c54-066f3ee1c1c1', alt: 'ReserGas: primeira tela do aplicativo publicada no README.' },
+      { src: 'https://github.com/user-attachments/assets/40cfd6cf-6cf8-43eb-a853-12cbf0369b78', alt: 'ReserGas: segunda tela do aplicativo publicada no README.' },
+      { src: 'https://github.com/user-attachments/assets/25630f92-ab65-4320-bdcc-ec3bdc0e6dd3', alt: 'ReserGas: terceira tela do aplicativo publicada no README.' },
+    ],
     repositorio: 'https://github.com/SladeSouzaSantos/reser_gas',
     demonstracao: 'https://phasscode.com/projetos/resergas/resergas.apk',
     demonstracaoRotulo: 'BAIXAR APK ↗',

@@ -13,6 +13,7 @@ export interface Projeto {
   icone: string;
   imagem: string;
   imagemAlt: string;
+  galeria?: { src: string; alt: string }[];
   detalhes: string[];
   observacao?: string;
   demonstracaoRotulo?: string;

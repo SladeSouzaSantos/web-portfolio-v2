@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Modal } from '../components/Modal';
+import { ProjetoMidia } from '../components/ProjetoMidia';
 import { projetos } from '../data/projetos';
 import { useSceneBackground } from '../hooks/useSceneBackground';
 import type { Projeto } from '../types/portfolio';
@@ -46,7 +47,7 @@ export function Projetos() {
                     </span>
                     <span className="guilda-cartaz__face guilda-cartaz__face--verso" aria-hidden="true">
                       <span className="guilda-cartaz__miniatura">
-                        <img src={projeto.imagem} alt="" loading="lazy" decoding="async" />
+                        <ProjetoMidia projeto={projeto} compact />
                       </span>
                       <span className="guilda-cartaz__verso-rotulo">{projeto.nome}</span>
                       <span className="guilda-cartaz__verso-acao">[ ABRIR MISSÃO ]</span>
@@ -88,7 +89,7 @@ export function Projetos() {
           <p className="guilda-detalhes__tipo">{projetoAberto.tipo}</p>
           <p id="guilda-detalhes-descricao" className="guilda-detalhes__descricao">{projetoAberto.descricao}</p>
           <figure className="projeto-detalhe__figura">
-            <img src={projetoAberto.imagem} alt={projetoAberto.imagemAlt} loading="lazy" />
+            <ProjetoMidia projeto={projetoAberto} />
             {projetoAberto.observacao && <figcaption>{projetoAberto.observacao}</figcaption>}
           </figure>
           <h3>DESAFIOS E SOLUÇÕES</h3>

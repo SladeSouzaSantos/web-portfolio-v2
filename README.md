@@ -111,3 +111,12 @@ site demonstra sua implementação.
 Verifique o catálogo via `npx playwright test tests/portfolio.spec.ts tests/project-gallery.spec.ts`.
 A publicação em DEV/PROD segue o fluxo operacional acima: este trabalho é
 proposto em um PR para `dev`, sem merge em `main` ou deploy remoto automático.
+
+### Ajustes de imagens e cartazes (2026-10-30)
+
+- A Guilda e o Arquivo usam `ProjetoMidia`: três screenshots lado a lado para GreenCity OS e ReserGas, uma imagem para os demais.
+- As telas do GreenCity OS são capturas fornecidas pelo autor; ReserGas utiliza três imagens de seu README.
+- GreenCity OS e a segunda página de proposta comercial foram republicados em WebP válido.
+- Fundos artificiais e bordas dos containers de imagens removidos; o fundo interno das interfaces reais é preservado.
+- A área útil dos cartazes foi limitada para evitar que títulos, categorias e descrições atinjam os ornamentos.
+- Sem alterações em `main`, Orbe, backend, workflows ou deploy remoto.

@@ -57,3 +57,36 @@ test('arquivo preserva demonstração web, APK e conteúdo de segurança', async
   await page.getByRole('button', { name: 'Ver detalhes de GUARDRAILS & IA' }).click();
   await expect(page.getByRole('dialog')).toContainText('prompt injection');
 });
+
+test('Galerias mobile usam exatamente três telas e a proposta local é uma imagem WebP válida', async ({ page }) => {
+  await page.goto('/#projetos');
+  await page.locator('.guilda-cartaz[data-guilda-projeto="greencity-os"]').click();
+  const green = page.getByRole('dialog', { name: 'GREENCITY OS' });
+  await expect(green.locator('.projeto-midia--tripla img')).toHaveCount(3);
+  for (const image of await green.locator('.projeto-midia--tripla img').all()) {
+    await expect(image).toHaveJSProperty('complete', true);
+    await expect.poll(() => image.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  }
+  await page.keyboard.press('Escape');
+
+  await page.locator('.guilda-cartaz[data-guilda-projeto="resergas"]').click();
+  await expect(page.getByRole('dialog').locator('.projeto-midia--tripla img')).toHaveCount(3);
+  await page.keyboard.press('Escape');
+
+  await page.locator('.guilda-cartaz[data-guilda-projeto="greencity-api-orcamento"]').click();
+  const image = page.getByRole('dialog').locator('img[src$="greencity-proposta.webp"]');
+  await expect(image).toHaveCount(1);
+  await expect.poll(() => image.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+});
+
+test('Cartazes não deixam as legendas ultrapassarem a região interna do pergaminho', async ({ page }) => {
+  await page.goto('/#projetos');
+  const limits = await page.locator('.guilda-cartaz__conteudo').evaluateAll(items => items.map(el => {
+    const area = el.getBoundingClientRect();
+    return Array.from(el.children).every(child => {
+      const r = child.getBoundingClientRect();
+      return r.left >= area.left - 1 && r.right <= area.right + 1;
+    });
+  }));
+  expect(limits.every(Boolean)).toBe(true);
+});

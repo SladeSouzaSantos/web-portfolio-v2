@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Modal } from '../components/Modal';
+import { ProjetoMidia } from '../components/ProjetoMidia';
 import { projetos } from '../data/projetos';
 import { useSceneBackground } from '../hooks/useSceneBackground';
 import type { Projeto } from '../types/portfolio';
@@ -57,7 +58,7 @@ export function ArquivoProjetos() {
               {projetosVisiveis.map(projeto => (
                 <article className="arquivo-card" key={projeto.id}>
                   <span className="arquivo-card__icone" aria-hidden="true">{projeto.icone}</span>
-                  <img className="arquivo-card__imagem" src={projeto.imagem} alt="" loading="lazy" decoding="async" />
+                  <ProjetoMidia projeto={projeto} compact className="arquivo-card__imagem" />
                   <h2 className="arquivo-card__titulo">{projeto.nome}</h2>
                   <span className="arquivo-card__linha" aria-hidden="true" />
                   <p className="arquivo-card__tipo">{projeto.tipo}</p>
@@ -98,7 +99,7 @@ export function ArquivoProjetos() {
           <p>{projetoAberto.tipo}</p>
           <p id="arquivo-modal-descricao">{projetoAberto.descricao}</p>
           <figure className="projeto-detalhe__figura">
-            <img src={projetoAberto.imagem} alt={projetoAberto.imagemAlt} loading="lazy" />
+            <ProjetoMidia projeto={projetoAberto} />
             {projetoAberto.observacao && <figcaption>{projetoAberto.observacao}</figcaption>}
           </figure>
           <h3 className="arquivo-modal__arsenal">DESAFIOS E SOLUÇÕES</h3>
