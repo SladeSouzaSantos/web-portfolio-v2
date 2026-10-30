@@ -11,6 +11,11 @@ export interface Projeto {
   demonstracao: string;
   categoria: 'ia' | 'mobile' | 'ferramentas';
   icone: string;
+  imagem: string;
+  imagemAlt: string;
+  detalhes: string[];
+  observacao?: string;
+  demonstracaoRotulo?: string;
 }
 
 export interface Experiencia {
