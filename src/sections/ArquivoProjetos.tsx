@@ -75,7 +75,6 @@ export function ArquivoProjetos() {
                 href="https://github.com/SladeSouzaSantos?tab=repositories"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="REPOSITÓRIOS DO AVENTUREIRO EXPLORAR GITHUB — Explorar todos os repositórios no GitHub (nova aba)"
               >
                 <span className="guilda-arquivo__texto">
                   <span className="guilda-arquivo__titulo">REPOSITÓRIOS DO AVENTUREIRO</span>

@@ -48,12 +48,12 @@ test('Arquivo oferece minijogos, repositórios e a placa inferior da Guilda', as
   await expect(plate).toHaveAttribute('href', 'https://github.com/SladeSouzaSantos?tab=repositories');
 
   await page.getByRole('button', { name: '♫ MINIJOGOS' }).click();
-  await page.getByRole('button', { name: 'Ver detalhes de TECLADO SOUND' }).click();
+  await page.getByRole('button', { name: /TECLADO SOUND/ }).click();
   const sound = page.getByRole('dialog', { name: 'TECLADO SOUND' });
   await expect(sound.getByRole('link', { name: /EXPERIMENTAR/ }))
     .toHaveAttribute('href', 'https://projetos.phasscode.com/projetos/teclado_som/');
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Ver detalhes de NÚMERO SECRETO' }).click();
+  await page.getByRole('button', { name: /NÚMERO SECRETO/ }).click();
   await expect(page.getByRole('dialog', { name: 'NÚMERO SECRETO' }).getByRole('link', { name: /JOGAR/ }))
     .toHaveAttribute('href', 'https://projetos.phasscode.com/projetos/n_secreto/');
 });

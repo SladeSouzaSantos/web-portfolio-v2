@@ -106,7 +106,7 @@ for (const viewport of [
     await filter.click();
     await expect(filter).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(2);
-    await page.getByRole('button', { name: /Ver detalhes de TASK MANAGER/ }).click();
+    await page.getByRole('button', { name: /TASK MANAGER/ }).click();
     const dialog = page.getByRole('dialog', { name: 'TASK MANAGER', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();

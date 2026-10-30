@@ -17,9 +17,7 @@ export function CartazMissao({ projeto, indice, onOpen, arquivo = false }: Carta
       type="button"
       data-guilda-projeto={arquivo ? undefined : projeto.id}
       data-projeto={arquivo ? projeto.id : undefined}
-      // O nome acessível inclui todo o texto visível do pergaminho (WCAG 2.5.3).
-      // A ação fica ao final para preservar as consultas por nome dos testes.
-      aria-label={`MISSÃO ${String(indice + 1).padStart(2, '0')} ${projeto.nome} ${projeto.tipo} ${projeto.subtitulo} [ INSPECIONAR ] — ${arquivo ? `Ver detalhes de ${projeto.nome}` : `${projeto.nome} — abrir detalhes`}`}
+      // O próprio conteúdo visível define o nome acessível (WCAG 2.5.3).
       onClick={onOpen}
     >
       <span className="guilda-cartaz__folha">

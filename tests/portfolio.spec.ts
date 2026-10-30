@@ -76,21 +76,21 @@ test('the archive shows eight complementary projects with independent category f
   await expect(page).toHaveURL(/\/projetos$/);
   const cards = page.locator('.arquivo-grid .guilda-cartaz');
   await expect(cards).toHaveCount(8);
-  await expect(page.getByRole('button', { name: 'Ver detalhes de GREENCITY OS' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /GREENCITY OS/ })).toHaveCount(0);
 
   await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
   await expect(cards).toHaveCount(2);
-  await expect(page.getByRole('button', { name: 'Ver detalhes de TASK MANAGER' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Ver detalhes de ERP API' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /TASK MANAGER/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ERP API/ })).toBeVisible();
 
   await page.getByRole('button', { name: '♫ MINIJOGOS' }).click();
   await expect(cards).toHaveCount(2);
-  await expect(page.getByRole('button', { name: 'Ver detalhes de TECLADO SOUND' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Ver detalhes de NÚMERO SECRETO' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /TECLADO SOUND/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /NÚMERO SECRETO/ })).toBeVisible();
 
   await page.getByRole('button', { name: '✧ FRONT-END' }).click();
   await expect(cards).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Ver detalhes de STRANGER THINGS' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /STRANGER THINGS/ })).toBeVisible();
 
   await page.getByRole('button', { name: '⬡ IA & DADOS' }).click();
   await expect(cards).toHaveCount(2);
@@ -99,14 +99,14 @@ test('the archive shows eight complementary projects with independent category f
 
   await page.getByRole('button', { name: '✦ TODOS' }).click();
   await expect(cards).toHaveCount(8);
-  await expect(page.getByRole('link', { name: /Explorar todos os repositórios no GitHub/ }))
+  await expect(page.getByRole('link', { name: /REPOSITÓRIOS DO AVENTUREIRO.*EXPLORAR GITHUB/ }))
     .toHaveAttribute('href', 'https://github.com/SladeSouzaSantos?tab=repositories');
 });
 
 test('archive details preserve the filter and return to the Guild', async ({ page }) => {
   await page.goto('/projetos');
   await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
-  const trigger = page.getByRole('button', { name: /Ver detalhes de TASK MANAGER/ });
+  const trigger = page.getByRole('button', { name: /TASK MANAGER/ });
   await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'TASK MANAGER', exact: true });
   await expect(dialog).toContainText('observabilidade');
@@ -188,7 +188,7 @@ for (const width of [320, 375]) {
     await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
     await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
-    await page.getByRole('button', { name: /Ver detalhes de TECLADO SOUND/ }).click();
+    await page.getByRole('button', { name: /TECLADO SOUND/ }).click();
     const dialog = page.getByRole('dialog', { name: 'TECLADO SOUND', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();
