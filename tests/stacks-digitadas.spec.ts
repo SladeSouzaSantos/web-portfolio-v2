@@ -43,3 +43,24 @@ test('Digitação não trava ao encontrar & literal nas stacks de IA', async ({ 
   await expect.poll(() => stack.textContent(), { timeout: 15_000 })
     .toBe('IA • BASES VETORIAIS');
 });
+
+test('Cursor da stack é uma barra CSS centralizada, sem glifo deslocado', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/#sobre');
+  const tag = page.locator('.especialidade-tag--digitando');
+  await expect(tag).toBeVisible();
+  const css = await tag.evaluate(element => ({
+    display: getComputedStyle(element).display,
+    alignment: getComputedStyle(element).alignItems,
+    cursorContent: getComputedStyle(element, '::after').content,
+    cursorHeight: getComputedStyle(element, '::after').height,
+    cursorWidth: getComputedStyle(element, '::after').width,
+  }));
+  expect(css).toEqual({
+    display: 'inline-flex',
+    alignment: 'center',
+    cursorContent: '""',
+    cursorHeight: '9px',
+    cursorWidth: '2px',
+  });
+});
