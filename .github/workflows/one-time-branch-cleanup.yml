@@ -1,0 +1,44 @@
+name: One-time frontend branch cleanup
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/one-time-branch-cleanup.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.ref == 'refs/heads/dev' && github.repository == 'SladeSouzaSantos/web-portfolio-v2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Delete only verified, merged branch refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS=' ' read -r branch expected; do
+            case "$branch" in
+              main|dev) echo "Protected keep branch: $branch"; exit 1 ;;
+            esac
+            current="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${branch}" --jq '.object.sha')"
+            if [[ "$current" != "$expected" ]]; then
+              echo "Branch moved since verification: $branch ($current != $expected)" >&2
+              exit 1
+            fi
+            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${branch}"
+            echo "Deleted $branch at $current"
+          done <<'BRANCHES'
+          feat/guilda-projetos-flip-20261030 0acdf204e00e4a798190abce1276dd8c5a1a21b8
+          fix/commitlint-merge-pr-dev 5c44839e6a40af706020df635f3c23420aa01b32
+          fix/commitlint-skip-merge-commits-dev 2b2d7ebdb8c2934ce57ff80a57853fa0bac3e37b
+          BRANCHES
+          actual="$(gh api "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name')"
+          printf 'Remaining branches:\n%s\n' "$actual"
+          if [[ "$actual" != $'dev\nmain' ]]; then
+            echo "Unexpected branch inventory; investigate." >&2
+            exit 1
+          fi
