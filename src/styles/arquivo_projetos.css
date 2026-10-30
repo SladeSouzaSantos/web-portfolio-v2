@@ -1,4 +1,5 @@
 /* Arquivo de Missões: reutiliza madeira, pergaminhos, animações e placa da Guilda. */
+/* A folga lateral no mobile também acomoda o blur da sombra da moldura. */
 body.arquivo-ativa {
   color-scheme: dark;
   min-width: 0;
@@ -132,7 +133,7 @@ body.arquivo-ativa .arquivo-placa-rodape { margin: 24px auto 80px; }
   body.arquivo-ativa .topbar__inner { min-height: 72px; padding: 10px 12px; gap: 8px; }
   body.arquivo-ativa .brand { font-size: 9px; }
   body.arquivo-ativa .back-top { padding: 8px; font-size: 7px; }
-  body.arquivo-ativa .arquivo-container { width: calc(100% - 12px); margin-top: 18px !important; }
+  body.arquivo-ativa .arquivo-container { width: calc(100% - 52px); margin-top: 18px !important; }
   .arquivo-mural__interior { padding: 12px 0 0; }
   .arquivo-intro { font-size: 6px; margin-bottom: 18px; }
   .arquivo-filtros { gap: 6px; margin-bottom: 18px; }
