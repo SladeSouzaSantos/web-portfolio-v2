@@ -182,7 +182,7 @@ export function OrbAssistant() {
               com Nova conversa. Recarregar mantém o texto, mas reinicia o contexto da IA.
             </p>}
             <p className="orb-chat-counter" aria-label="Limite de perguntas">
-              {userTurnCount}/{maxUserTurns} perguntas nesta conversa
+              {maxUserTurns === 0 ? `${userTurnCount} perguntas · sem limite por conversa` : `${userTurnCount}/${maxUserTurns} perguntas nesta conversa`}
             </p>
             {copyStatus && <p role="status" className="orb-chat-copy-status">{copyStatus}</p>}
             <div ref={historyRef} className="orb-chat-history" role="log" aria-label="Conversa com o orbe" aria-live="polite" aria-relevant="additions text" aria-busy={isLoading} tabIndex={0}>
