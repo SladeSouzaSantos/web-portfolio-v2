@@ -357,3 +357,29 @@ test('isolated client remains functional if development diagnostics fail', async
   await expect(client.send('Consulta com logger indisponível')).resolves.toMatchObject({ answer: reply().answer });
   expect(fake.calls).toHaveLength(1);
 });
+
+
+test('opt-in de relatórios é explícito só na primeira mensagem; revogação usa token privado', async () => {
+  const fake = queuedFetch(
+    json(reply()),
+    json(reply({ conversationToken: undefined })),
+    json({ withdrawn: true }),
+  );
+  const client = createOrbeClient(API_URL, { fetch: fake.fetch });
+  await client.send('Quais projetos Java?', { reportConsent: true });
+  await client.send('E com Flutter?', { reportConsent: true });
+  expect(new Headers(fake.calls[0]?.options?.headers).get('X-Orbe-Report-Consent')).toBe('yes');
+  expect(new Headers(fake.calls[1]?.options?.headers).has('X-Orbe-Report-Consent')).toBe(false);
+  expect(await client.withdrawReport()).toBe(true);
+  expect(fake.calls[2]?.url).toBe(`${API_URL}/api/v1/chat/report-optout`);
+  expect(new Headers(fake.calls[2]?.options?.headers).get('X-Conversation-Token')).toBe(FIRST_TOKEN);
+  expect(JSON.parse(String(fake.calls[2]?.options?.body))).toEqual({ conversationId: FIRST_ID });
+  expect(fake.calls[2]?.url).not.toContain(FIRST_TOKEN);
+});
+
+test('sem consentimento não envia cabeçalho de relatórios', async () => {
+  const fake = queuedFetch(json(reply()));
+  const client = createOrbeClient(API_URL, { fetch: fake.fetch });
+  await client.send('Quais projetos Python?');
+  expect(new Headers(fake.calls[0]?.options?.headers).has('X-Orbe-Report-Consent')).toBe(false);
+});
