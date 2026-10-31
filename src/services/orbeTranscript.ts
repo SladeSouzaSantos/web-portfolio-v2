@@ -13,7 +13,7 @@ const KEY = 'phasscode:orbe:transcript:v1';
 // Vite bundles the public UI limit at build time. 0 removes only the UI's
 // per-conversation cap; backend/provider quotas, rate limiting and abuse controls remain.
 const requestedTurns = import.meta.env?.VITE_ORBE_MAX_USER_TURNS;
-const parsedTurns = typeof requestedTurns === 'string' && /^\\d+$/.test(requestedTurns)
+const parsedTurns = typeof requestedTurns === 'string' && /^\d+$/.test(requestedTurns)
   ? Number(requestedTurns) : NaN;
 export const MAX_ORBE_USER_TURNS = Number.isSafeInteger(parsedTurns) && parsedTurns >= 0 && parsedTurns <= 10000
   ? parsedTurns : 100;
