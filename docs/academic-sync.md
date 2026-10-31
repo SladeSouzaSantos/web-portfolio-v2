@@ -7,7 +7,7 @@ Para atualizar após modificações no backend:
 ```sh
 npm run sync:academic
 npm run build
-npm run test:smoke
+npx playwright test tests/formacao-cursos.spec.ts
 ```
 
 O script falha se a origem estiver inacessível ou se o contrato não corresponder ao esperado. Confirme o diff do snapshot antes de publicar. A sincronização não inclui arquivos pessoais, documentos, dados escolares identificáveis ou PDFs.
