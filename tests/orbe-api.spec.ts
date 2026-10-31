@@ -509,10 +509,10 @@ test('autorização de relatórios é visível antes de enviar e explica como in
   await expect(dialog.getByRole('log')).toContainText('Java, Spring Boot e TypeScript');
   await expect(consent).toHaveCount(0);
   await expect(dialog).toContainText('Esta conversa começou sem autorização');
-  await expect(dialog.getByRole('button', { name: 'Nova conversa para autorizar' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Reiniciar para autorizar' })).toBeVisible();
   expect(mock.requests[0].headers()['x-orbe-report-consent']).toBeUndefined();
 
-  await dialog.getByRole('button', { name: 'Nova conversa para autorizar' }).click();
+  await dialog.getByRole('button', { name: 'Reiniciar para autorizar' }).click();
   await expect(consent).toBeVisible();
   await consent.check();
   await expect(dialog).toContainText('SERÁ ATIVADO');
