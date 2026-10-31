@@ -41,6 +41,9 @@ export function useOrbeChat(reducedMotion: boolean) {
       : [greeting, ...restored];
   });
   const [query, setQuery] = useState('');
+  const [reportOptIn, setReportOptIn] = useState(false);
+  const [reportLocked, setReportLocked] = useState(false);
+  const [reportNotice, setReportNotice] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ChatNotice | null>(null);
   const [retryAt, setRetryAt] = useState(0);
@@ -72,6 +75,9 @@ export function useOrbeChat(reducedMotion: boolean) {
     nextId.current = 1;
     setMessages([greeting]);
     setQuery('');
+    setReportOptIn(false);
+    setReportLocked(false);
+    setReportNotice('');
     setIsLoading(false);
     setError(null);
     setRetryAt(0);
@@ -122,9 +128,10 @@ export function useOrbeChat(reducedMotion: boolean) {
     try {
       if (orbeConfig.enabled && !clientRef.current) clientRef.current = createOrbeClient(orbeConfig.apiBaseUrl);
       const reply = orbeConfig.enabled
-        ? await clientRef.current!.send(text, { signal: request.controller.signal })
+        ? await clientRef.current!.send(text, { signal: request.controller.signal, reportConsent: !reportLocked && reportOptIn })
         : await sendDemoMessage(text, request.controller.signal, reducedMotion);
       if (!mountedRef.current || pendingRef.current !== request || request.controller.signal.aborted) return;
+      setReportLocked(true);
       setMessages(current => [...current, {
         id: nextId.current++, sender: 'orb', text: reply.answer,
         sources: reply.sources, simulated: reply.meta.simulated,
@@ -162,7 +169,27 @@ export function useOrbeChat(reducedMotion: boolean) {
     }
   }
 
+  async function revokeReport() {
+    if (!reportOptIn) return;
+    if (!reportLocked) {
+      setReportOptIn(false);
+      setReportNotice('');
+      return;
+    }
+    if (isLoading) return;
+    const withdrawn = await clientRef.current?.withdrawReport();
+    if (!mountedRef.current) return;
+    if (withdrawn) {
+      setReportOptIn(false);
+      setReportNotice('Autorização revogada. Nenhum novo relatório será produzido para esta conversa.');
+    } else {
+      setReportNotice('Não foi possível revogar agora. Tente novamente antes de fechar o chat.');
+    }
+  }
+
   return {
+    reportOptIn, reportLocked, reportNotice,
+    setReportOptIn, revokeReport,
     messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
     newConversation, userTurnCount, limitReached, maxUserTurns: MAX_ORBE_USER_TURNS,
     cooldownSeconds: Math.max(0, Math.ceil((retryAt - now) / 1000)),
