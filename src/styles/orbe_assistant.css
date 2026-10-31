@@ -247,6 +247,22 @@ body.modo-claro .orb-chat-panel .chat-sender {
     line-height: 1.8;
 }
 
+/* The consent panel must not turn the normal dialog into a full-height window.
+   Cap its size and scroll the body; maximizing still expands both dimensions. */
+.login-modal-overlay .orb-chat-panel:not(.orb-chat-panel-expanded) {
+    display: flex;
+    flex-direction: column;
+    max-height: min(760px, calc(100dvh - 80px));
+    overflow: hidden;
+}
+.orb-chat-panel:not(.orb-chat-panel-expanded) .login-modal-header {
+    flex-shrink: 0;
+}
+.orb-chat-panel:not(.orb-chat-panel-expanded) .login-modal-body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
 .login-modal-overlay .orb-chat-panel.orb-chat-panel-expanded {
     max-width: none;
     width: min(1120px, calc(100vw - 24px));
