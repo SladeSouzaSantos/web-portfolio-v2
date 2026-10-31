@@ -182,27 +182,74 @@ export function OrbAssistant() {
               provedor de IA. O backend mantém até 12 mensagens recentes por conversa e considera a conversa expirada após 7 dias sem atividade. O texto fica neste navegador por até 24 horas e pode ser apagado
               com Nova conversa. Recarregar mantém o texto, mas reinicia o contexto da IA.
             </p>}
-            {apiEnabled && <div className="orb-chat-privacy" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: reportLocked ? 'default' : 'pointer' }}>
-                <input
-                  type="checkbox"
-                  aria-label="Permitir relatório anônimo da conversa"
-                  checked={reportOptIn}
-                  disabled={reportLocked || isLoading}
-                  onChange={event => setReportOptIn(event.target.checked)}
-                />
-                <span>Permito que sejam enviados ao responsável do portfólio, via Telegram, relatórios anônimos
-                  com assuntos, projetos públicos consultados e intenção provável. O relatório é enviado
-                  após 24h da primeira interação; não inclui o texto das perguntas nem dados pessoais.
-                  O consolidado diário contém apenas dados agregados. Opcional.</span>
-              </label>
-              {reportLocked && reportOptIn && <button type="button" className="orb-chat-size-btn"
-                style={{ width: 'auto', alignSelf: 'flex-start', padding: '4px 8px' }}
-                disabled={isLoading} onClick={() => void revokeReport()}>
-                Revogar autorização
-              </button>}
-              {reportNotice && <p role="status">{reportNotice}</p>}
-            </div>}
+            {apiEnabled && (
+              <section
+                className={`orb-report-consent${reportLocked ? ' orb-report-consent-locked' : ''}`}
+                aria-labelledby="orbReportConsentTitle"
+                aria-describedby="orbReportConsentDescription"
+              >
+                <div className="orb-report-consent-heading">
+                  <h3 id="orbReportConsentTitle">[ RELATÓRIOS DO ORBE ]</h3>
+                  <span className="orb-report-consent-status">
+                    {reportLocked
+                      ? reportOptIn ? 'AUTORIZADO' : 'NÃO AUTORIZADO'
+                      : reportOptIn ? 'SERÁ ATIVADO' : 'OPCIONAL'}
+                  </span>
+                </div>
+                {!reportLocked ? (
+                  <label className="orb-report-consent-option">
+                    <input
+                      type="checkbox"
+                      aria-label="Permitir relatório anônimo da conversa"
+                      checked={reportOptIn}
+                      disabled={isLoading}
+                      onChange={event => setReportOptIn(event.target.checked)}
+                    />
+                    <span>
+                      <strong>Autorizar relatório anônimo por Telegram</strong>
+                      <small id="orbReportConsentDescription">
+                        Após 24 horas da primeira pergunta, o responsável recebe assuntos,
+                        projetos públicos e intenção provável. O consolidado diário usa
+                        somente dados agregados. Não envia transcrições nem dados pessoais.
+                        Desmarcado por padrão; conversar não exige autorização.
+                      </small>
+                    </span>
+                  </label>
+                ) : reportOptIn ? (
+                  <p id="orbReportConsentDescription" className="orb-report-consent-description">
+                    Autorização ativa nesta conversa. Você pode revogá-la antes do envio.
+                    Um relatório já recebido no Telegram não pode ser recuperado.
+                  </p>
+                ) : (
+                  <p id="orbReportConsentDescription" className="orb-report-consent-description">
+                    Esta conversa começou sem autorização, portanto não gera relatório.
+                    Para autorizar, inicie uma nova conversa e marque a opção antes da
+                    primeira pergunta.
+                  </p>
+                )}
+                {reportLocked && reportOptIn && (
+                  <button
+                    type="button"
+                    className="orb-report-consent-action"
+                    disabled={isLoading}
+                    onClick={() => void revokeReport()}
+                  >
+                    Revogar autorização
+                  </button>
+                )}
+                {reportLocked && !reportOptIn && (
+                  <button
+                    type="button"
+                    className="orb-report-consent-action"
+                    disabled={isLoading}
+                    onClick={startNewConversation}
+                  >
+                    Nova conversa para autorizar
+                  </button>
+                )}
+                {reportNotice && <p className="orb-report-consent-notice" role="status">{reportNotice}</p>}
+              </section>
+            )}
             <p className="orb-chat-counter" aria-label="Limite de perguntas">
               {maxUserTurns === 0 ? `${userTurnCount} perguntas · sem limite por conversa` : `${userTurnCount}/${maxUserTurns} perguntas nesta conversa`}
             </p>
