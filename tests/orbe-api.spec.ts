@@ -275,8 +275,9 @@ test('copia a conversa e Nova conversa remove o cache e reinicia a sessão', asy
   expect(mock.requests[1].headers()['x-conversation-token']).toBeUndefined();
 });
 
-test('limite configurável permite pelo menos 21 perguntas e respeita modo ilimitado', async ({ page }) => {
-  const turns = configuredTurnLimit === 0 ? 21 : Math.min(configuredTurnLimit, 100);
+test('permite continuar além das antigas 20 perguntas', async ({ page }) => {
+  test.skip(configuredTurnLimit > 0 && configuredTurnLimit < 21);
+  const turns = 21;
   const mock = await mockChat(page, Array.from({ length: turns }, (_, i) => i === 0 ? {} : {
     body: (() => { const body = chatResponse({ answer: 'Confirmação ' + i }); delete (body as Partial<typeof body>).conversationToken; return body; })(),
   }));
@@ -287,15 +288,34 @@ test('limite configurável permite pelo menos 21 perguntas e respeita modo ilimi
     await expect(dialog.getByRole('log')).toContainText(i === 0 ? 'Java, Spring Boot e TypeScript' : 'Confirmação ' + i);
   }
   await expect(dialog.getByText(turnCountLabel(turns))).toBeVisible();
-  if (configuredTurnLimit > 0 && turns === configuredTurnLimit) {
-    await expect(send).toBeDisabled();
-  } else {
-    await expect(send).toBeEnabled();
-  }
-  if (configuredTurnLimit === 0 || configuredTurnLimit >= 21) {
-    expect(turns).toBeGreaterThanOrEqual(21);
-  }
+  await expect(send).toBeEnabled();
   expect(mock.requests).toHaveLength(turns);
+});
+
+test('limite padrão de 100 perguntas bloqueia só a 101ª, sem chamada à API', async ({ page }) => {
+  test.skip(configuredTurnLimit !== 100, 'O teste de limite usa a configuração padrão 100.');
+  await page.addInitScript(() => {
+    try {
+      const messages = [{ id: 0, sender: 'orb', text: 'Saudações!' }];
+      for (let i = 0; i < 99; i++) {
+        messages.push({ id: 2 * i + 1, sender: 'user', text: 'Pergunta antiga ' + i });
+        messages.push({ id: 2 * i + 2, sender: 'orb', text: 'Resposta antiga ' + i });
+      }
+      localStorage.setItem('phasscode:orbe:transcript:v1', JSON.stringify({
+        expiresAt: Date.now() + 60_000,
+        messages,
+      }));
+    } catch { /* Browser storage can be unavailable. */ }
+  });
+  const mock = await mockChat(page, [{}]);
+  const { dialog, input, send } = await openChat(page);
+  await expect(dialog.getByText(turnCountLabel(99))).toBeVisible();
+  await input.fill('Última pergunta');
+  await send.click();
+  await expect(dialog.getByRole('log')).toContainText('Java, Spring Boot e TypeScript');
+  await expect(dialog.getByText(turnCountLabel(100))).toBeVisible();
+  await expect(send).toBeDisabled();
+  expect(mock.requests).toHaveLength(1);
   await dialog.getByRole('button', { name: 'Nova conversa' }).click();
   await expect(send).toBeEnabled();
 });
