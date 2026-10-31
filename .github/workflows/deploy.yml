@@ -70,6 +70,19 @@ jobs:
       - name: Select Orbe API configuration for the destination branch
         run: node scripts/orbe-build-policy.mjs --github-env
 
+      - name: Configure public Orbe conversation limit
+        env:
+          ORBE_MAX_USER_TURNS: ${{ vars.ORBE_MAX_USER_TURNS }}
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const value = process.env.ORBE_MAX_USER_TURNS || "100";
+            if (!/^(0|[1-9]\d{0,4})$/.test(value) || Number(value) > 10000) {
+              throw new Error("ORBE_MAX_USER_TURNS must be an integer from 0 to 10000");
+            }
+            fs.appendFileSync(process.env.GITHUB_ENV, `VITE_ORBE_MAX_USER_TURNS=${value}\n`);
+          '
+
       - name: Validate TypeScript and compile Vite
         run: npm run build
 
