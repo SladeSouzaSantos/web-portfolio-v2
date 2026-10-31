@@ -491,3 +491,35 @@ test('valida pergunta vazia e aplica o limite publicado de 2000 caracteres', asy
   await expect(history).toContainText('Java, Spring Boot e TypeScript');
   expect(mock.requests[0].postDataJSON().message).toHaveLength(2000);
 });
+
+
+test('autorização de relatórios é visível antes de enviar e explica como iniciar outra conversa', async ({ page }) => {
+  const mock = await mockChat(page, [{}, {}]);
+  const { dialog, input, send } = await openChat(page);
+  const consent = dialog.getByRole('checkbox', { name: 'Permitir relatório anônimo da conversa' });
+
+  await expect(dialog.getByRole('heading', { name: '[ RELATÓRIOS DO ORBE ]' })).toBeVisible();
+  await expect(consent).toBeVisible();
+  await expect(consent).toBeEnabled();
+  await expect(consent).not.toBeChecked();
+  await expect(dialog).toContainText('Desmarcado por padrão');
+
+  await input.fill('Pedro conhece Java?');
+  await send.click();
+  await expect(dialog.getByRole('log')).toContainText('Java, Spring Boot e TypeScript');
+  await expect(consent).toHaveCount(0);
+  await expect(dialog).toContainText('Esta conversa começou sem autorização');
+  await expect(dialog.getByRole('button', { name: 'Nova conversa para autorizar' })).toBeVisible();
+  expect(mock.requests[0].headers()['x-orbe-report-consent']).toBeUndefined();
+
+  await dialog.getByRole('button', { name: 'Nova conversa para autorizar' }).click();
+  await expect(consent).toBeVisible();
+  await consent.check();
+  await expect(dialog).toContainText('SERÁ ATIVADO');
+  await input.fill('Quais projetos utilizam Python?');
+  await send.click();
+  await expect(dialog.getByRole('log')).toContainText('Java, Spring Boot e TypeScript');
+  expect(mock.requests[1].headers()['x-orbe-report-consent']).toBe('yes');
+  await expect(dialog).toContainText('Autorização ativa nesta conversa');
+  await expect(dialog.getByRole('button', { name: 'Revogar autorização' })).toBeVisible();
+});
