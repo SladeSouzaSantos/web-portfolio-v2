@@ -33,8 +33,12 @@ export function useOrbeChat(reducedMotion: boolean) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const restored = restoreOrbeTranscript();
     // Keep the conversation, but replace an outdated greeting from the local cache.
-    return restored.length && restored[0]?.id === 0 && restored[0].sender === 'orb'
-      ? [greeting, ...restored.slice(1)] : [greeting];
+    if (!restored.length) return [greeting];
+    // Unlimited sessions store only the recent, non-sensitive transcript; after
+    // the first 100 turns the cached window may no longer include the greeting.
+    return restored[0]?.id === 0 && restored[0].sender === 'orb'
+      ? [greeting, ...restored.slice(1)]
+      : [greeting, ...restored];
   });
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
