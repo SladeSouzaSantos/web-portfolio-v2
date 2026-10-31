@@ -1,18 +1,37 @@
 import type { Formacao as FormacaoItem, Trilha } from '../types/portfolio';
+import academicSnapshot from './ppks-academic.snapshot.json';
+
+const academicById = new Map(academicSnapshot.educations.map(education => [education.id, education]));
+const academicRecordIds: Record<string,string> = {
+  'computacao': 'formacao-computacao',
+  'gestao-ti': 'formacao-gestao-ti',
+  'petroleo': 'formacao-petroleo',
+  'eletrica': 'formacao-energia-eletrica',
+  'eletrotecnica': 'formacao-eletrotecnica',
+  'eolica': 'formacao-eolica',
+  'java-applied': 'formacao-unipds-java',
+  'engenharia-ia': 'formacao-unipds-ia',
+};
+export const origemAcademica = {
+  schemaVersion: academicSnapshot.schemaVersion,
+  sourceCommit: academicSnapshot.sourceCommit,
+  sourceBranch: academicSnapshot.sourceBranch,
+};
+
 
 // Catálogo preservado da versão original; revisar datas e situação antes de publicar.
-export const formacoes: FormacaoItem[] = [
+const formacoesLayout: FormacaoItem[] = [
   {
     id: 'computacao', titulo: 'Ciência da Computação', tipo: 'Graduação', instituicao: 'UNISUL',
-    periodo: 'Início: 07/2023 · Previsão: 12/2026', situacao: 'Situação a confirmar',
+    periodo: 'Previsão indicativa: fim de 2027 / início de 2028', situacao: 'Conclusão pendente',
     cor: '#164b91', icone: 'capelo',
-    descricao: 'Formação em computação, fundamentos de software, algoritmos e desenvolvimento de sistemas.', comprovante: '',
+    descricao: 'Disciplinas aprovadas de algoritmos, programação, engenharia de software, sistemas distribuídos, IA e dados. A graduação ainda não foi concluída.', observacao: 'Atividades de extensão com visitas presenciais pendentes; previsão de conclusão não garantida.', comprovante: '',
   },
   {
     id: 'gestao-ti', titulo: 'Gestão da Tecnologia da Informação', tipo: 'Tecnólogo', instituicao: 'UNIBF',
-    periodo: 'Concluída: 07/2025', situacao: 'Concluído',
+    periodo: 'Concluída: 08/2025', situacao: 'Concluído',
     cor: '#17744f', icone: 'engrenagem',
-    descricao: 'Gestão de tecnologia da informação, processos e soluções organizacionais.', comprovante: '',
+    descricao: 'Tecnólogo superior concluído, com disciplinas de algoritmos, POO, banco de dados, IA, engenharia de software e testes.', observacao: 'Diploma emitido pelo Centro Universitário ETEP; UNIBF é a identificação usada no portfólio.', comprovante: '',
   },
   {
     id: 'petroleo', titulo: 'Engenharia de Petróleo e Gás', tipo: 'Graduação', instituicao: 'UnP',
@@ -70,273 +89,75 @@ export const formacoes: FormacaoItem[] = [
 // Cursos dos currículos: conclusão confirmada pelo próprio autor em 30/10/2026.
 // Cursos do Hackers do Bem: títulos e cargas horárias conferidos nos quatro certificados enviados.
 // Os PDFs não integram o repositório público e os links de comprovantes ficam para depois.
-export const trilhas: Trilha[] = [
-  {
+
+// O snapshot é gerado da base PPKS canônica do backend dev. A apresentação é local e
+// não depende da API durante a renderização da página (mantém preloader e navegação).
+export const formacoes: FormacaoItem[] = formacoesLayout.map(card => {
+  const record = academicById.get(academicRecordIds[card.id] ?? '');
+  if (!record) return card;
+  // FacPrisma continua com medalhão agregado e situações individuais não verificadas.
+  if (card.id === 'computacao' || card.id === 'gestao-ti') return card;
+  if (record.status === 'completed' && card.situacao !== 'Concluído')
+    return { ...card, situacao: 'Concluído' };
+  if (record.status === 'in_progress' && card.situacao !== 'Em andamento')
+    return { ...card, situacao: 'Em andamento' };
+  return card;
+});
+
+const trilhasVisuais: Record<string, Omit<Trilha, 'cursos'>> = {
+  "cursos-java-arquitetura": {
     "id": "java",
     "titulo": "Java & Arquitetura",
     "descricao": "Java · POO · Clean Code · TDD",
     "icone": "codigo",
-    "aprofundamento": "Spring Boot, Quarkus, integração com IA e arquitetura moderna de aplicações Java.",
-    "cursos": [
-      {
-        "titulo": "Formação Java e Clean Architecture",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Java e Domain Driven Design",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação SOLID com Java",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Design Patterns em Java",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação TDD e Java — JUnit",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação em Java: POO, DDD e APIs REST",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Java Completo — Programação Orientada a Objetos",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Clean Code na Prática",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Padrões de Projeto em Java",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      }
-    ]
+    "aprofundamento": "Spring Boot, Quarkus, integração com IA e arquitetura moderna de aplicações Java."
   },
-  {
+  "cursos-ia-dados": {
     "id": "ia",
     "titulo": "IA & Dados",
     "descricao": "Python · Algoritmos · Redes Neurais",
     "icone": "cerebro",
-    "aprofundamento": "Engenharia de IA aplicada: RAG, embeddings, agentes, LangChain, LangGraph e MCP (pós-graduação).",
-    "cursos": [
-      {
-        "titulo": "Estruturas de Dados e Algoritmos em Python",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Redes Neurais Artificiais em Python",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Python Fundamentals",
-        "instituicao": "DIO",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Linguagem R para Análise de Dados",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Power BI Analyst",
-        "instituicao": "DIO",
-        "situacao": "Concluído"
-      }
-    ]
+    "aprofundamento": "Engenharia de IA aplicada: RAG, embeddings, agentes, LangChain, LangGraph e MCP (pós-graduação)."
   },
-  {
+  "cursos-frontend-mobile": {
     "id": "frontend",
     "titulo": "Frontend & Mobile",
     "descricao": "JavaScript · TypeScript · Flutter",
     "icone": "janela",
-    "aprofundamento": "Arquitetura de interfaces, React e integração de aplicativos com APIs.",
-    "cursos": [
-      {
-        "titulo": "Formação HTML e CSS — responsividade e mobile-first",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação JavaScript — DOM, formulários e APIs",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação TypeScript",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Dart",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Flutter — estados, APIs e testes",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Firebase Authentication",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Desenvolvimento Frontend com Angular",
-        "instituicao": "DIO",
-        "situacao": "Concluído"
-      }
-    ]
+    "aprofundamento": "Arquitetura de interfaces, React e integração de aplicativos com APIs."
   },
-  {
+  "cursos-engenharia-software": {
     "id": "arquitetura",
     "titulo": "Engenharia de Software",
     "descricao": "Requisitos · UML · Modelagem · UX",
     "icone": "blocos",
-    "aprofundamento": "Projetos de software orientados a domínio, arquitetura, manutenção e qualidade.",
-    "cursos": [
-      {
-        "titulo": "Formação Engenharia de Requisitos",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação UML — modelagem e BPMN",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Design Thinking",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação UI Design",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Figma — layouts de aplicativos mobile",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Aprendendo Domain Driven Design (DDD) do Zero",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      }
-    ]
+    "aprofundamento": "Projetos de software orientados a domínio, arquitetura, manutenção e qualidade."
   },
-  {
+  "cursos-bancos-dados": {
     "id": "dados",
     "titulo": "Bancos de Dados",
     "descricao": "SQL · NoSQL · MongoDB · SQL Server",
     "icone": "dados",
-    "aprofundamento": "Modelagem, persistência, consultas e integração entre bases relacionais e NoSQL.",
-    "cursos": [
-      {
-        "titulo": "Formação SQL Database Specialist",
-        "instituicao": "DIO",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "SQL Server Completo — Formação DBA",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Curso NoSQL — MongoDB e Neo4j",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Power BI + SQL Server",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      }
-    ]
+    "aprofundamento": "Modelagem, persistência, consultas e integração entre bases relacionais e NoSQL."
   },
-  {
+  "cursos-devops-qualidade": {
     "id": "qualidade",
     "titulo": "DevOps & Qualidade",
     "descricao": "Docker · Git · DevSecOps · Segurança",
     "icone": "escudo",
-    "aprofundamento": "CI/CD, testes automatizados, segurança de aplicações e observabilidade.",
-    "cursos": [
-      {
-        "titulo": "Formação Docker — containers",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Git e GitHub — controle de versão",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Git e GitHub do Básico ao Avançado",
-        "instituicao": "Udemy",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Automação de Testes com Cypress",
-        "instituicao": "DIO",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "HTTP — entendendo a Web",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Webpack — módulos em aplicações Web",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Formação Performance Web",
-        "instituicao": "Alura",
-        "situacao": "Concluído"
-      },
-      {
-        "titulo": "Hackers do Bem — Nivelamento",
-        "instituicao": "Programa Hackers do Bem",
-        "situacao": "Concluído",
-        "cargaHoraria": 80
-      },
-      {
-        "titulo": "Hackers do Bem — Básico",
-        "instituicao": "Programa Hackers do Bem",
-        "situacao": "Concluído",
-        "cargaHoraria": 64
-      },
-      {
-        "titulo": "Hackers do Bem — Fundamental",
-        "instituicao": "Programa Hackers do Bem",
-        "situacao": "Concluído",
-        "cargaHoraria": 96
-      },
-      {
-        "titulo": "Hackers do Bem — Especialização em DevOps e DevSecOps",
-        "instituicao": "Programa Hackers do Bem",
-        "situacao": "Concluído",
-        "cargaHoraria": 80
-      }
-    ]
+    "aprofundamento": "CI/CD, testes automatizados, segurança de aplicações e observabilidade."
   }
-];
+};
+export const trilhas: Trilha[] = academicSnapshot.tracks.map(track => {
+  const visual = trilhasVisuais[track.id];
+  if (!visual) throw new Error(`Trilha acadêmica sem layout: ${track.id}`);
+  return {
+    ...visual,
+    cursos: track.courses.map(course => ({
+      titulo: course.title,
+      instituicao: course.provider,
+      situacao: course.status === 'completed' ? 'Concluído' as const : 'A confirmar' as const,
+      ...(course.hours !== null ? { cargaHoraria: course.hours } : {}),
+    })),
+  };
+});

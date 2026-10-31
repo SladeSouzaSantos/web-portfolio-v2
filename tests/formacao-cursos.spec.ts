@@ -85,3 +85,19 @@ test('Cursos Hackers do Bem continuam acessíveis no mobile sem rolagem lateral'
   await page.keyboard.press('Escape');
   await expect(modal).toHaveCount(0);
 });
+
+test('status acadêmico da UNISUL e tecnólogo ETEP refletem PPKS canônico', async ({ page }) => {
+  await page.goto('/#academico');
+  const computacao = page.getByRole('button', { name: /Ciência da Computação/ });
+  await computacao.click();
+  const dialog = page.getByRole('dialog', { name: 'Ciência da Computação' });
+  await expect(dialog).toContainText('2027');
+  await expect(dialog).toContainText('2028');
+  await expect(dialog).toContainText('Conclusão pendente');
+  await expect(dialog).toContainText('extensão');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /Gestão da Tecnologia da Informação/ }).click();
+  const ti = page.getByRole('dialog', { name: 'Gestão da Tecnologia da Informação' });
+  await expect(ti).toContainText('08/2025');
+  await expect(ti).toContainText('ETEP');
+});
