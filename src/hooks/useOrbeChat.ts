@@ -131,8 +131,12 @@ export function useOrbeChat(reducedMotion: boolean) {
       setQuery(text);
       setError({
         message: issue?.code === 'LLM_BUDGET_EXHAUSTED'
-          ? 'O orçamento de consultas ao Orbe foi esgotado. Tente novamente mais tarde.'
-          : issue?.publicMessage ?? 'Não foi possível consultar o Orbe. Tente novamente apenas se desejar.',
+          ? 'O limite global de chamadas de IA foi atingido. Tente novamente após a renovação da cota.'
+          : issue?.code === 'LLM_PROVIDERS_LIMITED'
+            ? 'Todos os provedores de IA configurados estão temporariamente limitados. Tente novamente depois da renovação das cotas.'
+            : issue?.code === 'LLM_UNAVAILABLE'
+              ? 'Nenhum dos provedores de IA configurados conseguiu responder. Tente novamente mais tarde.'
+              : issue?.publicMessage ?? 'Não foi possível consultar o Orbe. Tente novamente apenas se desejar.',
         correlationId: issue?.correlationId,
       });
       if (issue?.retryAfterSeconds) {
