@@ -244,7 +244,7 @@ export function OrbAssistant() {
                     disabled={isLoading}
                     onClick={startNewConversation}
                   >
-                    Nova conversa para autorizar
+                    Reiniciar para autorizar
                   </button>
                 )}
                 {reportNotice && <p className="orb-report-consent-notice" role="status">{reportNotice}</p>}
