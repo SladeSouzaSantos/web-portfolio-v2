@@ -243,13 +243,18 @@ test('recarregar a página mantém o texto local, mas não persiste ID/token e i
   expect(mock.requests[2].headers()['x-conversation-token']).toBeUndefined();
 });
 
+const configuredTurnLimit = Number(process.env.VITE_ORBE_MAX_USER_TURNS ?? '100');
+const turnCountLabel = (count: number) => configuredTurnLimit === 0
+  ? `${count} perguntas · sem limite por conversa`
+  : `${count}/${configuredTurnLimit} perguntas nesta conversa`;
+
 test('copia a conversa e Nova conversa remove o cache e reinicia a sessão', async ({ page }) => {
   const mock = await mockChat(page, [{}, {}]);
   const { dialog, input, send, history } = await openChat(page);
   await input.fill('Primeira pergunta');
   await send.click();
   await expect(history).toContainText('Java, Spring Boot e TypeScript');
-  await expect(dialog).toContainText('1/20 perguntas');
+  await expect(dialog).toContainText(turnCountLabel(1));
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
   await dialog.getByRole('button', { name: 'Copiar conversa' }).click();
   await expect(dialog.getByRole('status')).toContainText('Conversa copiada');
@@ -270,19 +275,27 @@ test('copia a conversa e Nova conversa remove o cache e reinicia a sessão', asy
   expect(mock.requests[1].headers()['x-conversation-token']).toBeUndefined();
 });
 
-test('20 perguntas por conversa impedem o envio adicional e não afetam o backend', async ({ page }) => {
-  const mock = await mockChat(page, Array.from({ length: 20 }, (_, i) => i === 0 ? {} : {
+test('limite configurável permite pelo menos 21 perguntas e respeita modo ilimitado', async ({ page }) => {
+  const turns = configuredTurnLimit === 0 ? 21 : Math.min(configuredTurnLimit, 100);
+  const mock = await mockChat(page, Array.from({ length: turns }, (_, i) => i === 0 ? {} : {
     body: (() => { const body = chatResponse({ answer: 'Confirmação ' + i }); delete (body as Partial<typeof body>).conversationToken; return body; })(),
   }));
   const { dialog, input, send } = await openChat(page);
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < turns; i++) {
     await input.fill('Pergunta ' + i);
     await send.click();
     await expect(dialog.getByRole('log')).toContainText(i === 0 ? 'Java, Spring Boot e TypeScript' : 'Confirmação ' + i);
   }
-  await expect(dialog.getByText('20/20 perguntas nesta conversa')).toBeVisible();
-  await expect(send).toBeDisabled();
-  expect(mock.requests).toHaveLength(20);
+  await expect(dialog.getByText(turnCountLabel(turns))).toBeVisible();
+  if (configuredTurnLimit > 0 && turns === configuredTurnLimit) {
+    await expect(send).toBeDisabled();
+  } else {
+    await expect(send).toBeEnabled();
+  }
+  if (configuredTurnLimit === 0 || configuredTurnLimit >= 21) {
+    expect(turns).toBeGreaterThanOrEqual(21);
+  }
+  expect(mock.requests).toHaveLength(turns);
   await dialog.getByRole('button', { name: 'Nova conversa' }).click();
   await expect(send).toBeEnabled();
 });
