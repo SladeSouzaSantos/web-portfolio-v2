@@ -19,6 +19,7 @@ export function OrbAssistant() {
   const {
     messages, query, setQuery, isLoading, error, sendMessage, cancelPending,
     cooldownSeconds, maxMessageLength, apiEnabled,
+    reportOptIn, reportLocked, reportNotice, setReportOptIn, revokeReport,
     newConversation, userTurnCount, limitReached, maxUserTurns,
   } = useOrbeChat(reducedMotion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -181,6 +182,27 @@ export function OrbAssistant() {
               provedor de IA. O texto fica neste navegador por até 24 horas e pode ser apagado
               com Nova conversa. Recarregar mantém o texto, mas reinicia o contexto da IA.
             </p>}
+            {apiEnabled && <div className="orb-chat-privacy" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: reportLocked ? 'default' : 'pointer' }}>
+                <input
+                  type="checkbox"
+                  aria-label="Permitir relatório anônimo da conversa"
+                  checked={reportOptIn}
+                  disabled={reportLocked || isLoading}
+                  onChange={event => setReportOptIn(event.target.checked)}
+                />
+                <span>Permito que sejam enviados ao responsável do portfólio, via Telegram, relatórios anônimos
+                  com assuntos, projetos públicos consultados e intenção provável. O relatório é enviado
+                  após 24h da primeira interação; não inclui o texto das perguntas nem dados pessoais.
+                  O consolidado diário contém apenas dados agregados. Opcional.</span>
+              </label>
+              {reportLocked && reportOptIn && <button type="button" className="orb-chat-size-btn"
+                style={{ width: 'auto', alignSelf: 'flex-start', padding: '4px 8px' }}
+                disabled={isLoading} onClick={() => void revokeReport()}>
+                Revogar autorização
+              </button>}
+              {reportNotice && <p role="status">{reportNotice}</p>}
+            </div>}
             <p className="orb-chat-counter" aria-label="Limite de perguntas">
               {maxUserTurns === 0 ? `${userTurnCount} perguntas · sem limite por conversa` : `${userTurnCount}/${maxUserTurns} perguntas nesta conversa`}
             </p>
