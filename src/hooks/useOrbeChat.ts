@@ -58,7 +58,7 @@ export function useOrbeChat(reducedMotion: boolean) {
   }, [messages]);
 
   const userTurnCount = messages.filter(message => message.sender === 'user').length;
-  const limitReached = userTurnCount >= MAX_ORBE_USER_TURNS;
+  const limitReached = MAX_ORBE_USER_TURNS > 0 && userTurnCount >= MAX_ORBE_USER_TURNS;
 
   const newConversation = useCallback(() => {
     pendingRef.current?.controller.abort();
@@ -101,7 +101,7 @@ export function useOrbeChat(reducedMotion: boolean) {
   async function sendMessage() {
     if (pendingRef.current || Date.now() < retryAt) return;
     if (limitReached) {
-      setError({ message: 'Esta conversa atingiu o limite de 20 perguntas. Copie-a e inicie uma nova conversa.' });
+      setError({ message: `Esta conversa atingiu o limite de ${MAX_ORBE_USER_TURNS} perguntas. Copie-a e inicie uma nova conversa.` });
       return;
     }
     const text = query.trim();
