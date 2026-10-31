@@ -504,3 +504,35 @@ body.guilda-modal-aberto { overflow: hidden !important; }
 @media (prefers-reduced-motion:reduce) {
   .guilda-cartaz:active { transform:none; }
 }
+
+/* Apresentação da missão: categoria, descrição e imagem seguem um eixo central.
+   Especificidade maior que tipografia.css (importado depois neste projeto). */
+.guilda-detalhes__janela > .guilda-detalhes__tipo {
+  width: fit-content;
+  max-width: 100%;
+  margin: 10px auto 16px;
+  padding: 5px 12px 10px;
+  border-bottom: 2px dashed rgba(140, 67, 33, .50);
+  color: #873719;
+  font-size: 9px;
+  line-height: 1.9;
+  letter-spacing: .025em;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.guilda-detalhes__janela > .guilda-detalhes__descricao {
+  max-width: 540px;
+  margin: 0 auto 22px;
+  color: #3d2b1d;
+  font-size: clamp(9px, 1vw, 10.5px);
+  line-height: 2.1;
+  letter-spacing: .01em;
+  text-align: center;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+@media (max-width: 440px) {
+  .guilda-detalhes__janela > .guilda-detalhes__tipo { padding-inline: 4px; }
+  .guilda-detalhes__janela > .guilda-detalhes__descricao { margin-bottom: 18px; }
+}

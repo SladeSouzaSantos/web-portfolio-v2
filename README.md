@@ -228,3 +228,13 @@ Projetos: contraste consistente com o pergaminho e estados ativos/foco.
 Sem novas dependências ou animações invasivas. Respeita
 `prefers-reduced-motion`. Testes E2E: `tests/section-ui-ux.spec.ts`,
 em 320, 375, 768, 1024 e 1440px; verificar a DEV antes de integrar à main.
+
+### Ajustes finais de alinhamento
+
+As fichas dos projetos (Guilda e Arquivo) centralizam a categoria e a
+descrição acima das imagens. A categoria tem tinta ferrugem e um separador
+pontilhado discreto; a descrição mantém tinta escura e leitura centralizada.
+No Sumário do Herói, a regra de `tipografia.css` foi corrigida para alinhar
+o texto centralmente inclusive em mobile. A fonte Press Start 2P e os
+conteúdos originais foram preservados. Testes responsivos em
+`tests/project-detail-alignment.spec.ts`.
