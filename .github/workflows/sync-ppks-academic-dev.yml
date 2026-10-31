@@ -1,6 +1,11 @@
 name: Sync PPKS Academic snapshot to DEV
 on:
   workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/sync-ppks-academic-dev.yml
+      - src/data/formacoes.ts
 permissions:
   contents: write
 jobs:
