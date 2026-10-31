@@ -10,7 +10,13 @@ export interface CachedOrbeMessage {
 
 /** The public transcript contains no conversation ID, token, credentials or cookies. */
 const KEY = 'phasscode:orbe:transcript:v1';
-export const MAX_ORBE_USER_TURNS = 20;
+// Vite bundles the public UI limit at build time. 0 removes only the UI's
+// per-conversation cap; backend/provider quotas, rate limiting and abuse controls remain.
+const requestedTurns = import.meta.env?.VITE_ORBE_MAX_USER_TURNS;
+const parsedTurns = typeof requestedTurns === 'string' && /^\\d+$/.test(requestedTurns)
+  ? Number(requestedTurns) : NaN;
+export const MAX_ORBE_USER_TURNS = Number.isSafeInteger(parsedTurns) && parsedTurns >= 0 && parsedTurns <= 10000
+  ? parsedTurns : 100;
 export const TRANSCRIPT_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_CACHE_BYTES = 256_000;
 
@@ -21,7 +27,7 @@ export function restoreOrbeTranscript(): CachedOrbeMessage[] {
     const state: unknown = JSON.parse(raw);
     if (!state || typeof state !== 'object' || !('expiresAt' in state) || !('messages' in state)) return [];
     const { expiresAt, messages } = state as { expiresAt: unknown; messages: unknown };
-    if (typeof expiresAt !== 'number' || Date.now() >= expiresAt || !Array.isArray(messages) || messages.length > 41) {
+    if (typeof expiresAt !== 'number' || Date.now() >= expiresAt || !Array.isArray(messages) || messages.length > 201) {
       clearOrbeTranscript();
       return [];
     }
@@ -34,7 +40,7 @@ export function restoreOrbeTranscript(): CachedOrbeMessage[] {
       && Object.keys(m).every(key => ['id', 'sender', 'text', 'simulated'].includes(key))
       && (m.simulated === undefined || typeof m.simulated === 'boolean')
     )) return [];
-    if (messages.filter(m => m.sender === 'user').length > MAX_ORBE_USER_TURNS) return [];
+    if ((MAX_ORBE_USER_TURNS > 0 && messages.filter(m => m.sender === 'user').length > MAX_ORBE_USER_TURNS)) return [];
     return messages;
   } catch { return []; }
 }
@@ -55,7 +61,9 @@ export function saveOrbeTranscript(messages: CachedOrbeMessage[]) {
           typeof old.expiresAt === 'number' && old.expiresAt > Date.now()) expiresAt = old.expiresAt;
       } catch { /* Expired or corrupted cache is overwritten. */ }
     }
-    const serialized = JSON.stringify({ expiresAt, messages: safe });
+    // Bound browser storage even when the interactive conversation has no turn cap.
+    // Local transcript is a view-only convenience; API session credentials are never cached.
+    const serialized = JSON.stringify({ expiresAt, messages: safe.slice(-201) });
     if (serialized.length <= MAX_CACHE_BYTES) localStorage.setItem(KEY, serialized);
   } catch { /* Storage can be unavailable or full; chat remains functional in memory. */ }
 }
