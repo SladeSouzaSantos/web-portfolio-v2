@@ -140,7 +140,13 @@ export function useOrbeChat(reducedMotion: boolean) {
             ? 'Todos os provedores de IA configurados estão temporariamente limitados. Tente novamente depois da renovação das cotas.'
             : issue?.code === 'LLM_UNAVAILABLE'
               ? 'Nenhum dos provedores de IA configurados conseguiu responder. Tente novamente mais tarde.'
-              : issue?.publicMessage ?? 'Não foi possível consultar o Orbe. Tente novamente apenas se desejar.',
+              : issue?.code === 'LLM_BUDGET_UNAVAILABLE'
+                ? 'O controle de cotas de IA está temporariamente indisponível. A equipe precisa verificar o orçamento no servidor; não reenvie repetidamente.'
+                : issue?.code === 'LLM_CONTEXT_LIMIT'
+                  ? 'O contexto ficou grande demais para a IA. Tente uma pergunta mais específica ou inicie outra conversa.'
+                  : issue?.code === 'RATE_LIMIT_UNAVAILABLE'
+                    ? 'O controle de requisições está temporariamente indisponível. Tente novamente mais tarde.'
+                    : issue?.publicMessage ?? 'Não foi possível consultar o Orbe. Tente novamente apenas se desejar.',
         correlationId: issue?.correlationId,
       });
       if (issue?.retryAfterSeconds) {
