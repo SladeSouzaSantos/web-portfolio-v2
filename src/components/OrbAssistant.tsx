@@ -179,7 +179,7 @@ export function OrbAssistant() {
               : 'Demonstração do representante virtual de Pedro Santos, com respostas predefinidas sobre experiência e projetos.'}</p>
             {apiEnabled && <p id="orbChatPrivacy" className="orb-chat-privacy">
               Não informe dados pessoais sensíveis. As perguntas podem ser processadas pelo
-              provedor de IA. O texto fica neste navegador por até 24 horas e pode ser apagado
+              provedor de IA. O backend mantém até 12 mensagens recentes por conversa e considera a conversa expirada após 7 dias sem atividade. O texto fica neste navegador por até 24 horas e pode ser apagado
               com Nova conversa. Recarregar mantém o texto, mas reinicia o contexto da IA.
             </p>}
             {apiEnabled && <div className="orb-chat-privacy" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
