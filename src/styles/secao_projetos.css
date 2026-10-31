@@ -489,3 +489,18 @@ body.guilda-modal-aberto { overflow: hidden !important; }
     .guilda-arquivo__placa { transition: none; }
     .guilda-arquivo__placa:hover { transform: none; }
 }
+
+/* Coerência com as Crônicas e a Academia: tintas e estados de interação. */
+.guilda-cartaz__titulo { color:#482311; }
+.guilda-cartaz__tipo { color:#81341f; }
+.guilda-cartaz__subtitulo { color:#513823; }
+.guilda-cartaz__chamada { color:#8a421d; }
+.guilda-cartaz:focus-visible .guilda-cartaz__chamada { color:#562410; }
+.guilda-cartaz:active { transform:translateY(1px); }
+.guilda-detalhes__janela h3 {
+  border-bottom:1px dashed rgba(124,65,31,.35);
+  padding-bottom:7px;
+}
+@media (prefers-reduced-motion:reduce) {
+  .guilda-cartaz:active { transform:none; }
+}

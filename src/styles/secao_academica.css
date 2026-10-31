@@ -140,7 +140,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
 }
 .academia-armario__conteudo {
   position:absolute;
-  top:34.8%;left:6.9%;right:6.9%;bottom:6.1%;
+  top:34.8%;left:7.8%;right:7.8%;bottom:6.1%;
   display:grid;
   grid-template-columns:minmax(0,2.12fr) minmax(0,.96fr);
   gap:2.1%;
@@ -177,7 +177,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
 .academia-cartao__conteudo {
   box-sizing:border-box;
   display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;height:100%;
-  width:100%;min-width:0;padding:6% 13%;
+  width:100%;min-width:0;padding:6% 15%;
 }
 .academia-cartao__conteudo > * { max-width:100%;overflow-wrap:break-word; }
 .academia-cartao__tipo {
@@ -418,7 +418,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
     width:min(calc(100% - 24px),1040px);
     margin-inline:auto;
     aspect-ratio:auto;
-    padding:8px clamp(3px,1vw,10px) 20px;
+    padding:12px clamp(8px,1.4vw,18px) 24px;
     border:clamp(12px,2.8vw,24px) solid transparent;
     border-image-source:url('/assets/img/moldura-formacao-ft.webp');
     border-image-slice:145 145 180 145 fill;
@@ -460,7 +460,8 @@ body.academia-modal-aberto {overflow:hidden !important;}
     display:flex;
     flex-direction:column;
     gap:clamp(14px,2.4svh,23px);
-    padding:0;
+    padding-inline:clamp(4px,1.2vw,12px);
+    padding-block:0;
   }
 
   .academia-formacoes__grade {
@@ -594,7 +595,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
     width:calc(100% - 12px);
     border-width:14px;
     border-image-width:14px;
-    padding-inline:3px;
+    padding-inline:8px;
   }
 
   .academia-formacoes__grade {
@@ -604,7 +605,7 @@ body.academia-modal-aberto {overflow:hidden !important;}
 
   .academia-cartao {
     min-height:244px;
-    padding:36px 14%;
+    padding:36px 15%;
   }
 
   .academia-medalhao {
@@ -719,7 +720,65 @@ body.academia-modal-aberto {overflow:hidden !important;}
   overflow-wrap: anywhere;
 }
 @media (max-width: 639px) {
-  .academia-modal__painel { padding: 50px 16px 22px; }
+  .academia-modal__painel { padding: 50px clamp(20px, 6vw, 30px) 28px; }
   .academia-modal__curso { grid-template-columns: minmax(0, 1fr); }
   .academia-modal__curso-status { justify-self: start; }
+}
+
+/* Acabamento do armário: legibilidade SNES/16-bit sem trocar a fonte original. */
+.academia-cartao__tipo {
+  color:#794024;
+  letter-spacing:.02em;
+}
+.academia-cartao__nome {
+  color:#3b2112;
+  text-shadow:0 1px 0 rgba(255,246,216,.65);
+}
+.academia-cartao__instituicao { color:#5b381d; }
+.academia-cartao__periodo { color:#774421; }
+.academia-estudos__lista .academia-trilha {
+  border-bottom-color:rgba(111,62,25,.35);
+  border-radius:2px;
+  transition:background-color 150ms steps(3,end), box-shadow 150ms steps(3,end);
+}
+.academia-trilha strong { color:#3d2516; }
+.academia-trilha small { color:#66442c; }
+.academia-trilha__seta { color:#83421c; transition:transform 150ms steps(3,end),color 150ms ease; }
+.academia-trilha:is(:hover,:focus-visible) {
+  background:rgba(235,179,92,.2);
+  box-shadow:inset 3px 0 0 #9d5724;
+}
+.academia-trilha:is(:hover,:focus-visible) .academia-trilha__seta {
+  color:#542610;
+  transform:translateX(2px);
+}
+.academia-cartao:active { transform:translateY(1px);filter:brightness(.96); }
+.academia-trilha:active { background:rgba(235,179,92,.28); }
+.academia-modal__painel h2 {
+  border-bottom:2px solid rgba(117,63,26,.28);
+  padding-bottom:12px;
+}
+.academia-modal__categoria { color:#783a18; }
+.academia-modal__curso-titulo { color:#482710; }
+.academia-modal__curso { border-left:3px solid #986023; }
+.academia-modal__curso-status--concluido { font-weight:400; }
+.academia-modal__link:is(:hover,:focus-visible) { color:#164d60; }
+@media (max-width:1150px) {
+  .academia-armario__conteudo {
+    padding-inline:clamp(4px,1.2vw,12px);
+  }
+  .academia-trilha { padding-inline:5px; }
+  .academia-estudos__lista { padding-inline:14%; }
+}
+@media (max-width:639px) {
+  /* Mantém a arte intacta, porém cria uma margem de respiro para texto e moldura. */
+  .academia-armario__conteudo { padding-inline:4px; }
+  .academia-estudos__lista { padding-inline:13%; }
+  .academia-cartao__tipo { font-size:8px; }
+  .academia-cartao__nome { font-size:9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .academia-estudos__lista .academia-trilha,
+  .academia-trilha__seta { transition:none !important; }
+  .academia-cartao:active { transform:none; }
 }

@@ -664,3 +664,41 @@ body.taverna-ativa::after {
     .skill-categoria-box:hover,
     .skill-categoria-box:focus-within { transform: none; }
 }
+
+/* Painel de competências: títulos dourados, prática em verde, estudos em ciano. */
+.skill-categoria-box { padding:clamp(13px,1.35vw,18px); }
+.skill-cat-titulo {
+  font-size:clamp(8px,.75vw,9px);
+  line-height:1.9;
+  padding-bottom:10px;
+  border-bottom-color:rgba(222,159,76,.55);
+}
+.skill-cat-resumo { font-size:7.5px;line-height:1.95; }
+.skill-categoria-box .skill-tag { font-size:7px;line-height:1.85; }
+.skill-cat-aprofundamento { font-size:7px;line-height:1.95; }
+.skill-cat-aprofundamento strong { color:var(--acento-ciano); }
+.skill-cat-evidencias summary {
+  padding-inline:10px;
+  font-size:7px;
+  border-color:var(--borda-suave);
+  transition:background-color 140ms ease,border-color 140ms ease;
+}
+.skill-cat-evidencias[open] summary {
+  background:rgba(29,135,150,.12);
+  border-color:var(--acento-ciano);
+}
+.skill-cat-evidencias li a,
+.skill-cat-evidencia-desc { font-size:7px;line-height:1.9; }
+.skill-cat-evidencias summary:active { background:rgba(29,135,150,.19); }
+@media (max-width:640px) {
+  .skill-cat-titulo { font-size:9px; }
+  .skill-cat-resumo,
+  .skill-categoria-box .skill-tag,
+  .skill-cat-aprofundamento,
+  .skill-cat-evidencias summary,
+  .skill-cat-evidencias li a,
+  .skill-cat-evidencia-desc { font-size:8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-cat-evidencias summary { transition:none !important; }
+}

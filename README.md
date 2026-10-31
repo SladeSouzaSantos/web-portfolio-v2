@@ -215,3 +215,16 @@ Nenhuma alteração ao backend ou à `main`; publicação exige homologação DE
 Correção de especificidade: a centralização das missões 7–8 só é aplicada em
 `min-width: 1001px`. No mobile não existem colunas implícitas. A grade usa
 seis tracks CSS no desktop, ocupadas por três cartões de duas tracks cada.
+
+### Polimento UI/UX das seções com estética pixel art
+
+Formação: maior recuo do conteúdo em relação às bordas da moldura e dos
+medalhões (desktop, tablet e mobile) e fichas com padding lateral proporcional.
+Hierarquia de tinta escura, ferrugem e dourado preserva a fonte Press Start 2P.
+Experiência: separação por cor entre período, organização, função e ação,
+destaque de foco/pressão e divisores das fichas. Sobre Mim: cards mais legíveis
+e aprofundamento em ciano, evidências expansíveis com indicação de estado.
+Projetos: contraste consistente com o pergaminho e estados ativos/foco.
+Sem novas dependências ou animações invasivas. Respeita
+`prefers-reduced-motion`. Testes E2E: `tests/section-ui-ux.spec.ts`,
+em 320, 375, 768, 1024 e 1440px; verificar a DEV antes de integrar à main.
