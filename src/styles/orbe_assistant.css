@@ -187,7 +187,7 @@ body.modo-claro .orb-chat-panel .chat-sender {
 .orb-chat-status, .orb-chat-cooldown { color: var(--texto-destaque-ouro); }
 .orb-chat-error { color: var(--texto-principal); border-left: 3px solid var(--acento-ouro); padding-left: 10px; }
 .orb-chat-error small { display: block; margin-top: 6px; font-size: 7px; }
-.chat-text { white-space: pre-wrap; }
+.chat-text { white-space: pre-wrap; line-height: 2.5; }
 .orb-chat-simulated, .orb-chat-sources { margin-top: 10px; font-size: 8px; line-height: 1.9; }
 .orb-chat-simulated { color: var(--texto-destaque-ouro); }
 .orb-chat-sources ul { list-style: none; padding: 0; }
