@@ -83,6 +83,9 @@ jobs:
             fs.appendFileSync(process.env.GITHUB_ENV, `VITE_ORBE_MAX_USER_TURNS=${value}\n`);
           '
 
+      - name: Validate academic snapshot sync boundaries (Node tests)
+        run: node --test tests/security/sync-ppks-academic.test.mjs
+
       - name: Validate TypeScript and compile Vite
         run: npm run build
 
