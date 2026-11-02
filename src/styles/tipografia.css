@@ -40,7 +40,8 @@ h1, h2, h3 { font-family: var(--fonte-titulo); }
   font-size: 10px !important;
   line-height: 2.1 !important;
   letter-spacing: .025em !important;
-  text-align: left !important;
+  text-align: center !important;
+  text-wrap: pretty;
   overflow-wrap: break-word;
 }
 .painel-descricao .stat-box {

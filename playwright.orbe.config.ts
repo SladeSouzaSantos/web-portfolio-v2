@@ -20,7 +20,8 @@ export default defineConfig({
     env: {
       PHASSCODE_MOCK_API_BUILD: 'true',
       VITE_ORBE_API_ENABLED: 'true',
-      VITE_PHASE3_ENABLED: 'false',
+      VITE_AUTH_ENABLED: 'false',
+      VITE_MEETINGS_ENABLED: 'false',
       VITE_API_BASE_URL: 'https://orbe-api.invalid',
     },
     reuseExistingServer: false,

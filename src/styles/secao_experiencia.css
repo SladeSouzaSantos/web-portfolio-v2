@@ -538,3 +538,42 @@ body.cronicas-modal-aberto { overflow: hidden !important; }
 .cronicas-capitulo__medalhao--sig       { --medal-bg: #dbdbdb; } /* prata/azul */
 .cronicas-capitulo__medalhao--geowellex { --medal-bg: #c4c4c7; } /* azul-marinho */
 .cronicas-capitulo__medalhao--greencity { --medal-bg: #a2df92; } /* sol amarelo/verde */
+
+/* Hierarquia das crônicas: informações em camadas de tinta, não só em tamanho. */
+.cronicas-capitulo__periodo { color:#794222; letter-spacing:.02em; }
+.cronicas-capitulo__empresa {
+  color:#3b2114;
+  text-shadow:0 1px 0 rgba(255,241,203,.55);
+}
+.cronicas-capitulo__cargo { color:#6b3520; }
+.cronicas-capitulo__resumo { color:#513a29; }
+.cronicas-capitulo__acao { color:#8a3a18; letter-spacing:.025em; }
+.cronicas-capitulo__cartao:is(:hover,:focus-visible) .cronicas-capitulo__acao {
+  color:#5b2a12;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+.cronicas-capitulo__cartao:active { transform:translateY(1px); }
+.cronicas-detalhes__rotulo { color:#88421a; }
+.cronicas-detalhes h2 { color:#4b2113; }
+.cronicas-detalhes h3 {
+  color:#70321a;
+  border-bottom:1px dashed rgba(122,59,35,.35);
+  padding-bottom:7px;
+}
+.cronicas-detalhes__tecnologias li {
+  border-color:#a97845;
+  background:rgba(211,155,86,.12);
+  color:#59311b;
+}
+@media (max-width:480px) {
+  .cronicas-capitulo__periodo,
+  .cronicas-capitulo__acao { font-size:clamp(7px,2.1vw,8px); }
+  .cronicas-capitulo__cargo,
+  .cronicas-capitulo__resumo { font-size:clamp(7px,2.1vw,9px); }
+  .cronicas-capitulo__empresa { font-size:clamp(8px,2.3vw,10px); }
+  .cronicas-capitulo__interior { gap:8px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .cronicas-capitulo__cartao:active { transform:none; }
+}

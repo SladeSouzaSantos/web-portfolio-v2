@@ -41,11 +41,13 @@ export class OrbeClientError extends Error {
 
 export interface OrbeSendOptions {
   signal?: AbortSignal;
+  reportConsent?: boolean;
 }
 
 export interface OrbeClient {
   send(message: string, options?: OrbeSendOptions): Promise<ChatReply>;
   reset(): void;
+  withdrawReport(): Promise<boolean>;
 }
 
 export interface OrbeClientOptions {
@@ -241,6 +243,7 @@ export function createOrbeClient(baseUrl: string, options: OrbeClientOptions = {
       diagnose({ phase: 'started' });
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (options.meetingCapabilities) headers['X-Orbe-Capabilities'] = 'meetings-v1';
+      if (!session && sendOptions.reportConsent === true) headers['X-Orbe-Report-Consent'] = 'yes';
       if (session) headers['X-Conversation-Token'] = session.token;
       const response = await fetchRequest(apiUrl.toString(), {
         method: 'POST',
@@ -304,5 +307,29 @@ export function createOrbeClient(baseUrl: string, options: OrbeClientOptions = {
     }
   }
 
-  return { send, reset };
+  async function withdrawReport(): Promise<boolean> {
+    const session = conversation;
+    if (!session || activeRequest) return false;
+    try {
+      const endpoint = new URL(apiUrl.toString());
+      endpoint.pathname = endpoint.pathname.replace(/\/chat$/, '/chat/report-optout');
+      const response = await fetchRequest(endpoint.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Conversation-Token': session.token,
+        },
+        body: JSON.stringify({ conversationId: session.id }),
+        credentials: 'omit',
+        redirect: 'error',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(10000),
+      });
+      return response.ok && (await response.json())?.withdrawn === true;
+    } catch {
+      return false;
+    }
+  }
+
+  return { send, reset, withdrawReport };
 }

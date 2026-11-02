@@ -1,121 +1,240 @@
-# PHASSCODE — portfólio RPG
+# PHASSCODE — portfólio profissional em pixel art
 
-Portfólio de Pedro Santos em React, TypeScript e Vite. A interface preserva a identidade em pixel art da versão estática: Taverna, Guilda de Projetos, Crônicas da Jornada e Academia Arcana. As animações usam GSAP/ScrollTrigger e canvas, com limpeza ao trocar de seção e suporte à preferência de movimento reduzido.
+Portfólio público de Pedro Santos, construído em React, TypeScript e Vite.
+Apresenta projetos, experiência, formação e o **Orbe Mágico**, assistente
+virtual que representa sua trajetória profissional e cita fontes do portfólio.
 
-## Executar localmente
+## Funcionalidades atuais
 
-Requer Node.js **22.12 ou superior** e npm. A integração contínua usa Node.js 24.
+- Navegação pelas seções Sobre, Projetos, Experiência e Formação.
+- Arquivo de Missões e visualização de projetos.
+- Orbe conversacional sobre competências, experiência, estudos e contato.
+  No chat, **Enter envia** a pergunta e **Shift + Enter insere uma nova linha**.
+  Use o botão **Maximizar chat** para expandir a janela e **Restaurar tamanho do chat**
+  para voltar ao modo compacto; a conversa permanece aberta.
+- Temas claro/escuro, acessibilidade e suporte a movimento reduzido.
 
-```sh
+**Não há login, baú, contas, painel administrativo, reuniões nem notificações.**
+O Orbe não agenda compromissos nem envia mensagens em nome do proprietário.
+Os módulos históricos da Fase 3 ainda poderão ser vistos no Git, mas não
+são importados pela interface pública nem fazem parte da release.
+
+## Execução local
+
+Requer Node.js 24 e npm:
+
+```bash
 npm ci
+cp .env.example .env.local
 npm run dev
-```
-
-Abra o endereço informado pelo Vite. A aplicação precisa do servidor de desenvolvimento ou de uma publicação do build; abrir `index.html` diretamente pelo sistema de arquivos não executa o TypeScript.
-
-```sh
-npm run typecheck  # Verifica os tipos sem gerar arquivos
-npm run build      # Verifica tipos e gera dist/
-npm run preview    # Serve o build localmente
-```
-
-## Testes de navegação e interface
-
-Os testes Playwright executam contra o build de produção e iniciam o servidor de preview automaticamente. Gere novamente o build depois de alterar o código.
-
-```sh
 npm run build
 npx playwright install chromium
-npm test
+npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts
+npm run test:orbe
 ```
 
-No Windows, a configuração utiliza o Microsoft Edge instalado. Nos demais sistemas, utiliza o Chromium do Playwright. No Linux da CI, a instalação inclui as dependências do navegador com `npx playwright install --with-deps chromium`.
+O chat real requer `VITE_ORBE_API_ENABLED=true` e uma URL válida no
+`VITE_API_BASE_URL`. Sem API habilitada, a interface mostra uma demonstração
+de respostas predefinidas. Nunca coloque chaves de LLM em variáveis `VITE_*`.
 
-Os testes também verificam erros JavaScript, recursos do site, responsividade em tablet/desktop e acessibilidade com axe. A suíte separada `npm run test:smoke` verifica a URL publicada após o deploy; `npm run test:visual` compara capturas com referências revisadas. Consulte [os comandos e as configurações dos testes](docs/testes.md).
+## Ambientes no Mac Mini
 
-`npm run test:orbe` gera um build isolado com a integração HTTP habilitada e executa o chat
-com respostas interceptadas pelo Playwright. Os testes não chamam a OpenRouter.
+| Branch | Site | API de chat |
+| --- | --- | --- |
+| `dev` | `https://devgbc.phasscode.com` | `https://devapi.phasscode.com` |
+| `main` | `https://gbc.phasscode.com` | `https://api.phasscode.com` |
 
-`npm run test:phase3` valida Google/sessão, agendamento público, administração e
-ações do Orbe com uma API `.invalid` inteiramente interceptada. Não cria eventos
-nem envia notificações. Consulte a [integração da Fase 3](docs/phase3-integracao.md)
-e o [roteiro de homologação controlada](docs/phase3-homologacao.md).
+O workflow `.github/workflows/deploy.yml` valida o frontend, executa SAST,
+publica uma imagem imutável e a verifica em ambiente descartável.
+Para publicar no Mac Mini use **Actions → PHASSCODE → Run workflow**,
+selecione a branch e execute `apply_remote=true`.
 
-## Organização
+O deployment requer `ENABLE_REMOTE_DEPLOY=true` no environment
+correspondente (`development` ou `production`), acesso Tailscale/SSH,
+checkout limpo e o servidor previamente configurado. O deploy de produção
+deve exigir aprovação humana no GitHub Environment.
 
-```text
-src/
-├── App.tsx                 # Rotas e composição da aplicação
-├── components/             # Navbar, modal, tema, baú e orbe
-├── sections/               # Sobre, Projetos, Experiência, Formação e Arquivo
-├── data/                   # Catálogos editáveis e informações do perfil
-├── effects/                # Desenho e interação do orbe em canvas
-├── hooks/                  # Navegação, tema, media queries e fundos
-├── lib/                    # Resolução de URLs dos assets
-├── config/                 # Ativação e URL pública do Orbe por ambiente
-├── services/               # Cliente HTTP, demonstração e fontes do Orbe
-├── styles/                 # CSS original e ajustes da aplicação
-└── types/                  # Contratos dos dados do portfólio
-public/assets/img/          # Imagens e símbolos SVG
-public/assets/fonts/        # Press Start 2P e licença SIL Open Font License
-tests/                      # Testes Playwright
-```
+**Nenhum PR ou push publica no Mac Mini por si só.**
+Faça o deploy do backend compatível primeiro, depois do frontend.
+O frontend nunca deve fazer chamadas de produção ao backend de desenvolvimento.
 
-Para editar conteúdo, comece por `src/data/perfil.ts`, `projetos.ts`, `experiencias.ts` e `formacoes.ts`. A seção inicial de projetos e o Arquivo de Missões compartilham o mesmo catálogo. Os registros de experiência, formação e trilhas mantêm o conteúdo e as datas da versão anterior, incluindo situações provisórias que precisam de revisão editorial antes da publicação.
+## Base de conhecimento
 
-A tipografia compartilhada fica em `src/styles/tipografia.css`: títulos, descrições, fichas e controles usam Press Start 2P, com tamanhos, espaçamento entre letras e entrelinhas ajustados para cada contexto. A fonte é servida pelo próprio site, com sua licença em `public/assets/fonts/OFL.txt`. O catálogo `/projetos` reutiliza as artes do mural e dos pergaminhos da Guilda, mantendo os símbolos dos projetos. As referências visuais devem ser revisadas após mudanças nesses estilos.
+O conteúdo visível fica em `src/data/`.
+A base consultada pelo Orbe reside no repositório
+`SladeSouzaSantos/phasscode-platform`, em `knowledge/portfolio.json`.
+Atualize ambos quando houver uma mudança profissional relevante.
 
-Na Experiência, a escala dos textos dos cartões fica em `src/styles/secao_experiencia.css`. Cada pergaminho é um contêiner: `clamp()` com unidades `cqi` adapta as fontes à largura útil do papel, com limites de tamanho, enquanto a altura acompanha o conteúdo. Evite definir tamanhos fixos para esses mesmos textos em `tipografia.css`, pois ela é carregada depois dos estilos das seções.
+Os testes legados de login e reuniões permanecem no histórico do repositório;
+a pipeline de release usa apenas as suítes pertinentes ao portfólio público.
 
-O baú utiliza Google e cookies de sessão no build da `dev`, com agendamento público
-sem login e painel de reuniões apenas para `admin`. A produção mantém esses
-recursos explicitamente indisponíveis e o Orbe demonstrativo. A URL compartilhada
-é `VITE_API_BASE_URL`; `VITE_PHASE3_ENABLED` habilita sessão/reuniões e
-`VITE_ORBE_API_ENABLED` habilita o chat. Não coloque segredos em `VITE_*`.
-ID/token do chat, CSRF e tokens privados de reunião ficam apenas em memória.
-Veja a [arquitetura, os ambientes e as limitações](docs/phase3-integracao.md).
+### Carregamento e transições do portfólio
 
-## Rotas e navegação
+A primeira renderização usa um preloader pixel art para a cena e fonte visíveis;
+a espera é limitada a 2,2 segundos (sem bloquear imagens GIF animadas), com
+remoção após o primeiro paint, fallback visual e suporte a movimento reduzido.
+As quatro seções trocam conteúdo por hash sem reload, com entrada curta de
+300 ms. Imagens WebP das cenas seguintes são antecipadas ao passar o mouse,
+focar ou tocar no item do menu; as animações de fundo continuam independentes.
 
-- `/`: página principal.
-- `/#sobre`, `/#projetos`, `/#experiencia` e `/#academico`: seções da página principal, com suporte ao histórico do navegador.
-- `/#portfolio` e `/#formacao`: aliases para Projetos e Formação.
-- `/projetos`: Arquivo de Missões com filtros e detalhes dos projetos.
-- `/index.html` e `/projetos.html`: endereços antigos, redirecionados para `/` e `/projetos`, respectivamente, preservando os parâmetros de consulta e o fragmento.
+Validação: `npx playwright test tests/site-loading.spec.ts`, incluindo desktop,
+320 px, acesso direto por hash, histórico e `prefers-reduced-motion`.
 
-O React Router usa `BrowserRouter` para navegar entre a página principal e o catálogo sem recarregar o documento. O `index.html` é a única entrada do Vite, e o build gera apenas esse HTML em `dist/`. Para publicar, sirva **o conteúdo de `dist/`** e configure o servidor para retornar `index.html` nas rotas da aplicação. Esse fallback permite abrir `/projetos` diretamente ou atualizar a página nessa rota. A configuração atual assume publicação na raiz do domínio; publicar em um subdiretório exige revisar `base` do Vite, o roteador e as URLs absolutas das imagens no CSS.
+### Transição circular entre seções
 
-## Nginx e publicação
+A troca dos itens do menu usa a mesma técnica de `clip-path: circle(...)` do
+seletor de tema. Um portal visual sai do botão selecionado, cobre o viewport,
+troca a cena por baixo e se retrai, sem trocar o documento, descartar histórico
+ou carregar GIFs como bloqueio. Links com Ctrl/Cmd e movimento reduzido seguem
+navegação padrão. Cliques repetidos durante a transição não criam filas. As
+navegações pelo histórico continuam instantâneas.
 
-O `nginx.conf` aponta a produção para `/opt/projects/web-portfolio-v2/dist`. Um exemplo equivalente é:
+## Guilda de Projetos — cinco casos de estudo
 
-```nginx
-server {
-    listen 80;
-    server_name portfolio.exemplo.com;
-    root /opt/projects/web-portfolio-v2/dist;
-    index index.html;
+A Guilda e o Arquivo de Missões compartilham `src/data/projetos.ts`. A curadoria
+apresenta **GreenCity OS, HSP Simulator, GreenCity API, ReserGas e Guardrails/Prompt
+Injection**. O PHASSCODE e o Orbe não são listados como projeto externo: o próprio
+site demonstra sua implementação.
 
-    location = /projetos.html {
-        return 301 /projetos$is_args$args;
-    }
+- Ao passar o mouse sobre um pergaminho, a folha gira em 3D e exibe a imagem no verso;
+  ao clicar, abre a ficha de desafios, tecnologias e links.
+- Com teclado, foco visível e Enter abrem a ficha; com tela touch, o toque abre
+  diretamente a ficha, sem exigir hover. `prefers-reduced-motion` desativa o giro.
+- Capturas de tela: GreenCity OS (imagem fornecida pelo autor), API de Orçamento
+  (recorte da página 2 do PDF fornecido), ReserGas (imagem publicada no README).
+- As artes HSP Simulator e Guardrails são ilustrações, não capturas de software.
+- O endereço `https://hsp.greencity.net.br/` é apresentado como demonstração do
+  simulador web HSP; ele não executa o aplicativo Flutter GreenCity OS no navegador.
+- As capturas anexadas foram reduzidas para o mural; mantenha arquivos originais
+  fora dos assets públicos quando houver dados comerciais ou pessoais.
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+Verifique o catálogo via `npx playwright test tests/portfolio.spec.ts tests/project-gallery.spec.ts`.
+A publicação em DEV/PROD segue o fluxo operacional acima: este trabalho é
+proposto em um PR para `dev`, sem merge em `main` ou deploy remoto automático.
 
-    location /assets/ {
-        try_files $uri =404;
-    }
-}
-```
+### Ajustes de imagens e cartazes (2026-10-30)
 
-Para homologação, configure um domínio próprio e use `/opt/projects/web-portfolio-v2-dev/dist`. Se o Nginx executar em Docker, monte o diretório do projeto inteiro no mesmo caminho absoluto do host, ou ajuste a estratégia de links: o contêiner precisa conseguir resolver tanto `dist` quanto os diretórios `.releases` para os quais ele aponta. Montar apenas o destino atual de `dist` impede que futuras trocas de symlink sejam acompanhadas pelo contêiner.
+- A Guilda e o Arquivo usam `ProjetoMidia`: três screenshots lado a lado para GreenCity OS e ReserGas, uma imagem para os demais.
+- As telas do GreenCity OS são capturas fornecidas pelo autor; ReserGas utiliza três imagens de seu README.
+- GreenCity OS e a segunda página de proposta comercial foram republicados em WebP válido.
+- Fundos artificiais e bordas dos containers de imagens removidos; o fundo interno das interfaces reais é preservado.
+- A área útil dos cartazes foi limitada para evitar que títulos, categorias e descrições atinjam os ornamentos.
+- Sem alterações em `main`, Orbe, backend, workflows ou deploy remoto.
 
-O workflow `.github/workflows/deploy.yml` mantém a sequência: testes/build → SAST/SCA → imagem GHCR → DAST → deploy → verificação pública. A imagem contém o `dist` aprovado pelos testes e é consumida por digest. Em pushes para `main` e `dev`, o servidor extrai os arquivos dessa imagem em `.releases/<commit>-<execução>/dist`, atualiza o checkout e ativa a release por symlink, com as verificações e o rollback existentes. O servidor não compila o front-end. Depois do deploy, os smoke tests verificam a navegação pelo navegador e comparam os bundles publicados com o artefato da mesma execução.
+## Arquivo de Missões — oito projetos complementares
 
-A homologação usa `DEV_SITE_URL=https://devgbc.phasscode.com`; a produção usa `https://gbc.phasscode.com`. A autenticação Tailscale está preparada para OAuth e preserva a authkey enquanto as novas credenciais não forem cadastradas. Veja [a configuração do OAuth e as versões das actions](docs/tailscale-oauth.md).
+A Guilda permanece com cinco projetos principais em `src/data/projetos.ts`.
+A rota `/projetos` agora apresenta **oito projetos diferentes**, mantidos
+em `src/data/arquivoProjetos.ts`: Task Manager Flask, Stranger Things Experience,
+ERP API, Shadow Sim Pro, Gemini Nano Browser, Smart Model Router, Teclado Sound
+e Número Secreto. Os dois últimos são exercícios de curso da Alura e possuem
+demonstração interativa; Número Secreto depende de navegador com reconhecimento
+de voz e permissão para microfone.
 
-O ambiente existente precisa manter os secrets de conexão Tailscale/SSH configurados no GitHub Actions e o checkout de cada ambiente na branch correspondente. O usuário SSH precisa escrever no diretório do projeto e executar o Docker Compose do proxy. A validação recusa misturar um artefato antigo com um checkout mais novo.
+A página reaproveita `CartazMissao`, o mesmo pergaminho reversível, imagens no
+verso, fundo e moldura da Guilda. O rodapé usa a mesma placa de madeira
+(`moldura-projeto-simples.webp`), agora com link para todos os repositórios no
+GitHub. As imagens do Arquivo são ilustrações SVG originais e conceituais,
+não screenshots dos sistemas. A categoria pode ser filtrada por área,
+sem repetir os cinco projetos principais.
 
-Na primeira publicação, `dist` deve estar ausente ou já ser um symlink. Caso exista como diretório físico, mova o build existente para uma pasta de release e crie o link durante a preparação do servidor. O workflow recusa substituí-lo automaticamente. As releases anteriores são mantidas para permitir retorno manual; sua retenção deve ser administrada no servidor. Nenhuma configuração, execução ou publicação no servidor é realizada apenas por editar esses arquivos localmente.
+Teste com `npm run build` e `npx playwright test tests/portfolio.spec.ts tests/project-gallery.spec.ts tests/responsive.spec.ts tests/routing.spec.ts tests/accessibility.spec.ts`.
+Trabalho restrito à `dev`; nenhuma mudança em `main` ou publicação no Mac Mini.
+
+### Stack animada na seção Sobre Mim
+
+No painel do avatar, `JAVA & FLUTTER` foi substituído por uma sequência de
+stacks em foco com **Typed.js 2.1.0**: Java, Spring Boot, Quarkus,
+JPA/Hibernate, LangChain4j, RAG/embeddings, LangChain/LangGraph, agentes,
+MCP, bancos vetoriais e guardrails, a partir das ementas Java Elite e
+Engenharia de Software em IA Aplicada.
+
+A animação só existe enquanto a seção está montada; faz cleanup ao navegar
+e usa rótulo fixo para `prefers-reduced-motion: reduce`. Acessibilidade:
+o texto digitado é decorativo e leitores de tela recebem descrição estática.
+Nenhum texto narrativo, competência, projeto ou conteúdo do Orbe foi revisado
+nesta entrega. Teste específico: `npx playwright test tests/stacks-digitadas.spec.ts`.
+
+A animação Typed.js usa `contentType: 'null'` (texto puro) para preservar
+ampersands literais em `RAG & EMBEDDINGS` e `AGENTES & MCP`; a regressão é
+coberta por `tests/stacks-digitadas.spec.ts`.
+
+### Sobre Mim — foco em desenvolvimento e evidências profissionais
+
+O resumo apresenta o trabalho com Java/Hibernate/PostgreSQL em software acadêmico
+e as aplicações web e mobile desenvolvidas com Flutter, Python e PHP.
+Energia solar e petróleo e gás são descritos como contextos de negócios, não
+como especialidades principais. O foco profissional é backend Java,
+arquitetura e Engenharia de IA em aprofundamento.
+
+Os quatro cards agora distinguem tecnologias praticadas (experiência e
+projetos reais) de assuntos em estudo. Cada um possui `<details>` nativo,
+acessível por teclado/touch, com evidências e links para trabalhos públicos ou
+histórico profissional, sem mudar o padrão visual da taverna.
+Respeita `prefers-reduced-motion` e evita alegações de domínio em tecnologias
+citadas apenas em ementas. Critérios cobertos em
+`tests/sobre-competencias.spec.ts`.
+
+### Academia Arcana — cursos do currículo
+
+As seis trilhas de Estudos Contínuos apresentam 42 cursos
+das formações Alura, Udemy, DIO e Programa Hackers do Bem, classificados por
+áreas de desenvolvimento. Todos aparecem como **Concluído**, por confirmação
+expressa do autor em 30/10/2026. Isso não implica que todos os certificados
+individuais tenham sido disponibilizados no site.
+
+O Programa Hackers do Bem contém quatro etapas concluídas e documentadas nos
+certificados enviados pelo autor: Nivelamento (80h), Básico (64h), Fundamental
+(96h) e Especialização em DevOps e DevSecOps (80h), totalizando 320h.
+Os PDFs não foram inseridos no repositório público nem associados a botões
+de comprovante. A situação das graduações e pós-graduações é gerenciada
+separadamente e não foi modificada nesta atualização.
+A lista acadêmica mantém a composição de nove medalhões, incluindo um
+medalhão agrupado para as cinco especializações da FacPrisma (Arquitetura de
+Software, Big Data, Aplicações Móveis, Inteligência Artificial e Segurança
+da Informação); a previsão 07/2026 permanece marcada como não verificada.
+
+Dados: `src/data/formacoes.ts`; interface: `src/sections/Formacao.tsx`.
+Teste E2E: `tests/formacao-cursos.spec.ts`.
+Mudança exclusiva da branch `dev`, sem deploy remoto nem alterações na
+`main`. Uma revisão ampla de UI/UX responsiva será feita separadamente.
+
+### Arquivo de Missões — responsividade e hierarquia RPG
+
+A página `/projetos` reaproveita o comportamento da Guilda: três pergaminhos
+por linha no desktop, dois em tablet e um em mobile. A correção neutraliza as
+posições especiais da última fileira ao mudar de breakpoint ou filtro; não
+podem surgir colunas implícitas. O subtítulo fica abaixo do brasão da moldura,
+com espaço dedicado, separador pixel art e cores contrastantes nos títulos,
+subtítulos, filtros e informações técnicas. A tipografia continua
+`Press Start 2P` e não depende de bibliotecas adicionais.
+
+Teste: `tests/archive-layout.spec.ts` (270–1440 px, filtros, modal e grid).
+Nenhuma alteração ao backend ou à `main`; publicação exige homologação DEV.
+
+Correção de especificidade: a centralização das missões 7–8 só é aplicada em
+`min-width: 1001px`. No mobile não existem colunas implícitas. A grade usa
+seis tracks CSS no desktop, ocupadas por três cartões de duas tracks cada.
+
+### Polimento UI/UX das seções com estética pixel art
+
+Formação: maior recuo do conteúdo em relação às bordas da moldura e dos
+medalhões (desktop, tablet e mobile) e fichas com padding lateral proporcional.
+Hierarquia de tinta escura, ferrugem e dourado preserva a fonte Press Start 2P.
+Experiência: separação por cor entre período, organização, função e ação,
+destaque de foco/pressão e divisores das fichas. Sobre Mim: cards mais legíveis
+e aprofundamento em ciano, evidências expansíveis com indicação de estado.
+Projetos: contraste consistente com o pergaminho e estados ativos/foco.
+Sem novas dependências ou animações invasivas. Respeita
+`prefers-reduced-motion`. Testes E2E: `tests/section-ui-ux.spec.ts`,
+em 320, 375, 768, 1024 e 1440px; verificar a DEV antes de integrar à main.
+
+### Ajustes finais de alinhamento
+
+As fichas dos projetos (Guilda e Arquivo) centralizam a categoria e a
+descrição acima das imagens. A categoria tem tinta ferrugem e um separador
+pontilhado discreto; a descrição mantém tinta escura e leitura centralizada.
+No Sumário do Herói, a regra de `tipografia.css` foi corrigida para alinhar
+o texto centralmente inclusive em mobile. A fonte Press Start 2P e os
+conteúdos originais foram preservados. Testes responsivos em
+`tests/project-detail-alignment.spec.ts`.

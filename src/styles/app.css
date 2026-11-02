@@ -1,10 +1,10 @@
 /* Shared layout. Scene-specific artwork remains in its own stylesheet. */
 #root { min-height: 100svh; }
 body { user-select: text; -webkit-user-select: text; }
-button, input { font: inherit; }
+button, input, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: .7; }
-a:focus-visible, button:focus-visible, input:focus-visible, [tabindex="-1"]:focus-visible { outline: 3px solid var(--texto-ciano, #67e8f9); outline-offset: 4px; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex="-1"]:focus-visible { outline: 3px solid var(--texto-ciano, #67e8f9); outline-offset: 4px; }
 .skip-link { position: fixed; left: 1rem; top: -6rem; z-index: 11000; background: #080d12; color: #fff; padding: 1rem; font-size: 12px; }
 .skip-link:focus { top: 1rem; }
 .portfolio-main { width: 100%; padding: 9rem 1rem 4rem; max-width: 64rem; margin: 0 auto; }
@@ -17,18 +17,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex="-1"]:focu
 body.portfolio-modal-open { overflow: hidden !important; }
 .portfolio-modal-overlay > [role="dialog"] { max-height: calc(100dvh - 24px); overflow-y: auto; }
 .login-modal-header h2 { font-size: inherit; line-height: 1.7; }
-.chest-menu-panel { max-width: 380px; }
-.chest-menu-actions { text-align: center; display: flex; flex-direction: column; gap: 14px; }
-.chest-menu-actions .login-subtitle { margin-bottom: 0; }
-.chest-open-panel { background-color: #0284c7; border-color: #38bdf8; box-shadow: 0 4px 0 #0369a1; }
-.chest-logout { background-color: #dc2626; border-color: #f87171; box-shadow: 0 4px 0 #991b1b; margin-top: 0; }
 .restricted-preview { color: var(--texto-principal); font-size: 12px; line-height: 2; }
 .restricted-preview h1 { color: var(--texto-ciano); font-size: 20px; margin-bottom: 1rem; }
 .restricted-preview .login-submit-btn { margin-top: 1.5rem; }
 .orb-trigger { background: transparent; border: 0; padding: 0; line-height: 0; }
 .orb-chat-panel { max-width: 520px; width: 92%; }
 .orb-chat-form { min-width: 0; }
-.orb-chat-form input { min-width: 0; }
+.orb-chat-form textarea { min-width: 0; }
 .chat-msg { overflow-wrap: anywhere; }
 .gbc-speech-bubble { max-width: calc(100vw - 32px); }
 .gbc-speech-bubble.ativo { pointer-events: none; }
@@ -52,4 +47,68 @@ body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/as
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Scene transitions animate content without blocking URL, focus, or browser history.
+   Only opacity and transform are animated; animated scene GIFs load independently. */
+@keyframes portfolio-scene-arrive {
+  from { opacity: 0; transform: translateY(12px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.section-enter {
+  animation: portfolio-scene-arrive 300ms cubic-bezier(.2,.7,.2,1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-enter { animation: none !important; }
+}
+
+/* RPG portal: circular cover-and-reveal from the clicked navigation icon.
+   The destination is committed only after the circle covers the viewport. */
+#sectionTransitionMask {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at var(--scene-origin-x, 50%) var(--scene-origin-y, 50%),
+      #134458 0, #0b1d29 48%, #080d12 100%);
+  color: #fef08a;
+  clip-path: circle(0px at 50% 50%);
+  pointer-events: none;
+  overflow: hidden;
+}
+#sectionTransitionMask.is-active { pointer-events: auto; }
+.scene-transition-glyph {
+  font-family: var(--fonte-titulo, monospace);
+  color: #67e8f9;
+  font-size: clamp(45px, 10vw, 95px);
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(103, 232, 249, .45);
+}
+.scene-transition-caption {
+  font-family: var(--fonte-interface, monospace);
+  font-size: clamp(9px, 2vw, 13px);
+  letter-spacing: .15em;
+  line-height: 1.8;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  #sectionTransitionMask { display: none; }
+}
+
+/* A clipped circle does not cover all hit-test regions while expanding or
+   retracting. This invisible shield prevents lost clicks until the wipe ends. */
+#sectionTransitionShield {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+}
+#sectionTransitionShield.is-active { pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  #sectionTransitionShield { display: none; }
 }

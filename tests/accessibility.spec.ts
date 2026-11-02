@@ -46,18 +46,35 @@ test('archive and project details meet automated WCAG 2.1 A/AA checks', async ({
   await page.goto('/projetos');
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
   await expectAccessible(page, testInfo, 'archive');
-  await page.getByRole('button', { name: 'Ver detalhes de SMART MODEL ROUTER', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'SMART MODEL ROUTER', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /TASK MANAGER/ }).click();
+  await expect(page.getByRole('dialog', { name: 'TASK MANAGER', exact: true })).toBeVisible();
   await expectAccessible(page, testInfo, 'archive-project-details');
 });
 
-test('login and assistant dialogs meet automated WCAG 2.1 A/AA checks', async ({ page }, testInfo) => {
+test('public Orbe assistant meets automated WCAG 2.1 A/AA checks in both themes', async ({ page }, testInfo) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Abrir prévia de login', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: /PORTAL DE AUTENTICAÇÃO/ })).toBeVisible();
-  await expectAccessible(page, testInfo, 'login');
-  await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Abrir guia do portfólio', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ })).toBeVisible();
-  await expectAccessible(page, testInfo, 'assistant');
+  const question = 'Quais projetos Pedro desenvolveu?';
+  for (const theme of ['dark', 'light']) {
+    if (theme === 'light') {
+      await page.getByRole('button', { name: 'Ativar tema claro', exact: true }).click();
+      await expect(page.locator('body')).toHaveClass(/modo-claro/);
+    }
+    await page.getByRole('button', { name: 'Abrir guia do portfólio', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: /CONSULTAR ORBE MÁGICO/ });
+    const history = dialog.getByRole('log', { name: 'Conversa com o orbe', exact: true });
+    await expect(dialog).toBeVisible();
+    if (theme === 'dark') {
+      // API mode uses the shared fixture's synthetic reply; demo mode stays local.
+      await dialog.getByRole('textbox', { name: 'Sua pergunta ao orbe', exact: true }).fill(question);
+      await dialog.getByRole('button', { name: 'ENVIAR', exact: true }).click();
+    }
+    // Reopening in light mode must retain both speaker labels for the contrast scan.
+    await expect(history.locator('.user-msg')).toHaveCount(1);
+    await expect(history.locator('.user-msg')).toContainText(question);
+    await expect(history.locator('.orb-msg')).toHaveCount(2);
+    await expect(history.locator('.chat-sender')).toHaveText(['[ORBE]:', '[VOCÊ]:', '[ORBE]:']);
+    await expect(history).toHaveAttribute('aria-busy', 'false');
+    await expectAccessible(page, testInfo, `${theme}-assistant-with-messages`);
+    await page.keyboard.press('Escape');
+  }
 });

@@ -33,17 +33,17 @@ test('hashes select sections and browser history restores navigation', async ({ 
 
 test('project details isolate the background, trap keyboard focus and restore it on Escape', async ({ page }) => {
   await page.goto('/#projetos');
-  const trigger = page.getByRole('button', { name: /SMART MODEL ROUTER/ });
+  const trigger = page.getByRole('button', { name: /GREENCITY OS/ });
   await trigger.click();
-  const dialog = page.getByRole('dialog', { name: 'SMART MODEL ROUTER', exact: true });
+  const dialog = page.getByRole('dialog', { name: 'GREENCITY OS', exact: true });
   const close = dialog.getByRole('button', { name: 'Fechar detalhes', exact: true });
   await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText('Gateway experimental');
-  await expect(dialog).toContainText('OpenRouter');
+  await expect(dialog).toContainText('Aplicação Flutter');
+  await expect(dialog).toContainText('Flutter');
   await expect(page.locator('#root')).toHaveJSProperty('inert', true);
   await expect(close).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(close).toBeFocused();
+  await expect(dialog.getByRole('link', { name: /GITHUB/ })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(close).toBeFocused();
   await page.keyboard.press('Escape');
@@ -54,65 +54,69 @@ test('project details isolate the background, trap keyboard focus and restore it
 
 test('the backdrop closes details and a different project opens with its own content', async ({ page }) => {
   await page.goto('/#projetos');
-  const first = page.getByRole('button', { name: /SMART MODEL ROUTER/ });
+  const first = page.getByRole('button', { name: /GREENCITY OS/ });
   await first.click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.locator('.guilda-detalhes').click({ position: { x: 2, y: 2 } });
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(first).toBeFocused();
 
-  await page.getByRole('button', { name: /GREENCITY SDGP/ }).click();
-  const dialog = page.getByRole('dialog', { name: 'GREENCITY SDGP', exact: true });
-  await expect(dialog).toContainText('dimensionamento fotovoltaico');
-  await expect(dialog).toContainText('Firebase');
-  await expect(dialog).not.toContainText('OpenRouter');
+  await page.getByRole('button', { name: /HSP SIMULATOR/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'HSP SIMULATOR', exact: true });
+  await expect(dialog).toContainText('dados meteorológicos horários');
+  await expect(dialog).toContainText('pvlib');
+  await expect(dialog).not.toContainText('Isar');
   await dialog.getByRole('button', { name: 'Fechar detalhes' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
-test('the archive filters the shared catalog and restores all projects', async ({ page }) => {
+test('the archive shows eight complementary projects with independent category filters', async ({ page }) => {
   await page.goto('/#projetos');
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page).toHaveURL(/\/projetos$/);
-  await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
-  const cards = page.locator('.arquivo-grid').getByRole('article');
-  await expect(cards).toHaveCount(5);
+  const cards = page.locator('.arquivo-grid .guilda-cartaz');
+  await expect(cards).toHaveCount(8);
+  await expect(page.getByRole('button', { name: /GREENCITY OS/ })).toHaveCount(0);
 
-  const ai = page.getByRole('button', { name: '✧ IA & BACKEND', exact: true });
-  await ai.click();
-  await expect(ai).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
   await expect(cards).toHaveCount(2);
-  await expect(page.getByRole('heading', { name: 'SMART MODEL ROUTER', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'LANGCHAIN INTRO', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'GREENCITY SDGP', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /TASK MANAGER/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ERP API/ })).toBeVisible();
 
-  await page.getByRole('button', { name: '▣ MOBILE', exact: true }).click();
-  await expect(ai).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: '♫ MINIJOGOS' }).click();
   await expect(cards).toHaveCount(2);
-  await expect(page.getByRole('heading', { name: 'GREENCITY SDGP', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'PROPRIEDADES DOS GASES', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /TECLADO SOUND/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /NÚMERO SECRETO/ })).toBeVisible();
 
-  await page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true }).click();
+  await page.getByRole('button', { name: '✧ FRONT-END' }).click();
   await expect(cards).toHaveCount(1);
-  await expect(page.getByRole('heading', { name: 'LITHOLOGY', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '✦ TODOS', exact: true }).click();
-  await expect(cards).toHaveCount(5);
+  await expect(page.getByRole('button', { name: /STRANGER THINGS/ })).toBeVisible();
+
+  await page.getByRole('button', { name: '⬡ IA & DADOS' }).click();
+  await expect(cards).toHaveCount(2);
+  await page.getByRole('button', { name: '☀ ENGENHARIA' }).click();
+  await expect(cards).toHaveCount(1);
+
+  await page.getByRole('button', { name: '✦ TODOS' }).click();
+  await expect(cards).toHaveCount(8);
+  await expect(page.getByRole('link', { name: /REPOSITÓRIOS DO AVENTUREIRO.*EXPLORAR GITHUB/ }))
+    .toHaveAttribute('href', 'https://github.com/SladeSouzaSantos?tab=repositories');
 });
 
-test('archive details preserve the selected filter and return to the Guild', async ({ page }) => {
+test('archive details preserve the filter and return to the Guild', async ({ page }) => {
   await page.goto('/projetos');
-  await page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true }).click();
-  const trigger = page.getByRole('button', { name: 'Ver detalhes de LITHOLOGY', exact: true });
+  await page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' }).click();
+  const trigger = page.getByRole('button', { name: /TASK MANAGER/ });
   await trigger.click();
-  const dialog = page.getByRole('dialog', { name: 'LITHOLOGY', exact: true });
-  await expect(dialog).toContainText('informações técnicas');
-  await expect(dialog).toContainText('Excel');
+  const dialog = page.getByRole('dialog', { name: 'TASK MANAGER', exact: true });
+  await expect(dialog).toContainText('observabilidade');
+  await expect(dialog).toContainText('Flask');
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
-  await expect(page.getByRole('button', { name: '⚒ FERRAMENTAS', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('.arquivo-grid').getByRole('article')).toHaveCount(1);
-  await page.getByRole('link', { name: '← RETORNAR AO PORTFÓLIO', exact: true }).click();
+  await expect(page.getByRole('button', { name: '⚒ BACKEND & DEVOPS' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.arquivo-grid .guilda-cartaz')).toHaveCount(2);
+  await page.getByRole('link', { name: '← VOLTAR À GUILDA', exact: true }).click();
   await expect(page).toHaveURL(/\/#projetos$/);
   await expect(page.getByRole('heading', { name: 'QUADRO DE MISSÕES' })).toBeVisible();
 });
@@ -126,7 +130,7 @@ test('the selected theme survives reloads and a visit to the archive', async ({ 
   await expect(page.getByRole('button', { name: 'Ativar tema escuro', exact: true })).toBeVisible();
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: '← VOLTAR AO PORTFÓLIO', exact: true }).click();
+  await page.getByRole('link', { name: '← VOLTAR À GUILDA', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Ativar tema escuro', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ativar tema escuro', exact: true }).click();
   await expect(page.locator('body')).toHaveClass(/modo-escuro/);
@@ -159,8 +163,8 @@ test('animated scenes can be mounted repeatedly without JavaScript runtime error
     }
   }
   await navigateTo(page, sections[1]);
-  await page.getByRole('button', { name: /LITHOLOGY/ }).click();
-  await expect(page.getByRole('dialog', { name: 'LITHOLOGY', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /GREENCITY API/ }).click();
+  await expect(page.getByRole('dialog', { name: 'GREENCITY API', exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
@@ -184,8 +188,8 @@ for (const width of [320, 375]) {
     await page.getByRole('link', { name: /ARQUIVO DE MISSÕES EXPLORAR OUTROS PROJETOS/ }).click();
     await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
-    await page.getByRole('button', { name: 'Ver detalhes de SMART MODEL ROUTER', exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: 'SMART MODEL ROUTER', exact: true });
+    await page.getByRole('button', { name: /TECLADO SOUND/ }).click();
+    const dialog = page.getByRole('dialog', { name: 'TECLADO SOUND', exact: true });
     await expect(dialog).toBeVisible();
     const bounds = await dialog.boundingBox();
     expect(bounds).not.toBeNull();

@@ -1,0 +1,749 @@
+{
+  "schemaVersion": "1.1",
+  "sourceRepository": "SladeSouzaSantos/phasscode-platform",
+  "sourceBranch": "dev",
+  "sourceCommit": "23960bb6bdef9521a45bd772af77037f35d6b0e6",
+  "educations": [
+    {
+      "id": "formacao-computacao",
+      "title": "Bacharelado em Ciência da Computação",
+      "level": "bachelor",
+      "institution": "UNISUL",
+      "issuer": "UNISUL",
+      "status": "pending_completion",
+      "completedAt": null,
+      "expectedWindow": "final de 2027 ou início de 2028 (estimativa não vinculante)",
+      "competencies": [
+        "Algoritmos",
+        "Estruturas de Dados",
+        "Programação",
+        "Inteligência Artificial",
+        "Sistemas Distribuídos",
+        "Segurança",
+        "Engenharia de Software",
+        "Big Data"
+      ],
+      "coursework": [
+        {
+          "name": "Algoritmos e Estruturas de Dados",
+          "status": "approved"
+        },
+        {
+          "name": "Computação Gráfica e Realidade Virtual",
+          "status": "approved"
+        },
+        {
+          "name": "Estruturas Matemáticas",
+          "status": "approved"
+        },
+        {
+          "name": "Inteligência Artificial",
+          "status": "approved"
+        },
+        {
+          "name": "Modelagem de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Modelos, Métodos e Técnicas da Engenharia de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Programação de Soluções Computacionais",
+          "status": "approved"
+        },
+        {
+          "name": "Sistemas Computacionais e Segurança",
+          "status": "approved"
+        },
+        {
+          "name": "Sistemas Distribuídos e Mobile",
+          "status": "approved"
+        },
+        {
+          "name": "Teoria da Computação e Compiladores",
+          "status": "approved"
+        },
+        {
+          "name": "Usabilidade, Desenvolvimento Web, Mobile e Jogos",
+          "status": "approved"
+        },
+        {
+          "name": "Estruturas de Dados e Análise de Algoritmos",
+          "status": "approved"
+        },
+        {
+          "name": "Gestão e Qualidade de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Análise de Dados e Big Data",
+          "status": "approved"
+        },
+        {
+          "name": "Ambientes Computacionais e Conectividade",
+          "status": "approved"
+        },
+        {
+          "name": "Inovação, Sustentabilidade e Competitividade Empresarial",
+          "status": "approved"
+        },
+        {
+          "name": "Inglês Instrumental e Pensamento Digital",
+          "status": "approved"
+        },
+        {
+          "name": "Vida & Carreira",
+          "status": "approved"
+        }
+      ]
+    },
+    {
+      "id": "formacao-gestao-ti",
+      "title": "Tecnólogo em Gestão da Tecnologia da Informação",
+      "level": "technologist",
+      "institution": "UNIBF (identificação usada no portfólio)",
+      "issuer": "Centro Universitário ETEP (emissor do diploma)",
+      "status": "completed",
+      "completedAt": "2025-08-21",
+      "expectedWindow": null,
+      "competencies": [
+        "Programação",
+        "Algoritmos",
+        "POO",
+        "SQL",
+        "Bancos de Dados",
+        "Testes",
+        "Engenharia de Software",
+        "Segurança",
+        "Inteligência Artificial",
+        "Big Data"
+      ],
+      "coursework": [
+        {
+          "name": "Algoritmos e Programação",
+          "status": "approved"
+        },
+        {
+          "name": "Banco de Dados",
+          "status": "approved"
+        },
+        {
+          "name": "Programação Orientada a Objetos",
+          "status": "approved"
+        },
+        {
+          "name": "Programação para Internet",
+          "status": "approved"
+        },
+        {
+          "name": "Inteligência Artificial",
+          "status": "approved"
+        },
+        {
+          "name": "BI e Big Data",
+          "status": "approved"
+        },
+        {
+          "name": "Gerenciamento Ágil de Projetos de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Segurança da Informação",
+          "status": "approved"
+        },
+        {
+          "name": "Testes e Homologação de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Engenharia de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Design de Software",
+          "status": "approved"
+        },
+        {
+          "name": "Redes de Computadores",
+          "status": "approved"
+        },
+        {
+          "name": "Sistemas Operacionais",
+          "status": "approved"
+        },
+        {
+          "name": "Probabilidade e Estatística",
+          "status": "approved"
+        }
+      ]
+    },
+    {
+      "id": "formacao-petroleo",
+      "title": "Bacharelado em Engenharia de Petróleo e Gás",
+      "level": "bachelor",
+      "institution": "Universidade Potiguar (UnP)",
+      "issuer": "Universidade Potiguar",
+      "status": "completed",
+      "completedAt": "2014-12",
+      "expectedWindow": null,
+      "competencies": [
+        "Matemática",
+        "Estatística",
+        "Programação Científica",
+        "Engenharia",
+        "Análise de Dados"
+      ],
+      "coursework": [
+        {
+          "name": "Informática Aplicada às Exatas e Engenharias",
+          "status": "approved"
+        },
+        {
+          "name": "Programação Científica",
+          "status": "approved"
+        },
+        {
+          "name": "Álgebra Linear",
+          "status": "approved"
+        },
+        {
+          "name": "Estatística e Probabilidade",
+          "status": "approved"
+        },
+        {
+          "name": "Cálculo Numérico Computacional",
+          "status": "approved"
+        },
+        {
+          "name": "Gestão de Processos",
+          "status": "approved"
+        }
+      ]
+    },
+    {
+      "id": "formacao-energia-eletrica",
+      "title": "Pós-graduação em Engenharia Elétrica e Sistemas de Energia",
+      "level": "specialization",
+      "institution": "Faculdade Unyleya",
+      "issuer": "Faculdade Unyleya",
+      "status": "completed",
+      "completedAt": "2020-09",
+      "expectedWindow": null,
+      "competencies": [
+        "Engenharia Elétrica",
+        "Sistemas de Energia",
+        "Geração e Distribuição"
+      ],
+      "coursework": [
+        {
+          "name": "Redes de Distribuição de Energia Elétrica",
+          "status": "approved"
+        },
+        {
+          "name": "Sistemas de Geração de Energia Elétrica",
+          "status": "approved"
+        },
+        {
+          "name": "Controle e Integração ao Sistema Elétrico",
+          "status": "approved"
+        },
+        {
+          "name": "Componentes de Baixa, Média e Alta Tensão",
+          "status": "approved"
+        },
+        {
+          "name": "Comunicação de Dispositivos em Subestação de Energia",
+          "status": "approved"
+        },
+        {
+          "name": "Elementos Compartilhados da Rede Elétrica",
+          "status": "approved"
+        }
+      ]
+    },
+    {
+      "id": "formacao-eolica",
+      "title": "Especialização Técnica em Energia Eólica",
+      "level": "technical_specialization",
+      "institution": "CTGAS-ER/SENAI",
+      "issuer": "SENAI RN",
+      "status": "completed",
+      "completedAt": "2017-09-14",
+      "expectedWindow": null,
+      "competencies": [
+        "Energia Eólica",
+        "Aerodinâmica",
+        "Automação",
+        "Manutenção"
+      ],
+      "coursework": [
+        {
+          "name": "Fundamentos da Geração Eólica",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Medição Anemométrica",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Aerodinâmica de Aerogeradores",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Automação de Aerogeradores",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Manutenção de Turbinas Eólicas",
+          "status": "curriculum_topic"
+        }
+      ]
+    },
+    {
+      "id": "formacao-eletrotecnica",
+      "title": "Técnico em Eletrotécnica",
+      "level": "technical",
+      "institution": "Escola Politécnica Brasileira",
+      "issuer": "Escola Politécnica Brasileira",
+      "status": "completed",
+      "completedAt": "2022-10-20",
+      "expectedWindow": null,
+      "competencies": [
+        "Eletrotécnica",
+        "Sistemas Elétricos"
+      ],
+      "coursework": [
+        {
+          "name": "Instalações Elétricas",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Circuitos Elétricos",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Eletrotécnica",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Manutenção",
+          "status": "curriculum_topic"
+        }
+      ]
+    },
+    {
+      "id": "formacao-prisma",
+      "title": "Pós-graduação em Segurança da Informação",
+      "level": "specialization",
+      "institution": "FacPrisma",
+      "issuer": "FacPrisma",
+      "status": "completed",
+      "completedAt": null,
+      "expectedWindow": null,
+      "competencies": [
+        "Segurança da Informação"
+      ],
+      "coursework": []
+    },
+    {
+      "id": "formacao-unipds-java",
+      "title": "Pós-graduação Java Applied Engineering",
+      "level": "specialization",
+      "institution": "UNIPDS",
+      "issuer": "UNIPDS",
+      "status": "in_progress",
+      "completedAt": null,
+      "expectedWindow": "2026–2027 (planejamento divulgado na Academia Arcana)",
+      "competencies": [
+        "Java",
+        "Spring Boot",
+        "Arquitetura de Software"
+      ],
+      "coursework": [
+        {
+          "name": "Spring Boot",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Quarkus",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "JPA/Hibernate",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Arquitetura de Software",
+          "status": "curriculum_topic"
+        }
+      ]
+    },
+    {
+      "id": "formacao-unipds-ia",
+      "title": "Pós-graduação Engenharia de IA Aplicada",
+      "level": "specialization",
+      "institution": "UNIPDS",
+      "issuer": "UNIPDS",
+      "status": "in_progress",
+      "completedAt": null,
+      "expectedWindow": "2026–2027 (planejamento divulgado na Academia Arcana)",
+      "competencies": [
+        "Engenharia de IA",
+        "RAG",
+        "Agentes",
+        "LLMs"
+      ],
+      "coursework": [
+        {
+          "name": "RAG e embeddings",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "LangChain e LangGraph",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Agentes e MCP",
+          "status": "curriculum_topic"
+        },
+        {
+          "name": "Guardrails",
+          "status": "curriculum_topic"
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "id": "cursos-java-arquitetura",
+      "name": "Java & Arquitetura",
+      "courses": [
+        {
+          "id": "curso-formacao-java-e-clean-architecture",
+          "title": "Formação Java e Clean Architecture",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-java-e-domain-driven-design",
+          "title": "Formação Java e Domain Driven Design",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-solid-com-java",
+          "title": "Formação SOLID com Java",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-design-patterns-em-java",
+          "title": "Formação Design Patterns em Java",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-tdd-e-java-junit",
+          "title": "Formação TDD e Java — JUnit",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-em-java-poo-ddd-e-apis-rest",
+          "title": "Formação em Java: POO, DDD e APIs REST",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-java-completo-programacao-orientada-a-objetos",
+          "title": "Java Completo — Programação Orientada a Objetos",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-clean-code-na-pratica",
+          "title": "Clean Code na Prática",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-padroes-de-projeto-em-java",
+          "title": "Padrões de Projeto em Java",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        }
+      ]
+    },
+    {
+      "id": "cursos-ia-dados",
+      "name": "IA & Dados",
+      "courses": [
+        {
+          "id": "curso-estruturas-de-dados-e-algoritmos-em-python",
+          "title": "Estruturas de Dados e Algoritmos em Python",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-redes-neurais-artificiais-em-python",
+          "title": "Redes Neurais Artificiais em Python",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-python-fundamentals",
+          "title": "Formação Python Fundamentals",
+          "provider": "DIO",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-linguagem-r-para-analise-de-dados",
+          "title": "Linguagem R para Análise de Dados",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-power-bi-analyst",
+          "title": "Formação Power BI Analyst",
+          "provider": "DIO",
+          "status": "completed",
+          "hours": null
+        }
+      ]
+    },
+    {
+      "id": "cursos-frontend-mobile",
+      "name": "Frontend & Mobile",
+      "courses": [
+        {
+          "id": "curso-formacao-html-e-css-responsividade-e-mobile-first",
+          "title": "Formação HTML e CSS — responsividade e mobile-first",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-javascript-dom-formularios-e-apis",
+          "title": "Formação JavaScript — DOM, formulários e APIs",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-typescript",
+          "title": "Formação TypeScript",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-dart",
+          "title": "Formação Dart",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-flutter-estados-apis-e-testes",
+          "title": "Formação Flutter — estados, APIs e testes",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-firebase-authentication",
+          "title": "Formação Firebase Authentication",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-desenvolvimento-frontend-com-angular",
+          "title": "Desenvolvimento Frontend com Angular",
+          "provider": "DIO",
+          "status": "completed",
+          "hours": null
+        }
+      ]
+    },
+    {
+      "id": "cursos-engenharia-software",
+      "name": "Engenharia de Software",
+      "courses": [
+        {
+          "id": "curso-formacao-engenharia-de-requisitos",
+          "title": "Formação Engenharia de Requisitos",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-uml-modelagem-e-bpmn",
+          "title": "Formação UML — modelagem e BPMN",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-design-thinking",
+          "title": "Design Thinking",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-ui-design",
+          "title": "Formação UI Design",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-figma-layouts-de-aplicativos-mobile",
+          "title": "Figma — layouts de aplicativos mobile",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-aprendendo-domain-driven-design-ddd-do-zero",
+          "title": "Aprendendo Domain Driven Design (DDD) do Zero",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        }
+      ]
+    },
+    {
+      "id": "cursos-bancos-dados",
+      "name": "Bancos de Dados",
+      "courses": [
+        {
+          "id": "curso-formacao-sql-database-specialist",
+          "title": "Formação SQL Database Specialist",
+          "provider": "DIO",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-sql-server-completo-formacao-dba",
+          "title": "SQL Server Completo — Formação DBA",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-curso-nosql-mongodb-e-neo4j",
+          "title": "Curso NoSQL — MongoDB e Neo4j",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-power-bi-sql-server",
+          "title": "Formação Power BI + SQL Server",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        }
+      ]
+    },
+    {
+      "id": "cursos-devops-qualidade",
+      "name": "DevOps & Qualidade",
+      "courses": [
+        {
+          "id": "curso-formacao-docker-containers",
+          "title": "Formação Docker — containers",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-git-e-github-controle-de-versao",
+          "title": "Git e GitHub — controle de versão",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-git-e-github-do-basico-ao-avancado",
+          "title": "Git e GitHub do Básico ao Avançado",
+          "provider": "Udemy",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-automacao-de-testes-com-cypress",
+          "title": "Formação Automação de Testes com Cypress",
+          "provider": "DIO",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-http-entendendo-a-web",
+          "title": "HTTP — entendendo a Web",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-webpack-modulos-em-aplicacoes-web",
+          "title": "Webpack — módulos em aplicações Web",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-formacao-performance-web",
+          "title": "Formação Performance Web",
+          "provider": "Alura",
+          "status": "completed",
+          "hours": null
+        },
+        {
+          "id": "curso-hackers-do-bem-nivelamento",
+          "title": "Hackers do Bem — Nivelamento",
+          "provider": "Programa Hackers do Bem",
+          "status": "completed",
+          "hours": 80
+        },
+        {
+          "id": "curso-hackers-do-bem-basico",
+          "title": "Hackers do Bem — Básico",
+          "provider": "Programa Hackers do Bem",
+          "status": "completed",
+          "hours": 64
+        },
+        {
+          "id": "curso-hackers-do-bem-fundamental",
+          "title": "Hackers do Bem — Fundamental",
+          "provider": "Programa Hackers do Bem",
+          "status": "completed",
+          "hours": 96
+        },
+        {
+          "id": "curso-hackers-do-bem-especializacao-em-devops-e-devsecops",
+          "title": "Hackers do Bem — Especialização em DevOps e DevSecOps",
+          "provider": "Programa Hackers do Bem",
+          "status": "completed",
+          "hours": 80
+        }
+      ]
+    }
+  ]
+}

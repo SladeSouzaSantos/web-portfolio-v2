@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Modal } from '../components/Modal';
+import { CartazMissao } from '../components/CartazMissao';
+import { ProjetoMidia } from '../components/ProjetoMidia';
 import { projetos } from '../data/projetos';
 import { useSceneBackground } from '../hooks/useSceneBackground';
 import type { Projeto } from '../types/portfolio';
@@ -25,22 +27,12 @@ export function Projetos() {
           <div className="guilda-mural__interior">
             <div className="guilda-projetos-grid">
               {projetos.map((projeto, index) => (
-                <button
+                <CartazMissao
                   key={projeto.id}
-                  className="guilda-cartaz"
-                  type="button"
-                  data-guilda-projeto={projeto.id}
-                  onClick={() => setProjetoAberto(projeto)}
-                >
-                  <span className="guilda-cartaz__conteudo">
-                    <span className="guilda-cartaz__numero">MISSÃO {String(index + 1).padStart(2, '0')}</span>
-                    <span className="guilda-cartaz__titulo">{projeto.nome}</span>
-                    <span className="guilda-cartaz__linha" aria-hidden="true" />
-                    <span className="guilda-cartaz__tipo">{projeto.tipo}</span>
-                    <span className="guilda-cartaz__subtitulo">{projeto.subtitulo}</span>
-                    <span className="guilda-cartaz__chamada">[ INSPECIONAR ]</span>
-                  </span>
-                </button>
+                  projeto={projeto}
+                  indice={index}
+                  onOpen={() => setProjetoAberto(projeto)}
+                />
               ))}
             </div>
             <div className="guilda-arquivo" aria-label="Outros projetos">
@@ -75,6 +67,14 @@ export function Projetos() {
           <h2 id="guilda-detalhes-titulo">{projetoAberto.nome}</h2>
           <p className="guilda-detalhes__tipo">{projetoAberto.tipo}</p>
           <p id="guilda-detalhes-descricao" className="guilda-detalhes__descricao">{projetoAberto.descricao}</p>
+          <figure className="projeto-detalhe__figura">
+            <ProjetoMidia projeto={projetoAberto} />
+            {projetoAberto.observacao && <figcaption>{projetoAberto.observacao}</figcaption>}
+          </figure>
+          <h3>DESAFIOS E SOLUÇÕES</h3>
+          <ul className="projeto-detalhe__desafios">
+            {projetoAberto.detalhes.map(item => <li key={item}>{item}</li>)}
+          </ul>
           <h3>ARSENAL UTILIZADO</h3>
           <ul className="guilda-detalhes__tecnologias">
             {projetoAberto.tecnologias.map(tecnologia => <li key={tecnologia}>{tecnologia}</li>)}
@@ -82,7 +82,7 @@ export function Projetos() {
           {(projetoAberto.repositorio || projetoAberto.demonstracao) && (
             <div className="guilda-detalhes__links">
               {projetoAberto.repositorio && <a href={projetoAberto.repositorio} target="_blank" rel="noopener noreferrer" className="guilda-detalhes__link">GITHUB ↗</a>}
-              {projetoAberto.demonstracao && <a href={projetoAberto.demonstracao} target="_blank" rel="noopener noreferrer" className="guilda-detalhes__link">DEMONSTRAÇÃO ↗</a>}
+              {projetoAberto.demonstracao && <a href={projetoAberto.demonstracao} target="_blank" rel="noopener noreferrer" className="guilda-detalhes__link">{projetoAberto.demonstracaoRotulo ?? 'DEMONSTRAÇÃO ↗'}</a>}
             </div>
           )}
         </Modal>

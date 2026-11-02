@@ -132,15 +132,22 @@
     margin-right: 4px;
 }
 
+body.modo-claro .orb-chat-panel .chat-sender {
+    color: var(--texto-destaque-ouro);
+}
+
 .orb-chat-form {
     display: flex;
     gap: 8px;
 }
 
-.orb-chat-form input {
+.orb-chat-form textarea {
     flex: 1;
     min-width: 0;
-    min-height: 44px;
+    min-height: 64px;
+    max-height: min(160px, 30dvh);
+    resize: vertical;
+    line-height: 1.8;
     background-color: var(--bg-caixa-interna);
     border: 2px solid var(--borda-suave);
     color: var(--texto-principal);
@@ -150,7 +157,7 @@
     outline: none;
 }
 
-.orb-chat-form input:focus {
+.orb-chat-form textarea:focus {
     border-color: var(--acento-ouro);
 }
 
@@ -203,9 +210,206 @@
         flex-direction: column;
     }
 
-    .orb-chat-form input, .orb-chat-send-btn {
+    .orb-chat-form textarea, .orb-chat-send-btn {
         width: 100%;
     }
 }
 .orb-meeting-actions { margin-top: 12px; border-top: 1px solid var(--borda-ouro); padding-top: 10px; }
 .orb-meeting-actions .orb-chat-reset-btn { margin-top: 10px; width: 100%; white-space: normal; line-height: 1.8; }
+
+/* Public Orbe chat sizing and multiline composer. Modals remain inside the viewport. */
+.orb-chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.orb-chat-size-btn {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: var(--texto-destaque-ouro);
+    cursor: pointer;
+}
+
+.orb-chat-size-btn:hover { color: var(--texto-ciano); }
+.orb-chat-size-btn svg { display: block; }
+
+.orb-chat-keyboard-hint {
+    margin: 8px 0 0;
+    color: var(--texto-secundario);
+    font-size: 7px;
+    line-height: 1.8;
+}
+
+/* The consent panel must not turn the normal dialog into a full-height window.
+   Cap its size and scroll the body; maximizing still expands both dimensions. */
+.login-modal-overlay .orb-chat-panel:not(.orb-chat-panel-expanded) {
+    display: flex;
+    flex-direction: column;
+    max-height: min(760px, calc(100dvh - 80px));
+    overflow: hidden;
+}
+.orb-chat-panel:not(.orb-chat-panel-expanded) .login-modal-header {
+    flex-shrink: 0;
+}
+.orb-chat-panel:not(.orb-chat-panel-expanded) .login-modal-body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.login-modal-overlay .orb-chat-panel.orb-chat-panel-expanded {
+    max-width: none;
+    width: min(1120px, calc(100vw - 24px));
+    height: calc(100dvh - 24px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.orb-chat-panel-expanded .login-modal-header { flex-shrink: 0; }
+.orb-chat-panel-expanded .login-modal-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.orb-chat-panel-expanded .orb-chat-history {
+    flex: 1;
+    height: auto;
+    min-height: 96px;
+}
+
+.orb-chat-panel-expanded .orb-chat-form,
+.orb-chat-panel-expanded .orb-chat-keyboard-hint { flex-shrink: 0; }
+
+@media (max-width: 640px) {
+    .orb-chat-panel .orb-chat-title { font-size: 8px; }
+    .orb-chat-panel .orb-chat-header-actions { gap: 0; }
+    .orb-chat-panel .orb-chat-form textarea { max-height: 140px; }
+}
+
+@media (max-height: 520px) {
+    .orb-chat-panel-expanded .orb-chat-history { min-height: 80px; }
+}
+
+/* Public chat utilities: high-contrast icons and inline status. */
+.orb-chat-header-actions .orb-chat-size-btn:disabled { opacity: .4; cursor: not-allowed; }
+.orb-chat-header-actions .orb-chat-size-btn:focus-visible { outline: 2px solid var(--texto-ciano); outline-offset: 2px; }
+.orb-chat-counter, .orb-chat-copy-status, .orb-chat-limit {
+  font-size: 7px; line-height: 1.8; margin: 0 0 8px;
+  color: var(--texto-secundario);
+}
+.orb-chat-copy-status, .orb-chat-limit { color: var(--texto-destaque-ouro); }
+
+
+/* Explicit opt-in with the PHASSCODE pixel-art palette, independently of theme. */
+.orb-report-consent {
+    margin: 10px 0 12px;
+    padding: 12px;
+    border: 2px solid var(--borda-ouro);
+    background: var(--bg-caixa-interna);
+    box-shadow: inset 3px 3px 0 rgba(217, 119, 6, 0.12);
+    color: var(--texto-principal);
+}
+.orb-report-consent-locked {
+    border-color: var(--borda-suave);
+}
+.orb-report-consent-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.orb-report-consent-heading h3 {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.65;
+    color: var(--texto-destaque-ouro);
+}
+.orb-report-consent-status {
+    display: inline-block;
+    padding: 5px 7px;
+    border: 1px solid var(--borda-suave);
+    color: var(--texto-ciano);
+    font-size: 8px;
+    line-height: 1.5;
+}
+.orb-report-consent-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+}
+.orb-report-consent-option input[type='checkbox'] {
+    margin: 2px 0 0;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--acento-ouro);
+    cursor: pointer;
+}
+.orb-report-consent-option input[type='checkbox']:focus-visible,
+.orb-report-consent-action:focus-visible {
+    outline: 2px solid var(--texto-ciano);
+    outline-offset: 3px;
+}
+.orb-report-consent-option strong {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--texto-principal);
+    font-size: 9px;
+    line-height: 1.75;
+}
+.orb-report-consent-option small,
+.orb-report-consent-description {
+    display: block;
+    margin: 0;
+    color: var(--texto-secundario);
+    font-size: 8px;
+    line-height: 1.85;
+    overflow-wrap: anywhere;
+}
+.orb-report-consent-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border: 2px solid var(--borda-ouro);
+    background: var(--bg-card-elevado);
+    color: var(--texto-destaque-ouro);
+    font: inherit;
+    font-size: 8px;
+    line-height: 1.6;
+    text-align: left;
+    cursor: pointer;
+}
+.orb-report-consent-action:hover {
+    color: var(--texto-ciano);
+    border-color: var(--texto-ciano);
+}
+.orb-report-consent-action:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+.orb-report-consent-notice {
+    margin: 8px 0 0;
+    color: var(--texto-destaque-ouro);
+    font-size: 8px;
+    line-height: 1.8;
+}
+@media (max-width: 400px) {
+    .orb-report-consent { padding: 10px; }
+    .orb-report-consent-option { gap: 9px; }
+    .orb-report-consent-action { width: 100%; }
+}

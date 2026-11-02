@@ -9,8 +9,14 @@ export interface Projeto {
   tecnologias: string[];
   repositorio: string;
   demonstracao: string;
-  categoria: 'ia' | 'mobile' | 'ferramentas';
+  categoria: 'ia' | 'mobile' | 'ferramentas' | 'frontend' | 'backend' | 'engenharia' | 'minijogos';
   icone: string;
+  imagem: string;
+  imagemAlt: string;
+  galeria?: { src: string; alt: string }[];
+  detalhes: string[];
+  observacao?: string;
+  demonstracaoRotulo?: string;
 }
 
 export interface Experiencia {
@@ -36,6 +42,17 @@ export interface Formacao {
   icone: string;
   descricao: string;
   comprovante: string;
+  especializacoes?: string[];
+  observacao?: string;
+}
+
+export type SituacaoCurso = 'Concluído' | 'Em andamento' | 'A confirmar';
+
+export interface CursoFormacao {
+  titulo: string;
+  instituicao: string;
+  situacao: SituacaoCurso;
+  cargaHoraria?: number;
 }
 
 export interface Trilha {
@@ -43,4 +60,6 @@ export interface Trilha {
   titulo: string;
   descricao: string;
   icone: string;
+  aprofundamento: string;
+  cursos: CursoFormacao[];
 }

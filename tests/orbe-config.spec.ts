@@ -39,17 +39,45 @@ test('Orbe rejeita configuração insegura e permite uma API HTTP local sem cred
     .toEqual({ enabled: true, apiBaseUrl: 'http://localhost:3000' });
 });
 
+test('push em DEV executa CI e par B2/F3 sem liberar release remota', () => {
+  const workflow = readFileSync(resolve('.github/workflows/deploy.yml'), 'utf8');
+  const pairedCi = readFileSync(resolve('.github/workflows/paired-dev-ci.yml'), 'utf8');
+  expect(workflow).toContain('branches: [main, dev]');
+  expect(workflow).toContain("github.event_name == 'push' || github.event_name == 'workflow_dispatch'");
+  expect(workflow).toContain('frontend-dev-candidate-pair');
+  expect(workflow).toContain('automatic-dev-candidate');
+  expect(workflow).toContain('inputs.backend_sha || vars.PHASSCODE_RELEASE_BACKEND_SHA');
+  expect(workflow).toContain('inputs.frontend_sha || vars.PHASSCODE_RELEASE_FRONTEND_SHA');
+  expect(workflow).toContain('needs: [sast, coordinated]');
+  expect(workflow).toContain(
+    "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.apply_remote",
+  );
+  expect(workflow).toContain('test "$ENABLE_REMOTE_DEPLOY" = true');
+  expect(pairedCi).toContain('branches: [dev]');
+  expect(pairedCi).toContain('npm run test:e2e -- --frontend ../frontend --regression');
+  expect(pairedCi).not.toContain('PHASSCODE_RELEASE_BACKEND_SHA');
+  expect(pairedCi).not.toContain('ENABLE_REMOTE_DEPLOY');
+  expect(pairedCi).not.toContain('appleboy/ssh-action');
+  expect(pairedCi).not.toContain('docker/build-push-action');
+});
+
 test('política do CI mantém dev ativo e PRs para main em demonstração', async () => {
   const policyPath = resolve('scripts/orbe-build-policy.mjs');
   const policy = await import(pathToFileURL(policyPath).href) as {
-    resolveOrbeBuildEnvironment(branch: string): typeof enabledEnvironment;
+    resolveOrbeBuildEnvironment(branch: string): {
+      VITE_ORBE_API_ENABLED: string;
+      VITE_AUTH_ENABLED: string;
+      VITE_MEETINGS_ENABLED: string;
+      VITE_API_BASE_URL: string;
+    };
   };
   expect(policy.resolveOrbeBuildEnvironment('dev')).toEqual({
-    VITE_ORBE_API_ENABLED: 'true', VITE_PHASE3_ENABLED: 'true', VITE_API_BASE_URL: 'https://devapi.phasscode.com',
+    VITE_ORBE_API_ENABLED: 'true', VITE_AUTH_ENABLED: 'true', VITE_MEETINGS_ENABLED: 'false',
+    VITE_API_BASE_URL: 'https://devapi.phasscode.com',
   });
   for (const branch of ['main', '', 'feature/orbe']) {
     expect(policy.resolveOrbeBuildEnvironment(branch)).toEqual({
-      VITE_ORBE_API_ENABLED: 'false', VITE_PHASE3_ENABLED: 'false', VITE_API_BASE_URL: '',
+      VITE_ORBE_API_ENABLED: 'false', VITE_AUTH_ENABLED: 'false', VITE_MEETINGS_ENABLED: 'false', VITE_API_BASE_URL: '',
     });
   }
 
@@ -60,7 +88,7 @@ test('política do CI mantém dev ativo e PRs para main em demonstração', asyn
       env: { ...process.env, GITHUB_BASE_REF: 'main', GITHUB_REF_NAME: 'dev', GITHUB_ENV: githubEnvironmentFile },
     });
     expect(readFileSync(githubEnvironmentFile, 'utf8'))
-      .toBe('VITE_ORBE_API_ENABLED=false\nVITE_PHASE3_ENABLED=false\nVITE_API_BASE_URL=\n');
+      .toBe('VITE_ORBE_API_ENABLED=false\nVITE_AUTH_ENABLED=false\nVITE_MEETINGS_ENABLED=false\nVITE_API_BASE_URL=\n');
   } finally {
     rmSync(githubEnvironmentFile, { force: true });
     rmdirSync(temporaryDirectory);

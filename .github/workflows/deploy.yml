@@ -5,17 +5,35 @@ on:
     branches: [main, dev]
   pull_request:
     branches: [main, dev]
+  # DEV push qualifies captured candidates with no remote deployment.
   workflow_dispatch:
+    inputs:
+      apply_remote:
+        description: Deploy tested artifact to the Mac Mini for this branch (default false)
+        type: boolean
+        default: false
+      backend_sha:
+        description: Immutable backend commit for manual DEV release (optional fallback vars)
+        type: string
+        required: false
+      frontend_sha:
+        description: Immutable frontend commit for manual DEV release (optional fallback vars)
+        type: string
+        required: false
 
 permissions:
   contents: read
 
 # Nunca publicar duas releases simultâneas da mesma branch.
 concurrency:
-  group: phasscode-${{ github.ref }}
-  cancel-in-progress: false
+  # Cancel only superseded automatic candidates, never a manual release.
+  group: phasscode-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
+  # R2: no frontend release can proceed without the same complete paired B2/F3 gate.
+  # Both repository variables pin the exact authorized pair of commits.
+  # This intentionally fails closed for main until a separately authorized main gate.
   tests:
     name: '1 - Tests / Typecheck / Build / Playwright'
     runs-on: ubuntu-latest
@@ -43,13 +61,27 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -n "${COMMIT_BASE:-}" ]] && git cat-file -e "${COMMIT_BASE}^{commit}" 2>/dev/null; then
-            npx commitlint --from "$COMMIT_BASE" --to "$COMMIT_HEAD"
+            # Validate developer commits; GitHub merge commits carry integration metadata.
+            npx commitlint --from "$COMMIT_BASE" --to "$COMMIT_HEAD" --git-log-args=--no-merges
           else
             git log -1 --format=%B "$COMMIT_HEAD" | npx commitlint
           fi
 
       - name: Select Orbe API configuration for the destination branch
         run: node scripts/orbe-build-policy.mjs --github-env
+
+      - name: Configure public Orbe conversation limit
+        env:
+          ORBE_MAX_USER_TURNS: ${{ vars.ORBE_MAX_USER_TURNS }}
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const value = process.env.ORBE_MAX_USER_TURNS || "100";
+            if (!/^(0|[1-9]\d{0,4})$/.test(value) || Number(value) > 10000) {
+              throw new Error("ORBE_MAX_USER_TURNS must be an integer from 0 to 10000");
+            }
+            fs.appendFileSync(process.env.GITHUB_ENV, `VITE_ORBE_MAX_USER_TURNS=${value}\n`);
+          '
 
       - name: Validate TypeScript and compile Vite
         run: npm run build
@@ -58,14 +90,16 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run end-to-end browser tests
-        run: npm test
+        run: npx playwright test tests/portfolio.spec.ts tests/routing.spec.ts tests/orbe-public.spec.ts tests/orbe-client.spec.ts tests/site-loading.spec.ts tests/section-circle-transition.spec.ts tests/stacks-digitadas.spec.ts tests/sobre-competencias.spec.ts tests/responsive.spec.ts tests/accessibility.spec.ts tests/project-gallery.spec.ts tests/formacao-cursos.spec.ts tests/archive-layout.spec.ts tests/section-ui-ux.spec.ts tests/project-detail-alignment.spec.ts
 
-      - name: Test Orbe API integration with mocked requests only
+      - name: Validate Orbe chat lifecycle and keyboard controls against a mock API
         run: npm run test:orbe
 
-      - name: Test authentication and meetings with mocked requests only
-        run: npm run test:phase3
 
+
+
+
+      # F3 requires B2 isolated Fastify/Vite and is executed by coordinated.
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v6
@@ -122,7 +156,7 @@ jobs:
   image:
     name: '3 - Build and push immutable GHCR image'
     needs: sast
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -227,7 +261,7 @@ jobs:
   deploy:
     name: '5 - Deploy identical image contents to Mac Mini Nginx'
     needs: [image, dast]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main') && inputs.apply_remote
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -243,6 +277,12 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - name: Require explicit frontend remote release enablement
+        env:
+          ENABLE_REMOTE_DEPLOY: ${{ vars.ENABLE_REMOTE_DEPLOY }}
+        run: |
+          set -euo pipefail
+          test "$ENABLE_REMOTE_DEPLOY" = true
       - name: Connect to Tailscale
         uses: ./.github/actions/tailscale-connect
         with:
@@ -397,7 +437,7 @@ jobs:
   verify_deploy:
     name: '6 - Verify deployed site'
     needs: deploy
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.apply_remote
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:

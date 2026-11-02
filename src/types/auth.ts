@@ -12,6 +12,10 @@ export interface AuthSessionResponse {
   csrfToken: string | null;
   expiresAt: string | null;
 }
+export interface AuthSessionNotice {
+  kind: 'logout-not-sent' | 'logout-uncertain' | 'logout-active' | 'logout-inactive' | 'logout-confirmed' | 'session-check-required' | 'coordination-required';
+  message: string;
+}
 /** The public state intentionally excludes CSRF and session credentials. */
 export interface AuthState {
   status: 'loading' | 'anonymous' | 'authenticated' | 'unavailable' | 'error';
@@ -20,4 +24,6 @@ export interface AuthState {
   error?: PlatformApiError | null;
   /** Absolute advisory cooldown, shared by every session consumer in this tab. */
   retryAt?: number;
+  /** Local feedback survives route changes, without persisting credentials. */
+  notice?: AuthSessionNotice | null;
 }

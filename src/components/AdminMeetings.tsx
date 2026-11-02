@@ -8,13 +8,17 @@ import { Modal } from './Modal';
 
 const statuses: MeetingStatus[] = ['PENDING', 'APPROVED', 'CONFIRMED', 'REJECTED', 'CANCELLED', 'FAILED'];
 const decisions: Record<MeetingDecision, string> = { approve: 'APROVAR', reject: 'REJEITAR', cancel: 'CANCELAR' };
+const searchText = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('pt-BR');
 
-export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
+export function AdminMeetings() {
   const { state, client } = useAuth();
   const api = useMemo(() => client ? createAdminMeetingsClient(client) : null, [client]);
   const [items, setItems] = useState<AdminMeetingItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [status, setStatus] = useState<MeetingStatus | ''>('');
+  const [query, setQuery] = useState('');
+  const [order, setOrder] = useState<'received' | 'start'>('received');
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<PlatformApiError | null>(null);
@@ -53,6 +57,7 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
         ? [...current, ...result.items.filter(item => !current.some(existing => existing.id === item.id))]
         : result.items);
       setNextCursor(result.nextCursor);
+      setHasLoaded(true);
     } catch (issue) {
       if (mounted.current && reading.current === request && !request.signal.aborted) reportError(issue);
     } finally {
@@ -75,6 +80,7 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
   useEffect(() => {
     setItems([]);
     setNextCursor(null);
+    setHasLoaded(false);
     void load();
     return () => reading.current?.abort();
   }, [load]);
@@ -89,6 +95,21 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
     }, Math.max(0, retryAt - Date.now()));
     return () => { window.clearInterval(timer); window.clearTimeout(finish); };
   }, [retryAt]);
+
+  const visibleItems = useMemo(() => {
+    const needle = searchText(query.trim());
+    const matches = items.filter(item => !needle || searchText(`${item.name} ${item.email} ${item.topic}`).includes(needle));
+    return matches.sort((left, right) => order === 'start'
+      ? Date.parse(left.start) - Date.parse(right.start)
+      : Date.parse(right.createdAt) - Date.parse(left.createdAt));
+  }, [items, query, order]);
+  const summary = useMemo(() => [
+    { label: 'Pedidos carregados', count: items.length },
+    { label: 'Confirmadas', count: items.filter(item => item.status === 'CONFIRMED').length },
+    { label: 'Aguardando análise', count: items.filter(item => item.status === 'PENDING').length },
+    { label: 'Aguardando agenda', count: items.filter(item => item.status === 'APPROVED').length },
+    { label: 'Canceladas', count: items.filter(item => item.status === 'CANCELLED').length },
+  ], [items]);
 
   function closeDecision() {
     const active = writing.current;
@@ -130,9 +151,16 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
 
   if (!isAdmin) return null;
   const coolingDown = Date.now() < retryAt;
-  return <section className="phase3-admin" aria-labelledby="admin-title">
-    <h1 id="admin-title">[ PAINEL DO MESTRE ]</h1>
+  return <section className="phase3-admin" aria-labelledby="admin-meetings-title">
+    <h2 id="admin-meetings-title">[ AGENDA E PEDIDOS ]</h2>
     <p>Pedidos de reunião. As decisões são verificadas pelo servidor; a agenda pode ser atualizada depois da resposta.</p>
+    {hasLoaded && !loading && !error && <section className="phase3-admin-summary" aria-label="Resumo dos pedidos carregados">
+      <h3>RESUMO DOS PEDIDOS CARREGADOS</h3>
+      <p>Contagens dos pedidos carregados para o filtro atual; não representam os totais globais do portfólio.</p>
+      <dl>{summary.map(metric => <div key={metric.label}><dt>{metric.label}</dt><dd>{metric.count}</dd></div>)}</dl>
+      <p>{nextCursor ? 'Há outra página de pedidos. O resumo é parcial; carregue mais pedidos para ampliá-lo.'
+        : 'Todos os pedidos retornados nesta consulta foram carregados.'}</p>
+    </section>}
     <div className="phase3-admin-controls">
       <div className="phase3-admin-filter">
         <label htmlFor="admin-status">FILTRAR SITUAÇÃO</label>
@@ -143,8 +171,20 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
         </select>
       </div>
       <button type="button" className="login-submit-btn" disabled={loading || busy || coolingDown} onClick={() => void load()}>ATUALIZAR PEDIDOS</button>
-      <button type="button" className="login-submit-btn" onClick={onReturn}>VOLTAR AO PORTFÓLIO</button>
     </div>
+    <div className="phase3-admin-local-controls">
+      <div><label htmlFor="admin-search">BUSCAR NOS PEDIDOS CARREGADOS</label>
+        <input id="admin-search" type="search" value={query} maxLength={200} placeholder="Nome, e-mail ou assunto"
+          onChange={event => setQuery(event.target.value)} aria-describedby="admin-local-scope" /></div>
+      <div><label htmlFor="admin-order">ORDENAR PEDIDOS CARREGADOS</label>
+        <select id="admin-order" value={order} onChange={event => setOrder(event.target.value as 'received' | 'start')}
+          aria-describedby="admin-local-scope">
+          <option value="received">Recebidos recentemente</option>
+          <option value="start">Data da reunião: crescente</option>
+        </select></div>
+    </div>
+    <p id="admin-local-scope" className="phase3-admin-note">A busca e a ordenação consideram apenas os pedidos já carregados. Use o filtro de situação para consultar a API.</p>
+    <p id="admin-edit-unavailable" className="phase3-admin-note">Alterar dados ou reagendar reuniões ainda não está disponível. O cancelamento exige confirmação.</p>
     {loading && <p role="status">[ CONSULTANDO PEDIDOS... ]</p>}
     {error && <div role="alert" className="phase3-error">
       <p>{error.publicMessage}</p>
@@ -153,8 +193,10 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
     </div>}
     {coolingDown && <p role="status">Aguarde {Math.max(0, Math.ceil((retryAt - now) / 1000))}s antes de consultar novamente.</p>}
     {!loading && !error && items.length === 0 && <p>Nenhum pedido encontrado para este filtro.</p>}
+    {hasLoaded && !loading && !error && items.length > 0 && <p role="status">Exibindo {visibleItems.length} de {items.length} pedidos carregados.
+      {visibleItems.length === 0 && ' Nenhum pedido carregado corresponde à busca; outras páginas podem conter resultados.'}</p>}
     <div className="phase3-admin-list" aria-busy={loading}>
-      {items.map(item => <article key={item.id} className="phase3-admin-card" aria-label={`Pedido de ${item.name}`}>
+      {visibleItems.map(item => <article key={item.id} className="phase3-admin-card" aria-label={`Pedido de ${item.name}`}>
         <h2>{item.name}</h2>
         <p>{item.email}</p>
         <p className="phase3-admin-topic">{item.topic}</p>
@@ -165,6 +207,7 @@ export function AdminMeetings({ onReturn }: { onReturn: () => void }) {
           {(Object.keys(decisions) as MeetingDecision[]).map(action => <button key={action} type="button"
             className="login-submit-btn" disabled={busy || loading || coolingDown}
             onClick={() => setDecision({ item, action })}>{decisions[action]}</button>)}
+          <button type="button" className="login-submit-btn" disabled aria-describedby="admin-edit-unavailable">ALTERAR REUNIÃO</button>
         </div>
       </article>)}
     </div>

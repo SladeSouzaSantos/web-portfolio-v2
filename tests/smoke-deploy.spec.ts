@@ -21,8 +21,12 @@ test('publicação permite navegar até o catálogo e abrir um projeto', async (
   await page.getByRole('link', { name: /ARQUIVO DE MISSÕES/i }).click();
   await expect(page).toHaveURL(/\/projetos$/);
   await expect(page.getByRole('heading', { name: 'ARQUIVO DE MISSÕES', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /^Ver detalhes de / }).first().click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  // Seleciona o cartão pela estrutura estável, sem depender de um aria-label antigo.
+  // Os nomes acessíveis agora vêm do texto visível dos pergaminhos (WCAG 2.5.3).
+  const cartazes = page.locator('.arquivo-grid button.guilda-cartaz[data-projeto]');
+  await expect(cartazes).toHaveCount(8);
+  await cartazes.first().click();
+  await expect(page.getByRole('dialog', { name: 'TASK MANAGER' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });

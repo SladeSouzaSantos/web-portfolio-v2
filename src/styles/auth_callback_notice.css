@@ -1,0 +1,29 @@
+.auth-callback-notice {
+  position: fixed;
+  z-index: 9000;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  width: min(48rem, calc(100vw - 2rem));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 3px solid var(--borda-ouro, #d97706);
+  background: var(--bg-card-elevado, #090d12);
+  color: var(--texto-principal, #fff);
+  box-shadow: 4px 4px 0 #000;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.auth-callback-notice p { margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.auth-callback-notice button {
+  flex: 0 0 44px;
+  min-height: 44px;
+  border: 2px solid var(--borda-ouro, #d97706);
+  background: var(--bg-caixa-interna, #080d12);
+  color: var(--texto-principal, #fff);
+  font-size: 20px;
+}
+@media (max-width: 640px) { .auth-callback-notice { bottom: 8rem; gap: .5rem; padding: .75rem; } }

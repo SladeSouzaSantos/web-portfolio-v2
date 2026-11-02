@@ -1,18 +1,37 @@
 import type { Formacao as FormacaoItem, Trilha } from '../types/portfolio';
+import academicSnapshot from './ppks-academic.snapshot.json';
+
+const academicById = new Map(academicSnapshot.educations.map(education => [education.id, education]));
+const academicRecordIds: Record<string,string> = {
+  'computacao': 'formacao-computacao',
+  'gestao-ti': 'formacao-gestao-ti',
+  'petroleo': 'formacao-petroleo',
+  'eletrica': 'formacao-energia-eletrica',
+  'eletrotecnica': 'formacao-eletrotecnica',
+  'eolica': 'formacao-eolica',
+  'java-applied': 'formacao-unipds-java',
+  'engenharia-ia': 'formacao-unipds-ia',
+};
+export const origemAcademica = {
+  schemaVersion: academicSnapshot.schemaVersion,
+  sourceCommit: academicSnapshot.sourceCommit,
+  sourceBranch: academicSnapshot.sourceBranch,
+};
+
 
 // Catálogo preservado da versão original; revisar datas e situação antes de publicar.
-export const formacoes: FormacaoItem[] = [
+const formacoesLayout: FormacaoItem[] = [
   {
     id: 'computacao', titulo: 'Ciência da Computação', tipo: 'Graduação', instituicao: 'UNISUL',
-    periodo: 'Início: 07/2023 · Previsão: 12/2026', situacao: 'Situação a confirmar',
+    periodo: 'Previsão indicativa: fim de 2027 / início de 2028', situacao: 'Conclusão pendente',
     cor: '#164b91', icone: 'capelo',
-    descricao: 'Formação em computação, fundamentos de software, algoritmos e desenvolvimento de sistemas.', comprovante: '',
+    descricao: 'Disciplinas aprovadas de algoritmos, programação, engenharia de software, sistemas distribuídos, IA e dados. A graduação ainda não foi concluída.', observacao: 'Atividades de extensão com visitas presenciais pendentes; previsão de conclusão não garantida.', comprovante: '',
   },
   {
     id: 'gestao-ti', titulo: 'Gestão da Tecnologia da Informação', tipo: 'Tecnólogo', instituicao: 'UNIBF',
-    periodo: 'Concluída: 07/2025', situacao: 'Concluído',
+    periodo: 'Concluída: 08/2025', situacao: 'Concluído',
     cor: '#17744f', icone: 'engrenagem',
-    descricao: 'Gestão de tecnologia da informação, processos e soluções organizacionais.', comprovante: '',
+    descricao: 'Tecnólogo superior concluído, com disciplinas de algoritmos, POO, banco de dados, IA, engenharia de software e testes.', observacao: 'Diploma emitido pelo Centro Universitário ETEP; UNIBF é a identificação usada no portfólio.', comprovante: '',
   },
   {
     id: 'petroleo', titulo: 'Engenharia de Petróleo e Gás', tipo: 'Graduação', instituicao: 'UnP',
@@ -50,14 +69,95 @@ export const formacoes: FormacaoItem[] = [
     cor: '#265fa4', icone: 'cerebro',
     descricao: 'Especialização em engenharia de software aplicada a sistemas inteligentes, integração de IA e soluções baseadas em modelos de linguagem.', comprovante: '',
   },
+  {
+    id: 'pos-computacao-tic', titulo: 'Computação e TIC — 5 Especializações', tipo: 'Pós-graduações', instituicao: 'FacPrisma',
+    periodo: 'Previsão informada: 07/2026', situacao: 'Conclusão a confirmar',
+    cor: '#395a9b', icone: 'blocos',
+    descricao: 'Cinco especializações lato sensu em áreas da computação, registradas no currículo. O conjunto fica em um único medalhão para preservar a composição da Academia.',
+    especializacoes: [
+      'Arquitetura de Software',
+      'Big Data',
+      'Desenvolvimento de Aplicações para Dispositivos Móveis',
+      'Inteligência Artificial',
+      'Segurança da Informação',
+    ],
+    observacao: 'Previsão de conclusão extraída do currículo; situação final e certificados ainda não verificados.',
+    comprovante: '',
+  },
 ];
 
-// Áreas de estudo, não declarações de certificações concluídas.
-export const trilhas: Trilha[] = [
-  { id: 'java', titulo: 'Java & Ecossistema', descricao: 'Java · Spring · APIs · Boas práticas', icone: 'codigo' },
-  { id: 'frontend', titulo: 'React & Frontend', descricao: 'React · JavaScript · Interfaces', icone: 'janela' },
-  { id: 'ia', titulo: 'Inteligência Artificial', descricao: 'LLMs · Agentes · LangChain · RAG', icone: 'cerebro' },
-  { id: 'arquitetura', titulo: 'Arquitetura de Software', descricao: 'SOLID · Design Patterns · Clean Architecture', icone: 'blocos' },
-  { id: 'dados', titulo: 'Dados & Bancos', descricao: 'SQL · NoSQL · Pipelines · Big Data', icone: 'dados' },
-  { id: 'qualidade', titulo: 'Segurança & Qualidade', descricao: 'Testes · TDD · Segurança da Informação', icone: 'escudo' },
-];
+// Cursos dos currículos: conclusão confirmada pelo próprio autor em 30/10/2026.
+// Cursos do Hackers do Bem: títulos e cargas horárias conferidos nos quatro certificados enviados.
+// Os PDFs não integram o repositório público e os links de comprovantes ficam para depois.
+
+// O snapshot é gerado da base PPKS canônica do backend dev. A apresentação é local e
+// não depende da API durante a renderização da página (mantém preloader e navegação).
+export const formacoes: FormacaoItem[] = formacoesLayout.map(card => {
+  const record = academicById.get(academicRecordIds[card.id] ?? '');
+  if (!record) return card;
+  // FacPrisma continua com medalhão agregado e situações individuais não verificadas.
+  if (card.id === 'computacao' || card.id === 'gestao-ti') return card;
+  if (record.status === 'completed' && card.situacao !== 'Concluído')
+    return { ...card, situacao: 'Concluído' };
+  if (record.status === 'in_progress' && card.situacao !== 'Em andamento')
+    return { ...card, situacao: 'Em andamento' };
+  return card;
+});
+
+const trilhasVisuais: Record<string, Omit<Trilha, 'cursos'>> = {
+  "cursos-java-arquitetura": {
+    "id": "java",
+    "titulo": "Java & Arquitetura",
+    "descricao": "Java · POO · Clean Code · TDD",
+    "icone": "codigo",
+    "aprofundamento": "Spring Boot, Quarkus, integração com IA e arquitetura moderna de aplicações Java."
+  },
+  "cursos-ia-dados": {
+    "id": "ia",
+    "titulo": "IA & Dados",
+    "descricao": "Python · Algoritmos · Redes Neurais",
+    "icone": "cerebro",
+    "aprofundamento": "Engenharia de IA aplicada: RAG, embeddings, agentes, LangChain, LangGraph e MCP (pós-graduação)."
+  },
+  "cursos-frontend-mobile": {
+    "id": "frontend",
+    "titulo": "Frontend & Mobile",
+    "descricao": "JavaScript · TypeScript · Flutter",
+    "icone": "janela",
+    "aprofundamento": "Arquitetura de interfaces, React e integração de aplicativos com APIs."
+  },
+  "cursos-engenharia-software": {
+    "id": "arquitetura",
+    "titulo": "Engenharia de Software",
+    "descricao": "Requisitos · UML · Modelagem · UX",
+    "icone": "blocos",
+    "aprofundamento": "Projetos de software orientados a domínio, arquitetura, manutenção e qualidade."
+  },
+  "cursos-bancos-dados": {
+    "id": "dados",
+    "titulo": "Bancos de Dados",
+    "descricao": "SQL · NoSQL · MongoDB · SQL Server",
+    "icone": "dados",
+    "aprofundamento": "Modelagem, persistência, consultas e integração entre bases relacionais e NoSQL."
+  },
+  "cursos-devops-qualidade": {
+    "id": "qualidade",
+    "titulo": "DevOps & Qualidade",
+    "descricao": "Docker · Git · DevSecOps · Segurança",
+    "icone": "escudo",
+    "aprofundamento": "CI/CD, testes automatizados, segurança de aplicações e observabilidade."
+  }
+};
+export const trilhas: Trilha[] = academicSnapshot.tracks.map(track => {
+  const visual = trilhasVisuais[track.id];
+  if (!visual) throw new Error(`Trilha acadêmica sem layout: ${track.id}`);
+  return {
+    ...visual,
+    cursos: track.courses.map(course => ({
+      titulo: course.title,
+      instituicao: course.provider,
+      situacao: course.status === 'completed' ? 'Concluído' as const : 'A confirmar' as const,
+      ...(course.hours !== null ? { cargaHoraria: course.hours } : {}),
+    })),
+  };
+});
