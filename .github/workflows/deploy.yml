@@ -83,6 +83,9 @@ jobs:
             fs.appendFileSync(process.env.GITHUB_ENV, `VITE_ORBE_MAX_USER_TURNS=${value}\n`);
           '
 
+      - name: Validate academic snapshot sync boundaries (Node tests)
+        run: node --test tests/security/sync-ppks-academic.test.mjs
+
       - name: Validate TypeScript and compile Vite
         run: npm run build
 
@@ -437,7 +440,7 @@ jobs:
   verify_deploy:
     name: '6 - Verify deployed site'
     needs: deploy
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.apply_remote
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main') && inputs.apply_remote
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
