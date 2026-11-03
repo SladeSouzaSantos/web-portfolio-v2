@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Smoke (5 messages) or extended (9 messages); real model billing applies'
+        description: 'Smoke (6 messages) or extended (10 messages); real model billing applies'
         type: choice
         options: [smoke, extended]
         default: smoke
