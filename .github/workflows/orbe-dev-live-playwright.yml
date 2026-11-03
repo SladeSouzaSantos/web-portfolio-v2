@@ -2,6 +2,10 @@ name: Orbe DEV Live | Playwright recruiter acceptance
 
 # No push or pull_request trigger: real LLM calls are opt-in only.
 on:
+  # DEV-only, explicitly approved file change. Ordinary pushes never invoke LLMs.
+  push:
+    branches: [dev]
+    paths: [.github/orbe-live-dev.request.json]
   workflow_dispatch:
     inputs:
       suite:
@@ -30,8 +34,8 @@ jobs:
     timeout-minutes: 25
     env:
       ORBE_LIVE_E2E_ENABLED: 'true'
-      ORBE_LIVE_SUITE: ${{ inputs.suite }}
-      ORBE_LIVE_EXPECTED_BACKEND_SHA: ${{ inputs.backend_sha }}
+      ORBE_LIVE_SUITE: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || '' }}
+      ORBE_LIVE_EXPECTED_BACKEND_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_sha || '' }}
     steps:
       - name: Checkout only frontend DEV
         uses: actions/checkout@v7
@@ -46,6 +50,10 @@ jobs:
 
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify explicit DEV-only request on push
+        if: github.event_name == 'push'
+        run: node scripts/read-orbe-live-request.mjs
 
       - name: Verify backend DEV deployed SHA and GitHub deploy/verify
         env:
