@@ -32,13 +32,20 @@ function requirePublicEvidence(reply: ChatResponse, question: string) {
   }
   if (!question.trim()) throw new Error('Empty test question.');
   // Month/year-only employment records cannot justify an exact, aggregated
-  // tenure claim. This was seen in a REAL Orbe answer ("19 meses") even
-  // though two separate employment intervals were cited without exact dates.
+  // months-only tenure claim. Accept clearly approximate composite durations
+  // such as "aproximadamente 1 ano e 7 meses"; the older validator mistakenly
+  // flagged its "7 meses de vínculos" substring as an unsupported total.
+  // Removing ONLY full year+month expressions still rejects "19 meses"
+  // and "somam 19 meses de vínculos".
+  const monthsOnlyContext = reply.answer.replace(
+    /\b\d{1,3}\s+anos?\s+e\s+\d{1,2}\s+meses?\b/gi,
+    '[DURACAO_ANOS_E_MESES]',
+  );
   if (
     /ACRUX/i.test(reply.answer) &&
     /SIGAA|SIG Software/i.test(reply.answer) &&
     /(?:\b(?:somam|somados|totalizam|equivalem a)\s+(?:aproximadamente\s+)?\d{1,3}\s+meses?\b|\b\d{1,3}\s+meses?\s+de\s+v[ií]nculos?\b)/i.test(
-      reply.answer,
+      monthsOnlyContext,
     )
   ) {
     throw new Error('Java employment periods were summed as exact months without exact dates in public evidence.');
