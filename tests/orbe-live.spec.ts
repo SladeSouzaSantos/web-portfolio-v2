@@ -179,7 +179,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
         !/não equivale a anos de dedicação integral/i.test(reply.answer)) {
       throw new Error('Duration answer confused the pure-software subset with coding time.');
     }
-    if (!reply.meta.deterministic) {
+    if ((reply.meta as { deterministic?: boolean }).deterministic !== true) {
       throw new Error('Verified broad duration was not served from canonical employment facts.');
     }
   });
