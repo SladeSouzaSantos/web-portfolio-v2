@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "approval": "RUN_REAL_DEV_LLM_TESTS",
-  "suite": "extended",
-  "backendSha": "bc66c449c87c098b4a2a19c01b40319ab8cb6ad1",
-  "requestId": "orbe-dev-extended-20261103-1"
+  "suite": "smoke",
+  "backendSha": "866d93c85d5f6c7b41c0c6eae5234853d51f8e68",
+  "requestId": "orbe-dev-tenure-20261103-1"
 }
