@@ -7,35 +7,43 @@
 const expected = process.env.ORBE_LIVE_EXPECTED_BACKEND_SHA ?? '';
 const backend = 'SladeSouzaSantos/phasscode-platform';
 let currentStage = 'init';
-const publicHeaders = {
-  Accept: 'application/vnd.github+json',
-  'X-GitHub-Api-Version': '2022-11-28',
-};
-const tokenHeaders = process.env.GITHUB_TOKEN
-  ? { ...publicHeaders, Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
-  : publicHeaders;
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const exec = promisify(execFile);
 
 function fail(message) {
   console.error(`ORBE_LIVE_PREFLIGHT_BLOCKED: ${message}`);
   process.exitCode = 1;
 }
 
-async function github(path, stage) {
-  const url = `https://api.github.com/repos/${backend}/${path}`;
-  const read = (headers) => fetch(url, {
-    headers,
-    signal: AbortSignal.timeout(15_000),
-    redirect: 'error',
-  });
-  let response = await read(tokenHeaders);
-  // The GitHub Actions token belongs to the FRONTEND repository. Even for
-  // public BACKEND metadata, GitHub may reply 404 to a repository-scoped token.
-  // Read this immutable public API endpoint anonymously in that case.
-  if (process.env.GITHUB_TOKEN && [403, 404].includes(response.status)) {
-    response = await read(publicHeaders);
+async function curlText(url, stage) {
+  try {
+    const { stdout } = await exec('curl', [
+      '--fail',
+      '--silent',
+      '--show-error',
+      '--location',
+      '--max-time', '15',
+      '--header', 'Accept: application/vnd.github+json',
+      url,
+    ], { maxBuffer: 2_000_000 });
+    return stdout;
+  } catch {
+    throw new Error(`${stage}: HTTP/transport unavailable`);
   }
-  if (!response.ok()) throw new Error(`${stage}: HTTP ${response.status}`);
-  return response.json();
+}
+
+async function github(path, stage) {
+  // Public backend metadata only. curl uses the runner's supported proxy
+  // settings; do not send the frontend repository's scoped GITHUB_TOKEN.
+  const url = `https://api.github.com/repos/${backend}/${path}`;
+  const raw = await curlText(url, stage);
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new Error(`${stage}: invalid public metadata JSON`);
+  }
 }
 
 async function main() {
@@ -78,12 +86,10 @@ async function main() {
     ['https://devapi.phasscode.com/health', 'DEV API'],
     ['https://devgbc.phasscode.com', 'DEV portfolio'],
   ]) {
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(15_000),
-      redirect: 'error',
-    });
-    if (!response.ok()) {
-      fail(`${label} failed HTTP health/readability check ${response.status}`);
+    try {
+      await curlText(url, label);
+    } catch {
+      fail(`${label} did not pass public health/access check.`);
       return;
     }
   }
@@ -92,10 +98,10 @@ async function main() {
 }
 
 main().catch((error) => {
-  // Only stage names and HTTP statuses from our own error messages are safe.
-  // Never expose raw upstream exceptions, request tokens, URLs or headers.
-  const message = error instanceof Error && /^(backend-ref|backend-workflow|backend-jobs): HTTP \d{3}$/.test(error.message)
-    ? error.message
-    : `Unclassified request/parse failure during ${currentStage}`;
+  // Only static stage and known transport/schema markers, never URLs/tokens.
+  const message = error instanceof Error &&
+    /^(backend-ref|backend-workflow|backend-jobs): (HTTP\/transport unavailable|invalid public metadata JSON)$/.test(error.message)
+      ? error.message
+      : `Public release verification failed at ${currentStage}`;
   fail(message);
 });
