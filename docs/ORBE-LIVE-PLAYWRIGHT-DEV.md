@@ -6,10 +6,29 @@ não altera o backend, não cadastra reuniões e não autoriza relatórios de co
 
 ## Isolamento e autorização
 
-- Execução **somente manual**, via
-  [Actions → Orbe DEV Live | Playwright recruiter acceptance](../../actions/workflows/orbe-dev-live-playwright.yml).
-- Escolha a branch `dev` e informe o **SHA completo de 40 caracteres** do backend
-  que já teve o deploy DEV validado.
+- Execução **somente por aprovação explícita**. Como o novo workflow ainda
+  existe apenas em `dev` (e não na branch padrão `main`), a opção
+  `workflow_dispatch` não aparece necessariamente no menu do GitHub.
+  **Não alteramos `main` apenas para registrá-lo.**
+- Enquanto `main` permanece congelada, a execução é disparada ao fazer um
+  commit **específico** no arquivo `.github/orbe-live-dev.request.json` na
+  branch `dev`. O workflow observa somente alterações desse caminho:
+  outros pushes e a CI normal não chamam o modelo real.
+- O arquivo deve conter exatamente:
+  ```json
+  {
+    "schemaVersion": 1,
+    "approval": "RUN_REAL_DEV_LLM_TESTS",
+    "suite": "smoke",
+    "backendSha": "<FULL_40_CHAR_DEPLOYED_DEV_BACKEND_SHA>",
+    "requestId": "orbe-dev-smoke-001"
+  }
+  ```
+  Para novas execuções, use novo `requestId` e confirme novamente o SHA
+  do backend. Alterar outros arquivos não dispara esta suíte.
+- Quando o workflow também estiver registrado na branch padrão, será possível
+  executá-lo por [Actions → Orbe DEV Live | Playwright recruiter acceptance](../../actions/workflows/orbe-dev-live-playwright.yml),
+  escolhendo branch `dev` e informando o SHA implantado.
 - O preflight consulta GitHub e exige que o último workflow manual DEV
   corresponda exatamente ao SHA informado e tenha os jobs `deploy` e `verify`
   aprovados. Também verifica o HEAD do backend e acessibilidade dos hosts DEV.
