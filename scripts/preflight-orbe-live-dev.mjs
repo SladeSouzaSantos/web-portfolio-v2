@@ -6,6 +6,7 @@
  */
 const expected = process.env.ORBE_LIVE_EXPECTED_BACKEND_SHA ?? '';
 const backend = 'SladeSouzaSantos/phasscode-platform';
+let currentStage = 'init';
 const publicHeaders = {
   Accept: 'application/vnd.github+json',
   'X-GitHub-Api-Version': '2022-11-28',
@@ -42,12 +43,14 @@ async function main() {
     fail('A full, pinned DEV SHA is mandatory.');
     return;
   }
+  currentStage = 'backend-ref';
   const ref = await github('git/ref/heads/dev', 'backend-ref');
   if (ref?.object?.sha !== expected) {
     fail('Backend DEV HEAD moved after the requested deployment; select a newly verified release.');
     return;
   }
 
+  currentStage = 'backend-workflow';
   const runs = await github(
     'actions/workflows/deploy.yml/runs?branch=dev&event=workflow_dispatch&per_page=20',
     'backend-workflow',
@@ -61,6 +64,7 @@ async function main() {
     return;
   }
 
+  currentStage = 'backend-jobs';
   const jobs = await github(`actions/runs/${latest.id}/jobs?per_page=100`, 'backend-jobs');
   const success = (name) =>
     (jobs.jobs ?? []).some((job) => job.name === name && job.conclusion === 'success');
@@ -69,6 +73,7 @@ async function main() {
     return;
   }
 
+  currentStage = 'dev-health';
   for (const [url, label] of [
     ['https://devapi.phasscode.com/health', 'DEV API'],
     ['https://devgbc.phasscode.com', 'DEV portfolio'],
@@ -91,6 +96,6 @@ main().catch((error) => {
   // Never expose raw upstream exceptions, request tokens, URLs or headers.
   const message = error instanceof Error && /^(backend-ref|backend-workflow|backend-jobs): HTTP \d{3}$/.test(error.message)
     ? error.message
-    : 'Unclassified metadata or health verification failure';
+    : `Unclassified request/parse failure during ${currentStage}`;
   fail(message);
 });
