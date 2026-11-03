@@ -34,7 +34,7 @@ não altera o backend, não cadastra reuniões e não autoriza relatórios de co
   aprovados. Também verifica o HEAD do backend e acessibilidade dos hosts DEV.
 - Esse procedimento **não executa** deploy nem altera `main`.
 - `smoke` = **4 cenários, 6 mensagens**: programação, anos de experiência com atuação híbrida, Java→Go, Java→projetos React.
-- `extended` = **6 cenários, 10 mensagens**: acrescenta Java→Go→Flutter e UNISUL.
+- `extended` = **7 cenários, 12 mensagens**: acrescenta Java→Go→Flutter, UNISUL e 'Pedtro têm experiência?'→'E com o GO?'.
 - `maxFailures: 1`, sem retries, um único worker e execução serial. Uma falha
   HTTP interrompe a bateria; não repetir automaticamente.
 - Relatórios de até 3 dias contêm exclusivamente perguntas sobre o portfólio,
