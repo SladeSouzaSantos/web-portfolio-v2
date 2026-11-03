@@ -3,7 +3,7 @@ import type { ChatResponse } from '../src/types/orbe';
 
 const apiUrl = 'https://devapi.phasscode.com/api/v1/chat';
 const suite = process.env.ORBE_LIVE_SUITE ?? 'smoke';
-const maxMessages = suite === 'extended' ? 9 : 5;
+const maxMessages = suite === 'extended' ? 10 : 6;
 let sentMessages = 0;
 
 const genericRefusal =
@@ -156,6 +156,34 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
     }
   });
 
+  test('smoke: total programming experience includes documented mixed-role employment', async ({ page }) => {
+    const chat = await openOrbe(page);
+    const reply = await ask(page, chat, 'Quantos anos de experiência Pedro tem com programação?');
+    const expected = [
+      'experiencia-acrux',
+      'experiencia-sig',
+      'experiencia-geowellex',
+      'experiencia-greencity',
+    ];
+    const actual = reply.sources.map((source) => source.id);
+    for (const id of expected) {
+      if (!actual.includes(id)) throw new Error(`Duration answer omitted documented employment source ${id}.`);
+    }
+    if (!/10 anos e 10 meses/i.test(reply.answer)) {
+      throw new Error('Duration answer did not provide the bounded ten-year, ten-month employment estimate.');
+    }
+    if (!/Geowellex/i.test(reply.answer) || !/Greencity/i.test(reply.answer)) {
+      throw new Error('Duration answer omitted professional programming in mixed roles.');
+    }
+    if (/\\b19 meses\\b/i.test(reply.answer) ||
+        !/não equivale a anos de dedicação integral/i.test(reply.answer)) {
+      throw new Error('Duration answer confused the pure-software subset with coding time.');
+    }
+    if (!reply.meta.deterministic) {
+      throw new Error('Verified broad duration was not served from canonical employment facts.');
+    }
+  });
+
   test('smoke: professional Java to short Go follow-up retains intent', async ({ page }) => {
     const chat = await openOrbe(page);
     const first = await ask(page, chat, 'Pedro tem experiência profissional com Java?');
@@ -179,7 +207,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
   });
 
   test('extended: Java to Go to Flutter maintains the conversation for three turns', async ({ page }) => {
-    test.skip(suite !== 'extended', 'Smoke suite is limited to five live requests.');
+    test.skip(suite !== 'extended', 'Smoke suite is limited to six live requests.');
     const chat = await openOrbe(page);
     const first = await ask(page, chat, 'Pedro tem experiência profissional com Java?');
     const go = await ask(page, chat, 'E com Go?', first);
@@ -191,7 +219,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
   });
 
   test('extended: UNISUL degree must not be described as completed', async ({ page }) => {
-    test.skip(suite !== 'extended', 'Smoke suite is limited to five live requests.');
+    test.skip(suite !== 'extended', 'Smoke suite is limited to six live requests.');
     const chat = await openOrbe(page);
     const reply = await ask(page, chat, 'Pedro já concluiu Ciência da Computação na UNISUL?');
     requireSource(reply, ['formacao-computacao'], 'UNISUL degree');
