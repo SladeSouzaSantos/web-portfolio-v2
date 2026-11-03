@@ -31,6 +31,24 @@ function requirePublicEvidence(reply: ChatResponse, question: string) {
     }
   }
   if (!question.trim()) throw new Error('Empty test question.');
+  // Month/year-only employment records cannot justify an exact, aggregated
+  // tenure claim. This was seen in a REAL Orbe answer ("19 meses") even
+  // though two separate employment intervals were cited without exact dates.
+  if (
+    /ACRUX/i.test(reply.answer) &&
+    /SIGAA|SIG Software/i.test(reply.answer) &&
+    /(?:\b(?:somam|somados|totalizam|equivalem a)\s+(?:aproximadamente\s+)?\d{1,3}\s+meses?\b|\b\d{1,3}\s+meses?\s+de\s+v[ií]nculos?\b)/i.test(
+      reply.answer,
+    )
+  ) {
+    throw new Error('Java employment periods were summed as exact months without exact dates in public evidence.');
+  }
+}
+
+function requireSource(reply: ChatResponse, ids: readonly string[], question: string) {
+  if (!reply.sources.some((source) => ids.includes(source.id))) {
+    throw new Error(`Missing specific public source for ${question}; unrelated sources are insufficient.`);
+  }
 }
 
 const publicExcerpt = (value: string) =>
@@ -132,6 +150,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
   test('smoke: Pedro programa? returns a substantive grounded programming profile', async ({ page }) => {
     const chat = await openOrbe(page);
     const reply = await ask(page, chat, 'Pedro programa?');
+    requireSource(reply, ['experiencia-sig', 'experiencia-acrux', 'experiencia-geowellex', 'experiencia-greencity'], 'programming');
     if (!/(?:Java|Python|Flutter|TypeScript|SIGAA|PHASSCODE|programa(?:ção|dor)?)/i.test(reply.answer)) {
       throw new Error('Broad programming question omitted all expected programming evidence.');
     }
@@ -140,7 +159,9 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
   test('smoke: professional Java to short Go follow-up retains intent', async ({ page }) => {
     const chat = await openOrbe(page);
     const first = await ask(page, chat, 'Pedro tem experiência profissional com Java?');
+    requireSource(first, ['experiencia-sig', 'experiencia-acrux'], 'Java professional history');
     const next = await ask(page, chat, 'E com Go?', first);
+    requireSource(next, ['experiencia-sig', 'phasscode-platform'], 'Go transferable evidence');
     if (!/\bGo\b|Golang/i.test(next.answer) ||
         !/(?:n[aã]o|sem experi[eê]ncia|nunca)/i.test(next.answer)) {
       throw new Error('Go follow-up did not distinguish missing direct experience.');
@@ -151,6 +172,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
     const chat = await openOrbe(page);
     const first = await ask(page, chat, 'Pedro tem experiência profissional com Java?');
     const next = await ask(page, chat, 'E quais projetos React?', first);
+    requireSource(next, ['web-portfolio-v2'], 'React projects');
     if (!/React/i.test(next.answer)) {
       throw new Error('React projects follow-up omitted the requested technology.');
     }
@@ -162,6 +184,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
     const first = await ask(page, chat, 'Pedro tem experiência profissional com Java?');
     const go = await ask(page, chat, 'E com Go?', first);
     const flutter = await ask(page, chat, 'E com Flutter?', go);
+    requireSource(flutter, ['experiencia-greencity', 'greencity-os'], 'Flutter');
     if (!/Flutter/i.test(flutter.answer)) {
       throw new Error('Third conversational turn omitted Flutter.');
     }
@@ -171,6 +194,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
     test.skip(suite !== 'extended', 'Smoke suite is limited to five live requests.');
     const chat = await openOrbe(page);
     const reply = await ask(page, chat, 'Pedro já concluiu Ciência da Computação na UNISUL?');
+    requireSource(reply, ['formacao-computacao'], 'UNISUL degree');
     if (!/(?:UNISUL|Ci[eê]ncia da Computa[çc][aã]o)/i.test(reply.answer) ||
         !/(?:n[aã]o|pendente|em andamento)/i.test(reply.answer)) {
       throw new Error('UNISUL academic status was not correctly distinguished.');
