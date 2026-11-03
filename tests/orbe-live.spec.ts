@@ -175,7 +175,7 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
     if (!/Geowellex/i.test(reply.answer) || !/Greencity/i.test(reply.answer)) {
       throw new Error('Duration answer omitted professional programming in mixed roles.');
     }
-    if (/\\b19 meses\\b/i.test(reply.answer) ||
+    if (/\b19 meses\b/i.test(reply.answer) ||
         !/não equivale a anos de dedicação integral/i.test(reply.answer)) {
       throw new Error('Duration answer confused the pure-software subset with coding time.');
     }
