@@ -3,7 +3,7 @@ import type { ChatResponse } from '../src/types/orbe';
 
 const apiUrl = 'https://devapi.phasscode.com/api/v1/chat';
 const suite = process.env.ORBE_LIVE_SUITE ?? 'smoke';
-const maxMessages = suite === 'extended' ? 10 : 6;
+const maxMessages = suite === 'extended' ? 12 : 6;
 let sentMessages = 0;
 
 const genericRefusal =
@@ -215,6 +215,31 @@ test.describe.serial('Orbe live DEV recruiter acceptance (real UI + real API)', 
     requireSource(flutter, ['experiencia-greencity', 'greencity-os'], 'Flutter');
     if (!/Flutter/i.test(flutter.answer)) {
       throw new Error('Third conversational turn omitted Flutter.');
+    }
+  });
+
+  test('extended: misspelled broad career question followed by article-qualified GO', async ({ page }) => {
+    test.skip(suite !== 'extended', 'Smoke suite is limited to six live requests.');
+    const chat = await openOrbe(page);
+    const overview = await ask(page, chat, 'Pedtro têm experiência?');
+    for (const id of ['experiencia-acrux', 'experiencia-sig', 'experiencia-geowellex', 'experiencia-greencity']) {
+      if (!overview.sources.some((source) => source.id === id)) {
+        throw new Error(`Career overview omitted documented professional employer ${id}.`);
+      }
+    }
+    for (const employer of ['ACRUX', 'SIGAA', 'Geowellex', 'Greencity']) {
+      if (!overview.answer.includes(employer)) {
+        throw new Error(`Career overview omitted employer ${employer}.`);
+      }
+    }
+    if (/\b19 meses\b|\b1 ano e 7 meses\b/i.test(overview.answer)) {
+      throw new Error('Unasked pure-software subtotal overshadowed the complete career overview.');
+    }
+    const go = await ask(page, chat, 'E com o GO?', overview);
+    requireSource(go, ['experiencia-sig', 'phasscode-platform'], 'Go transferable evidence');
+    if (!/\bGo\b|Golang/i.test(go.answer) ||
+        !/não há experiência profissional com Go/i.test(go.answer)) {
+      throw new Error('Article-qualified Go follow-up fell through or misattributed proficiency.');
     }
   });
 
