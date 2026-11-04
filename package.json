@@ -20,7 +20,8 @@
     "test:f1": "playwright test --config playwright.f1.config.ts",
     "test:f2": "playwright test --config playwright.f2.config.ts",
     "test:f3": "playwright test --config playwright.f3.config.ts",
-    "sync:academic": "node scripts/sync-ppks-academic.mjs"
+    "sync:academic": "node scripts/sync-ppks-academic.mjs",
+    "test:orbe:local": "node scripts/orbe-local-playwright.mjs"
   },
   "dependencies": {
     "gsap": "^3.13.0",
