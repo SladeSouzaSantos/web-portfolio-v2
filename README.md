@@ -37,6 +37,32 @@ O chat real requer `VITE_ORBE_API_ENABLED=true` e uma URL válida no
 `VITE_API_BASE_URL`. Sem API habilitada, a interface mostra uma demonstração
 de respostas predefinidas. Nunca coloque chaves de LLM em variáveis `VITE_*`.
 
+## Avaliação local do Orbe com Playwright
+
+O executor `scripts/orbe-local-playwright.mjs` testa as interfaces e APIs reais
+de **DEV** e **MAIN** sem disparar workflows, fazer deploy ou trocar de branch.
+A execução exige `--execute` porque envia mensagens reais aos modelos e pode
+consumir quota. As saídas `reports/orbe-local/` são ignoradas pelo Git.
+
+```bash
+npm ci
+npx playwright install chromium
+npm run test:orbe:local -- --self-test
+
+# Sem chamadas reais: conferir o plano
+npm run test:orbe:local -- --env both --suite extended --max-requests 24
+
+# Testar os dois sites publicados (12 mensagens por site)
+npm run test:orbe:local -- --env both --suite extended --max-requests 24 --execute
+```
+
+Os relatórios de cada ambiente e a comparação `comparison.md` ficam sob
+`reports/orbe-local/`. O target `main` consulta **produção real** (somente chat,
+sem alterações de release). A tag `shadow-on` não confirma flags do servidor:
+no modo shadow, o grafo é observado e **não modifica respostas públicas**.
+
+Manual completo: [Playwright local para Orbe — DEV e MAIN](docs/orbe-playwright-local.md).
+
 ## Ambientes no Mac Mini
 
 | Branch | Site | API de chat |
