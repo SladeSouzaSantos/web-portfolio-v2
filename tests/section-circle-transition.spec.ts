@@ -132,14 +132,25 @@ test.describe('loading-aware section transitions', () => {
     await expect(page.getByRole('heading', { name: 'ACADEMIA ARCANA' })).toBeVisible();
   });
 
-  test('an unavailable image cannot trap the visitor behind the loader', async ({ page }) => {
+  test('a stalled image cannot trap the visitor behind the loader', async ({ page }) => {
     await page.goto('/#sobre');
     await expect(page.locator('#site-preloader')).toHaveCount(0);
-    await page.route('**/assets/img/moldura-armario.webp', route => route.abort());
-    await page.getByRole('navigation', { name: 'Navegação principal' })
-      .getByRole('link', { name: 'Formação acadêmica', exact: true }).click();
-    await expect(page.locator('#contentDisplay')).toHaveAttribute('data-section', 'academico');
-    await expect(page.locator('#sectionTransitionMask')).not.toHaveClass(/is-active/, { timeout: 6000 });
-    await expect(page.getByRole('heading', { name: 'ACADEMIA ARCANA' })).toBeVisible();
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    await page.route('**/assets/img/moldura-armario.webp', async route => {
+      await gate;
+      await route.continue();
+    });
+    try {
+      await page.getByRole('navigation', { name: 'Navegação principal' })
+        .getByRole('link', { name: 'Formação acadêmica', exact: true }).click();
+      await expect(page.locator('#contentDisplay')).toHaveAttribute('data-section', 'academico');
+      // Fail open after the bounded wait, even if an image request has stalled.
+      await expect(page.locator('#sectionTransitionMask')).not.toHaveClass(/is-active/, { timeout: 7000 });
+      await expect(page.getByRole('heading', { name: 'ACADEMIA ARCANA' })).toBeVisible();
+    } finally {
+      release();
+    }
+    await expect(page.locator('.academia-armario__arte')).toHaveJSProperty('complete', true);
   });
 });
