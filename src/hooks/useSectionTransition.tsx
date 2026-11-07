@@ -51,7 +51,7 @@ export function useSectionTransition(activeSection: SecaoId) {
   }, []);
 
   const waitUntilReady = useCallback(async (section: SecaoId, artworkReady: Promise<void>) => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timer: number | undefined;
     try {
       // One frame for CSS layout and lazy image selection after the React commit.
       await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
