@@ -1,20 +1,23 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import type { MouseEvent } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { useNavigate } from 'react-router';
-import { warmSectionScene } from '../lib/sceneAssets';
+import { prepareSectionArtwork, prepareVisibleSectionImages } from '../lib/sceneAssets';
 import type { SecaoId } from '../types/portfolio';
 
 const EXPAND_MS = 340;
 const REVEAL_MS = 380;
-const SCENE_WAIT_MS = 180;
+const MAX_SECTION_WAIT_MS = 4000;
+
+function afterPaint(): Promise<void> {
+  return new Promise(resolve => requestAnimationFrame(() =>
+    requestAnimationFrame(() => resolve())));
+}
 
 /**
- * A circular wipe originates at the selected navigation item. The route is
- * committed only when the viewport is fully covered, so neither scene nor
- * its background can flash while React replaces the previous section.
- *
- * This is intentionally a navigation effect, not a second loading overlay.
+ * The circular transition keeps the new section fully covered while its
+ * critical WebP artwork, visible React images and font finish loading.
+ * GIFs and off-screen/lazy images do not delay the reveal.
  */
 export function useSectionTransition(activeSection: SecaoId) {
   const navigate = useNavigate();
@@ -23,16 +26,67 @@ export function useSectionTransition(activeSection: SecaoId) {
   const animationRef = useRef<Animation | null>(null);
   const runId = useRef(0);
   const locked = useRef(false);
+  const previousSection = useRef(activeSection);
 
-  useEffect(() => () => {
-    runId.current += 1;
+  const beginCover = useCallback((clipPath: string) => {
+    const mask = maskRef.current;
+    if (!mask) return;
+    mask.style.clipPath = clipPath;
+    mask.classList.add('is-active');
+    mask.setAttribute('aria-hidden', 'false');
+    shieldRef.current?.classList.add('is-active');
+  }, []);
+
+  const endCover = useCallback((clipPath: string) => {
+    const mask = maskRef.current;
     animationRef.current?.cancel();
     animationRef.current = null;
+    if (mask) {
+      mask.style.clipPath = clipPath;
+      mask.classList.remove('is-active');
+      mask.setAttribute('aria-hidden', 'true');
+    }
+    shieldRef.current?.classList.remove('is-active');
     locked.current = false;
   }, []);
 
+  const waitUntilReady = useCallback(async (section: SecaoId, artworkReady: Promise<void>) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      // One frame for CSS layout and lazy image selection after the React commit.
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      await Promise.race([
+        Promise.allSettled([artworkReady, prepareVisibleSectionImages(section)]),
+        new Promise<void>(resolve => { timer = window.setTimeout(resolve, MAX_SECTION_WAIT_MS); }),
+      ]);
+      await afterPaint();
+    } finally {
+      if (timer !== undefined) window.clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => () => {
+    runId.current += 1;
+    endCover('circle(0px at 50% 50%)');
+  }, [endCover]);
+
+  // Browser Back/Forward and direct hash navigation must also wait under cover.
+  // Layout effects run before the destination can paint.
+  useLayoutEffect(() => {
+    if (previousSection.current === activeSection) return;
+    previousSection.current = activeSection;
+    if (locked.current || !maskRef.current) return;
+
+    const id = ++runId.current;
+    locked.current = true;
+    beginCover('inset(0)');
+    const ready = prepareSectionArtwork(activeSection);
+    void waitUntilReady(activeSection, ready).finally(() => {
+      if (id === runId.current) endCover('circle(0px at 50% 50%)');
+    });
+  }, [activeSection, beginCover, endCover, waitUntilReady]);
+
   const onNavigate = useCallback((event: MouseEvent<HTMLAnchorElement>, destination: SecaoId) => {
-    // Preserve normal link semantics for middle-click and modified clicks.
     if (event.defaultPrevented || event.button !== 0 || event.metaKey ||
       event.ctrlKey || event.shiftKey || event.altKey) return;
 
@@ -43,12 +97,10 @@ export function useSectionTransition(activeSection: SecaoId) {
     if (destination === activeSection) return;
 
     const mask = maskRef.current;
-    if (!mask || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // Let React Router navigate immediately, without motion.
-      return;
-    }
+    if (!mask) return;
     event.preventDefault();
 
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const rect = event.currentTarget.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
@@ -60,14 +112,11 @@ export function useSectionTransition(activeSection: SecaoId) {
     const open = `circle(${radius}px at ${x}px ${y}px)`;
     mask.style.setProperty('--scene-origin-x', `${x}px`);
     mask.style.setProperty('--scene-origin-y', `${y}px`);
-    mask.style.clipPath = closed;
-    mask.classList.add('is-active');
-    // The clipped circle cannot intercept clicks outside its radius.
-    // Shield the entire viewport until the reveal finishes.
-    shieldRef.current?.classList.add('is-active');
+    beginCover(reduced ? 'inset(0)' : closed);
 
     const id = ++runId.current;
     locked.current = true;
+    const artworkReady = prepareSectionArtwork(destination);
 
     const animate = async (from: string, to: string, duration: number) => {
       const animation = mask.animate([{ clipPath: from }, { clipPath: to }], {
@@ -82,48 +131,42 @@ export function useSectionTransition(activeSection: SecaoId) {
     };
 
     const move = async () => {
+      let committed = false;
       try {
-        // Start warming the target scene immediately, but never wait for GIFs.
-        const sceneReady = warmSectionScene(destination).decode().catch(() => undefined);
-        await animate(closed, open, EXPAND_MS);
+        if (!reduced) await animate(closed, open, EXPAND_MS);
         if (id !== runId.current) return;
+
+        // Commit only when the viewport is covered; never reveal incomplete content.
         flushSync(() => navigate({ pathname: '/', hash: `#${destination}` }));
-        // Allow a brief opportunity for the WebP scene to decode under cover.
-        await Promise.race([
-          sceneReady,
-          new Promise<void>(resolve => window.setTimeout(resolve, SCENE_WAIT_MS)),
-        ]);
-        await new Promise<void>(resolve => requestAnimationFrame(() =>
-          requestAnimationFrame(() => resolve())));
+        committed = true;
+        await waitUntilReady(destination, artworkReady);
         if (id !== runId.current) return;
-        await animate(open, closed, REVEAL_MS);
+
+        if (!reduced) await animate(open, closed, REVEAL_MS);
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
-          // Fall back to the requested route rather than trapping navigation.
-          if (id === runId.current) navigate({ pathname: '/', hash: `#${destination}` });
+        if (id === runId.current && !committed &&
+            !(error instanceof DOMException && error.name === 'AbortError')) {
+          navigate({ pathname: '/', hash: `#${destination}` });
         }
       } finally {
-        if (id === runId.current) {
-          animationRef.current?.cancel();
-          animationRef.current = null;
-          mask.style.clipPath = closed;
-          mask.classList.remove('is-active');
-          shieldRef.current?.classList.remove('is-active');
-          locked.current = false;
-        }
+        if (id === runId.current) endCover(closed);
       }
     };
     void move();
-  }, [activeSection, navigate]);
+  }, [activeSection, navigate, beginCover, endCover, waitUntilReady]);
 
   return {
     onNavigate,
     overlay: createPortal(
       <>
         <div id="sectionTransitionShield" ref={shieldRef} aria-hidden="true" />
-        <div id="sectionTransitionMask" ref={maskRef} aria-hidden="true">
-          <span className="scene-transition-glyph">✦</span>
-          <span className="scene-transition-caption">[ NOVA CENA ]</span>
+        <div id="sectionTransitionMask" ref={maskRef} role="status" aria-label="Preparando nova seção" aria-hidden="true">
+          <div className="scene-transition-loader">
+            <span className="scene-transition-glyph" aria-hidden="true">✦ ◆ ✦</span>
+            <span className="scene-transition-brand">PHASSCODE</span>
+            <span className="scene-transition-caption">[ PREPARANDO NOVA CENA ]</span>
+            <span className="scene-transition-track" aria-hidden="true"><span className="scene-transition-progress" /></span>
+          </div>
         </div>
       </>,
       document.body,
