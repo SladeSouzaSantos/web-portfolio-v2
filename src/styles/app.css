@@ -75,8 +75,8 @@ body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/as
   justify-content: center;
   background:
     radial-gradient(circle at var(--scene-origin-x, 50%) var(--scene-origin-y, 50%),
-      #134458 0, #0b1d29 48%, #080d12 100%);
-  color: #fef08a;
+      #3f291a 0, #201610 48%, #0d0b0a 100%);
+  color: #f3dbad;
   clip-path: circle(0px at 50% 50%);
   pointer-events: none;
   overflow: hidden;
@@ -84,10 +84,10 @@ body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/as
 #sectionTransitionMask.is-active { pointer-events: auto; }
 .scene-transition-glyph {
   font-family: var(--fonte-titulo, monospace);
-  color: #67e8f9;
+  color: #f1bd63;
   font-size: clamp(45px, 10vw, 95px);
   line-height: 1;
-  text-shadow: 0 0 24px rgba(103, 232, 249, .45);
+  text-shadow: 0 0 24px rgba(241, 189, 99, .34);
 }
 .scene-transition-caption {
   font-family: var(--fonte-interface, monospace);
