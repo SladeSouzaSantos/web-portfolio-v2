@@ -82,22 +82,58 @@ body.taverna-ativa::after { background-image: var(--taverna-mesa-atual, url('/as
   overflow: hidden;
 }
 #sectionTransitionMask.is-active { pointer-events: auto; }
+.scene-transition-loader {
+  width: min(380px, calc(100vw - 48px));
+  border: 3px solid #bf8643;
+  background: #17120e;
+  box-shadow: 0 0 0 5px #362415, 0 20px 60px rgba(0,0,0,.65);
+  padding: 30px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+  font-family: monospace;
+}
 .scene-transition-glyph {
-  font-family: var(--fonte-titulo, monospace);
   color: #f1bd63;
-  font-size: clamp(45px, 10vw, 95px);
-  line-height: 1;
-  text-shadow: 0 0 24px rgba(241, 189, 99, .34);
+  font-size: 13px;
+  letter-spacing: .24em;
+}
+.scene-transition-brand {
+  font-family: monospace;
+  font-size: clamp(12px, 3vw, 17px);
+  letter-spacing: .08em;
+  line-height: 1.65;
+  margin: 16px 0 12px;
 }
 .scene-transition-caption {
-  font-family: var(--fonte-interface, monospace);
-  font-size: clamp(9px, 2vw, 13px);
-  letter-spacing: .15em;
-  line-height: 1.8;
-  text-align: center;
+  color: #d6bc93;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+  line-height: 2;
+  margin: 0 0 22px;
+}
+.scene-transition-track {
+  height: 12px;
+  border: 2px solid #bf8643;
+  overflow: hidden;
+  background: #241810;
+}
+.scene-transition-progress {
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #e5b05e 0 13px, #824522 13px 17px);
+  animation: scene-transition-loading 1.15s ease-in-out infinite alternate;
+}
+@keyframes scene-transition-loading {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(285%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  #sectionTransitionMask { display: none; }
+  #sectionTransitionMask { transition: none; }
+  .scene-transition-progress { animation: none; width: 100%; }
 }
 
 /* A clipped circle does not cover all hit-test regions while expanding or

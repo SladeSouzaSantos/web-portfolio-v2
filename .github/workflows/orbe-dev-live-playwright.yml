@@ -1,0 +1,78 @@
+name: Orbe DEV Live | Playwright recruiter acceptance
+
+# No push or pull_request trigger: real LLM calls are opt-in only.
+on:
+  # DEV-only, explicitly approved file change. Ordinary pushes never invoke LLMs.
+  push:
+    branches: [dev]
+    paths: [.github/orbe-live-dev.request.json]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Smoke (6 messages) or extended (12 messages); real model billing applies'
+        type: choice
+        options: [smoke, extended]
+        default: smoke
+        required: true
+      backend_sha:
+        description: 'Full 40-character backend DEV SHA, already deployed and verified'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+# Never cancel a live run mid-conversation, and do not run two simultaneously.
+concurrency:
+  group: orbe-dev-live-playwright
+  cancel-in-progress: false
+
+jobs:
+  orbe-dev-live:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      ORBE_LIVE_E2E_ENABLED: 'true'
+      ORBE_LIVE_SUITE: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || '' }}
+      ORBE_LIVE_EXPECTED_BACKEND_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_sha || '' }}
+    steps:
+      - name: Checkout only frontend DEV
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Node.js 24 and lockfile cache
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify explicit DEV-only request on push
+        if: github.event_name == 'push'
+        run: node scripts/read-orbe-live-request.mjs
+
+      - name: Verify backend DEV deployed SHA and GitHub deploy/verify
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/preflight-orbe-live-dev.mjs
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run bounded real-browser recruiter conversations
+        run: npm run test:orbe:live
+
+      - name: Upload redacted public-answer and source reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: orbe-dev-live-recruiter-results
+          path: |
+            playwright-report/orbe-live/
+            test-results/orbe-live/
+          if-no-files-found: ignore
+          retention-days: 3
